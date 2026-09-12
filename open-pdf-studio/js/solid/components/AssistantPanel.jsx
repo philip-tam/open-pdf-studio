@@ -59,7 +59,7 @@ export default function AssistantPanel() {
   });
 
   function systemPrompt() {
-    return 'Je bent de OpenAEC-assistent in Open PDF Studio (een PDF-annotatie-editor). Help de gebruiker met vragen over het geopende PDF-document en algemene taken.\n\n' + SKILLS_SYSTEM_PROMPT;
+    return 'Je bent de OpenAEC-assistent in PT PDF Studio (een PDF-annotatie-editor). Help de gebruiker met vragen over het geopende PDF-document en algemene taken.\n\n' + SKILLS_SYSTEM_PROMPT;
   }
 
   function saveKey() {

@@ -40,7 +40,7 @@ export async function checkForUpdates(silent = true) {
 function showNoUpdateMessage() {
   if (window.__TAURI__?.dialog?.message) {
     window.__TAURI__.dialog.message(
-      'You are running the latest version of Open PDF Studio.',
+      'You are running the latest version of PT PDF Studio.',
       { title: 'Software Update', kind: 'info' }
     );
   }

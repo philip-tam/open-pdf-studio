@@ -24,7 +24,7 @@ export default function AboutDialog() {
       <div class="bs-about-panel">
         <div class="bs-about-app">
           <div class="bs-about-logo">
-            <img src="icon.png" alt="Open PDF Studio" />
+            <img src="icon.png" alt="PT PDF Studio" />
           </div>
           <div class="bs-about-app-info">
             <h1 class="bs-about-app-name">{t('aboutPanel.appName')}</h1>
