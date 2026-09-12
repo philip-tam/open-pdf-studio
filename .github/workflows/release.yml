@@ -100,10 +100,37 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      # Forks don't inherit the upstream repo's signing secrets. Detect what's
+      # actually available so the rest of the job can fall back to unsigned
+      # artifacts instead of failing outright (#personal-fork-builds).
+      - name: Detect signing secrets
+        id: signing
+        shell: bash
+        run: |
+          test -n "${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}" && echo "has_updater_key=true" >> "$GITHUB_OUTPUT" || echo "has_updater_key=false" >> "$GITHUB_OUTPUT"
+          test -n "${{ secrets.AZURE_TENANT_ID }}" && echo "has_azure=true" >> "$GITHUB_OUTPUT" || echo "has_azure=false" >> "$GITHUB_OUTPUT"
+          test -n "${{ secrets.APPLE_CERTIFICATE }}" && echo "has_apple=true" >> "$GITHUB_OUTPUT" || echo "has_apple=false" >> "$GITHUB_OUTPUT"
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 20
+
+      # bundle.createUpdaterArtifacts in tauri.conf.json makes every `tauri
+      # build` sign updater artifacts unconditionally, which fails hard if
+      # TAURI_SIGNING_PRIVATE_KEY is empty. Without the real key, disable it
+      # so the build still produces plain (non-auto-updating) installers.
+      - name: Disable updater signing (no key available)
+        if: steps.signing.outputs.has_updater_key != 'true'
+        shell: bash
+        run: |
+          node -e "
+            const fs = require('fs');
+            const f = 'src-tauri/tauri.conf.json';
+            const c = JSON.parse(fs.readFileSync(f));
+            c.bundle.createUpdaterArtifacts = false;
+            fs.writeFileSync(f, JSON.stringify(c, null, 2));
+          "
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
@@ -140,7 +167,7 @@ jobs:
       # heuristic false-positive and quarantine (Symantec Heur.AdvML.B, #245).
       # Signing it here means the extracted worker.exe carries a trusted signature.
       - name: Authenticode sign pdfium-worker sidecar (Windows)
-        if: contains(matrix.target, 'windows')
+        if: contains(matrix.target, 'windows') && steps.signing.outputs.has_azure == 'true'
         uses: azure/trusted-signing-action@v1
         with:
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -208,7 +235,7 @@ jobs:
       # kopieert. Eigen tijdelijke keychain; tauri-action maakt daarna zijn
       # eigen import — geen conflict.
       - name: Sign libpdfium.dylib (macOS)
-        if: matrix.target == 'macos'
+        if: matrix.target == 'macos' && steps.signing.outputs.has_apple == 'true'
         shell: bash
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
@@ -257,7 +284,7 @@ jobs:
           }
 
       - name: Write App Store Connect API key (macOS)
-        if: matrix.target == 'macos'
+        if: matrix.target == 'macos' && steps.signing.outputs.has_apple == 'true'
         shell: bash
         run: |
           printf '%s' "${{ secrets.APPLE_API_KEY_CONTENT }}" > "${{ runner.temp }}/apple-api-key.p8"
@@ -277,11 +304,11 @@ jobs:
       # the external notarization service can be retried without rebuilding
       # both macOS architectures.
       - name: Build macOS app without bundles
-        if: matrix.target == 'macos'
+        if: matrix.target == 'macos' && steps.signing.outputs.has_apple == 'true'
         run: npm run tauri -- build --target universal-apple-darwin --no-bundle
 
       - name: Upload macOS release assets
-        if: matrix.target == 'macos'
+        if: matrix.target == 'macos' && steps.signing.outputs.has_apple == 'true'
         uses: tauri-apps/tauri-action@action-v0.6.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -303,8 +330,28 @@ jobs:
           releaseId: ${{ needs.create-release.outputs.release_id }}
           includeUpdaterJson: true
 
+      # No Apple Developer certificate available (fork build): produce an
+      # ad-hoc-signed .dmg with the plain Tauri build and upload it as-is.
+      # It launches fine locally; macOS Gatekeeper will warn on first open
+      # since it isn't notarized (right-click > Open, or `xattr -cr` it).
+      - name: Build unsigned macOS bundle (no Apple certificate)
+        if: matrix.target == 'macos' && steps.signing.outputs.has_apple != 'true'
+        run: npm run tauri -- build --target universal-apple-darwin
+
+      - name: Upload unsigned macOS assets
+        if: matrix.target == 'macos' && steps.signing.outputs.has_apple != 'true'
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          VERSION="${{ needs.create-release.outputs.version }}"
+          DMG_PATH="$(find ../target/universal-apple-darwin/release/bundle/dmg -name '*.dmg' -print -quit)"
+          test -n "$DMG_PATH"
+          gh release upload "$VERSION" "$DMG_PATH" --clobber --repo "${{ github.repository }}"
+
       - name: Verify macOS signature and notarization
-        if: matrix.target == 'macos'
+        if: matrix.target == 'macos' && steps.signing.outputs.has_apple == 'true'
         run: |
           set -euo pipefail
           DMG_PATH="$(find ../target/universal-apple-darwin/release/bundle/dmg -name '*.dmg' -print -quit)"
@@ -338,7 +385,7 @@ jobs:
           args: ${{ matrix.args }}
 
       - name: Authenticode sign Windows installer
-        if: contains(matrix.target, 'windows')
+        if: contains(matrix.target, 'windows') && steps.signing.outputs.has_azure == 'true'
         uses: azure/trusted-signing-action@v1
         with:
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -357,7 +404,7 @@ jobs:
           timestamp-digest: SHA256
 
       - name: Re-sign updater artifacts after Authenticode signing
-        if: matrix.target == 'windows-system'
+        if: matrix.target == 'windows-system' && steps.signing.outputs.has_azure == 'true' && steps.signing.outputs.has_updater_key == 'true'
         shell: pwsh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
