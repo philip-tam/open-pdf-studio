@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "情報",
-    "aboutTitle": "Open PDF Studio について",
+    "aboutTitle": "PT PDF Studio について",
     "about": "バージョン情報",
     "keyboardShortcutsTitle": "キーボードショートカット (F1)",
     "shortcuts": "ショートカット",
@@ -188,7 +188,7 @@
     "fileAssociation": "ファイルの関連付け",
     "setDefaultPdf": "既定の PDF アプリケーションに設定",
     "fileAssociations": "ファイルの関連付け",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

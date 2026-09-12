@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "Informasi",
-    "aboutTitle": "Tentang Open PDF Studio",
+    "aboutTitle": "Tentang PT PDF Studio",
     "about": "Tentang",
     "keyboardShortcutsTitle": "Pintasan Keyboard (F1)",
     "shortcuts": "Pintasan",
@@ -188,7 +188,7 @@
     "fileAssociation": "Asosiasi File",
     "setDefaultPdf": "Atur Aplikasi PDF Bawaan",
     "fileAssociations": "Asosiasi File",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

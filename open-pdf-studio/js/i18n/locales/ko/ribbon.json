@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "정보",
-    "aboutTitle": "Open PDF Studio 정보",
+    "aboutTitle": "PT PDF Studio 정보",
     "about": "정보",
     "keyboardShortcutsTitle": "키보드 단축키 (F1)",
     "shortcuts": "단축키",
@@ -188,7 +188,7 @@
     "fileAssociation": "파일 연결",
     "setDefaultPdf": "기본 PDF 응용 프로그램으로 설정",
     "fileAssociations": "파일 연결",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

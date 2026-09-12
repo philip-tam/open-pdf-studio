@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "معلومات",
-    "aboutTitle": "حول Open PDF Studio",
+    "aboutTitle": "حول PT PDF Studio",
     "about": "حول",
     "keyboardShortcutsTitle": "اختصارات لوحة المفاتيح (F1)",
     "shortcuts": "اختصارات",
@@ -188,7 +188,7 @@
     "fileAssociation": "اقتران الملفات",
     "setDefaultPdf": "تعيين تطبيق PDF الافتراضي",
     "fileAssociations": "اقترانات الملفات",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

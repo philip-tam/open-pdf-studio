@@ -182,7 +182,7 @@
   },
   "update": {
     "title": "Aktualizácia softvéru",
-    "newVersionAvailable": "K dispozícii je nová verzia Open PDF Studio.",
+    "newVersionAvailable": "K dispozícii je nová verzia PT PDF Studio.",
     "currentVersion": "Aktuálna verzia:",
     "newVersion": "Nová verzia:",
     "releaseNotes": "Poznámky k vydaniu:",
@@ -289,7 +289,7 @@
   },
   "defaultPdfApp": {
     "title": "Predvolená PDF aplikácia",
-    "message": "Open PDF Studio nie je nastavený ako predvolená aplikácia na otváranie PDF súborov. Chcete ho nastaviť ako predvolený?",
+    "message": "PT PDF Studio nie je nastavený ako predvolená aplikácia na otváranie PDF súborov. Chcete ho nastaviť ako predvolený?",
     "setAsDefault": "Nastaviť ako predvolený",
     "dontAskAgain": "Už sa nepýtať",
     "notNow": "Teraz nie"

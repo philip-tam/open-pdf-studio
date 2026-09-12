@@ -277,7 +277,7 @@
     "extensionsTitle": "Manage Extensions",
     "extensions": "Extensions",
     "information": "Information",
-    "aboutTitle": "About Open PDF Studio",
+    "aboutTitle": "About PT PDF Studio",
     "about": "About",
     "whatsNewTitle": "What's new in this version",
     "whatsNew": "What's new",
@@ -291,7 +291,7 @@
     "startupDiagnostics": "Diagnostics",
     "setDefaultPdf": "Set Default PDF Application",
     "fileAssociations": "File Assoc.",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

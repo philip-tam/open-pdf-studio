@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "Informations",
-    "aboutTitle": "À propos de Open PDF Studio",
+    "aboutTitle": "À propos de PT PDF Studio",
     "about": "À propos",
     "keyboardShortcutsTitle": "Raccourcis clavier (F1)",
     "shortcuts": "Raccourcis",
@@ -188,7 +188,7 @@
     "fileAssociation": "Association de fichiers",
     "setDefaultPdf": "Définir l'application PDF par défaut",
     "fileAssociations": "Associations de fichiers",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

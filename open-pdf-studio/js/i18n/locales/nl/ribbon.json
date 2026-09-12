@@ -272,7 +272,7 @@
   },
   "help": {
     "information": "Informatie",
-    "aboutTitle": "Over Open PDF Studio",
+    "aboutTitle": "Over PT PDF Studio",
     "about": "Over",
     "whatsNewTitle": "Wat is nieuw in deze versie",
     "whatsNew": "Wat is nieuw",
@@ -291,7 +291,7 @@
     "extensionsTitle": "Extensies beheren",
     "extensions": "Extensies",
     "help": "Help",
-    "previousVersionTitle": "De vorige versie van Open PDF Studio installeren",
+    "previousVersionTitle": "De vorige versie van PT PDF Studio installeren",
     "previousVersion": "Vorige versie"
   },
   "format": {

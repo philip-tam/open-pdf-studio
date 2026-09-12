@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "Informatii",
-    "aboutTitle": "Despre Open PDF Studio",
+    "aboutTitle": "Despre PT PDF Studio",
     "about": "Despre",
     "keyboardShortcutsTitle": "Comenzi rapide de la tastatura (F1)",
     "shortcuts": "Comenzi rapide",
@@ -188,7 +188,7 @@
     "fileAssociation": "Asociere fisiere",
     "setDefaultPdf": "Setare aplicatie PDF implicita",
     "fileAssociations": "Asocieri fisiere",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

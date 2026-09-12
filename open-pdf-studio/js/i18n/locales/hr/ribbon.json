@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "Informacije",
-    "aboutTitle": "O programu Open PDF Studio",
+    "aboutTitle": "O programu PT PDF Studio",
     "about": "O programu",
     "keyboardShortcutsTitle": "Tipkovnički prečaci (F1)",
     "shortcuts": "Prečaci",
@@ -188,7 +188,7 @@
     "fileAssociation": "Asocijacija datoteka",
     "setDefaultPdf": "Postavi zadanu PDF aplikaciju",
     "fileAssociations": "Asocijacije datoteka",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

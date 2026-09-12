@@ -182,7 +182,7 @@
   },
   "update": {
     "title": "Actualizare software",
-    "newVersionAvailable": "O noua versiune a Open PDF Studio este disponibila.",
+    "newVersionAvailable": "O noua versiune a PT PDF Studio este disponibila.",
     "currentVersion": "Versiunea curenta:",
     "newVersion": "Versiunea noua:",
     "releaseNotes": "Note de lansare:",
@@ -289,7 +289,7 @@
   },
   "defaultPdfApp": {
     "title": "Aplicatie PDF implicita",
-    "message": "Open PDF Studio nu este setat ca aplicatia implicita pentru deschiderea fisierelor PDF. Doriti sa o setati ca implicita?",
+    "message": "PT PDF Studio nu este setat ca aplicatia implicita pentru deschiderea fisierelor PDF. Doriti sa o setati ca implicita?",
     "setAsDefault": "Setare ca implicita",
     "dontAskAgain": "Nu mai intreba",
     "notNow": "Nu acum"

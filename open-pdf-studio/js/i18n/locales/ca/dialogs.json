@@ -182,7 +182,7 @@
   },
   "update": {
     "title": "Actualització de programari",
-    "newVersionAvailable": "Hi ha una nova versió d'Open PDF Studio disponible.",
+    "newVersionAvailable": "Hi ha una nova versió d'PT PDF Studio disponible.",
     "currentVersion": "Versió actual:",
     "newVersion": "Nova versió:",
     "releaseNotes": "Notes de la versió:",
@@ -289,7 +289,7 @@
   },
   "defaultPdfApp": {
     "title": "Aplicació PDF per defecte",
-    "message": "Open PDF Studio no està establert com a aplicació per defecte per obrir fitxers PDF. Voleu establir-lo com a aplicació per defecte?",
+    "message": "PT PDF Studio no està establert com a aplicació per defecte per obrir fitxers PDF. Voleu establir-lo com a aplicació per defecte?",
     "setAsDefault": "Estableix com a per defecte",
     "dontAskAgain": "No ho tornis a preguntar",
     "notNow": "Ara no"

@@ -182,7 +182,7 @@
   },
   "update": {
     "title": "Kemas Kini Perisian",
-    "newVersionAvailable": "Versi baharu Open PDF Studio tersedia.",
+    "newVersionAvailable": "Versi baharu PT PDF Studio tersedia.",
     "currentVersion": "Versi semasa:",
     "newVersion": "Versi baharu:",
     "releaseNotes": "Nota Keluaran:",
@@ -289,7 +289,7 @@
   },
   "defaultPdfApp": {
     "title": "Aplikasi PDF Lalai",
-    "message": "Open PDF Studio tidak ditetapkan sebagai aplikasi lalai untuk membuka fail PDF. Adakah anda ingin menetapkannya sebagai lalai?",
+    "message": "PT PDF Studio tidak ditetapkan sebagai aplikasi lalai untuk membuka fail PDF. Adakah anda ingin menetapkannya sebagai lalai?",
     "setAsDefault": "Tetapkan sebagai Lalai",
     "dontAskAgain": "Jangan Tanya Lagi",
     "notNow": "Bukan Sekarang"

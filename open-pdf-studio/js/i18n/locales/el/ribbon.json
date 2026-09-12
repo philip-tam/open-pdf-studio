@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "Πληροφορίες",
-    "aboutTitle": "Σχετικά με το Open PDF Studio",
+    "aboutTitle": "Σχετικά με το PT PDF Studio",
     "about": "Σχετικά",
     "keyboardShortcutsTitle": "Συντομεύσεις πληκτρολογίου (F1)",
     "shortcuts": "Συντομεύσεις",
@@ -188,7 +188,7 @@
     "fileAssociation": "Συσχέτιση αρχείων",
     "setDefaultPdf": "Ορισμός προεπιλεγμένης εφαρμογής PDF",
     "fileAssociations": "Συσχετίσεις αρχείων",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

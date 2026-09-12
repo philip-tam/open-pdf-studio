@@ -182,7 +182,7 @@
   },
   "update": {
     "title": "อัปเดตซอฟต์แวร์",
-    "newVersionAvailable": "มีเวอร์ชันใหม่ของ Open PDF Studio พร้อมใช้งาน",
+    "newVersionAvailable": "มีเวอร์ชันใหม่ของ PT PDF Studio พร้อมใช้งาน",
     "currentVersion": "เวอร์ชันปัจจุบัน:",
     "newVersion": "เวอร์ชันใหม่:",
     "releaseNotes": "บันทึกการเผยแพร่:",
@@ -289,7 +289,7 @@
   },
   "defaultPdfApp": {
     "title": "แอป PDF เริ่มต้น",
-    "message": "Open PDF Studio ยังไม่ได้ถูกตั้งเป็นแอปเริ่มต้นสำหรับเปิดไฟล์ PDF คุณต้องการตั้งเป็นค่าเริ่มต้นหรือไม่?",
+    "message": "PT PDF Studio ยังไม่ได้ถูกตั้งเป็นแอปเริ่มต้นสำหรับเปิดไฟล์ PDF คุณต้องการตั้งเป็นค่าเริ่มต้นหรือไม่?",
     "setAsDefault": "ตั้งเป็นค่าเริ่มต้น",
     "dontAskAgain": "ไม่ต้องถามอีก",
     "notNow": "ไม่ใช่ตอนนี้"

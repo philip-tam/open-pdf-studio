@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "Tiedot",
-    "aboutTitle": "Tietoja - Open PDF Studio",
+    "aboutTitle": "Tietoja - PT PDF Studio",
     "about": "Tietoja",
     "keyboardShortcutsTitle": "Pikavalintaohjeet (F1)",
     "shortcuts": "Pikanäppäimet",
@@ -188,7 +188,7 @@
     "fileAssociation": "Tiedostoyhteys",
     "setDefaultPdf": "Aseta oletus-PDF-sovellus",
     "fileAssociations": "Tiedostoyhteydet",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

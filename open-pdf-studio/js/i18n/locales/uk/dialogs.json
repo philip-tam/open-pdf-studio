@@ -182,7 +182,7 @@
   },
   "update": {
     "title": "Оновлення програми",
-    "newVersionAvailable": "Доступна нова версія Open PDF Studio.",
+    "newVersionAvailable": "Доступна нова версія PT PDF Studio.",
     "currentVersion": "Поточна версія:",
     "newVersion": "Нова версія:",
     "releaseNotes": "Примітки до випуску:",
@@ -289,7 +289,7 @@
   },
   "defaultPdfApp": {
     "title": "Програма PDF за замовчуванням",
-    "message": "Open PDF Studio не встановлено як програму за замовчуванням для відкриття файлів PDF. Бажаєте встановити її за замовчуванням?",
+    "message": "PT PDF Studio не встановлено як програму за замовчуванням для відкриття файлів PDF. Бажаєте встановити її за замовчуванням?",
     "setAsDefault": "Встановити за замовчуванням",
     "dontAskAgain": "Більше не питати",
     "notNow": "Не зараз"

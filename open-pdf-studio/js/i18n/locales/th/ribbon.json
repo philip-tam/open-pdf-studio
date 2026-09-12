@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "ข้อมูล",
-    "aboutTitle": "เกี่ยวกับ Open PDF Studio",
+    "aboutTitle": "เกี่ยวกับ PT PDF Studio",
     "about": "เกี่ยวกับ",
     "keyboardShortcutsTitle": "ปุ่มลัด (F1)",
     "shortcuts": "ปุ่มลัด",
@@ -188,7 +188,7 @@
     "fileAssociation": "การเชื่อมโยงไฟล์",
     "setDefaultPdf": "ตั้งเป็นแอปพลิเคชัน PDF เริ่มต้น",
     "fileAssociations": "การเชื่อมโยงไฟล์",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

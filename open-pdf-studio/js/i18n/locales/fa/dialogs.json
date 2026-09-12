@@ -182,7 +182,7 @@
   },
   "update": {
     "title": "به‌روزرسانی نرم‌افزار",
-    "newVersionAvailable": "نسخه جدیدی از Open PDF Studio در دسترس است.",
+    "newVersionAvailable": "نسخه جدیدی از PT PDF Studio در دسترس است.",
     "currentVersion": "نسخه فعلی:",
     "newVersion": "نسخه جدید:",
     "releaseNotes": "یادداشت‌های انتشار:",
@@ -289,7 +289,7 @@
   },
   "defaultPdfApp": {
     "title": "برنامه PDF پیش‌فرض",
-    "message": "Open PDF Studio به عنوان برنامه پیش‌فرض برای باز کردن فایل‌های PDF تنظیم نشده است. آیا می‌خواهید آن را به عنوان پیش‌فرض تنظیم کنید؟",
+    "message": "PT PDF Studio به عنوان برنامه پیش‌فرض برای باز کردن فایل‌های PDF تنظیم نشده است. آیا می‌خواهید آن را به عنوان پیش‌فرض تنظیم کنید؟",
     "setAsDefault": "تنظیم به عنوان پیش‌فرض",
     "dontAskAgain": "دیگر نپرس",
     "notNow": "الان نه"

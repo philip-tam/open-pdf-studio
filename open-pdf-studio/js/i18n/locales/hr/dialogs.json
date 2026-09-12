@@ -182,7 +182,7 @@
   },
   "update": {
     "title": "Ažuriranje softvera",
-    "newVersionAvailable": "Nova verzija programa Open PDF Studio je dostupna.",
+    "newVersionAvailable": "Nova verzija programa PT PDF Studio je dostupna.",
     "currentVersion": "Trenutna verzija:",
     "newVersion": "Nova verzija:",
     "releaseNotes": "Bilješke o izdanju:",
@@ -289,7 +289,7 @@
   },
   "defaultPdfApp": {
     "title": "Zadana PDF aplikacija",
-    "message": "Open PDF Studio nije postavljen kao zadana aplikacija za otvaranje PDF datoteka. Želite li ga postaviti kao zadanu aplikaciju?",
+    "message": "PT PDF Studio nije postavljen kao zadana aplikacija za otvaranje PDF datoteka. Želite li ga postaviti kao zadanu aplikaciju?",
     "setAsDefault": "Postavi kao zadano",
     "dontAskAgain": "Ne pitaj ponovo",
     "notNow": "Ne sada"

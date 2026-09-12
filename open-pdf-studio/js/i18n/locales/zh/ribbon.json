@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "信息",
-    "aboutTitle": "关于 Open PDF Studio",
+    "aboutTitle": "关于 PT PDF Studio",
     "about": "关于",
     "keyboardShortcutsTitle": "键盘快捷键 (F1)",
     "shortcuts": "快捷键",
@@ -188,7 +188,7 @@
     "fileAssociation": "文件关联",
     "setDefaultPdf": "设为默认 PDF 应用程序",
     "fileAssociations": "文件关联",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

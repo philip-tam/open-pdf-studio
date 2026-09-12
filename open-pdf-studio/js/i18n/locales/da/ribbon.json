@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "Information",
-    "aboutTitle": "Om Open PDF Studio",
+    "aboutTitle": "Om PT PDF Studio",
     "about": "Om",
     "keyboardShortcutsTitle": "Tastaturgenveje (F1)",
     "shortcuts": "Genveje",
@@ -188,7 +188,7 @@
     "fileAssociation": "Filtilknytning",
     "setDefaultPdf": "Angiv standard PDF-program",
     "fileAssociations": "Filtilknytninger",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

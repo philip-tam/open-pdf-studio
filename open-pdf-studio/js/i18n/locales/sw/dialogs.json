@@ -182,7 +182,7 @@
   },
   "update": {
     "title": "Sasisha Programu",
-    "newVersionAvailable": "Toleo jipya la Open PDF Studio linapatikana.",
+    "newVersionAvailable": "Toleo jipya la PT PDF Studio linapatikana.",
     "currentVersion": "Toleo la sasa:",
     "newVersion": "Toleo jipya:",
     "releaseNotes": "Maelezo ya Toleo:",
@@ -289,7 +289,7 @@
   },
   "defaultPdfApp": {
     "title": "Programu Chaguo-msingi ya PDF",
-    "message": "Open PDF Studio haijawekwa kama programu chaguo-msingi ya kufungua faili za PDF. Je, ungependa kuiweka kama chaguo-msingi?",
+    "message": "PT PDF Studio haijawekwa kama programu chaguo-msingi ya kufungua faili za PDF. Je, ungependa kuiweka kama chaguo-msingi?",
     "setAsDefault": "Weka kama Chaguo-msingi",
     "dontAskAgain": "Usiulize Tena",
     "notNow": "Si Sasa"

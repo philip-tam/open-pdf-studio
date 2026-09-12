@@ -182,7 +182,7 @@
   },
   "update": {
     "title": "Pembaruan Perangkat Lunak",
-    "newVersionAvailable": "Versi baru Open PDF Studio tersedia.",
+    "newVersionAvailable": "Versi baru PT PDF Studio tersedia.",
     "currentVersion": "Versi saat ini:",
     "newVersion": "Versi baru:",
     "releaseNotes": "Catatan Rilis:",
@@ -289,7 +289,7 @@
   },
   "defaultPdfApp": {
     "title": "Aplikasi PDF Bawaan",
-    "message": "Open PDF Studio belum diatur sebagai aplikasi bawaan untuk membuka file PDF. Apakah Anda ingin mengaturnya sebagai bawaan?",
+    "message": "PT PDF Studio belum diatur sebagai aplikasi bawaan untuk membuka file PDF. Apakah Anda ingin mengaturnya sebagai bawaan?",
     "setAsDefault": "Atur sebagai Bawaan",
     "dontAskAgain": "Jangan Tanya Lagi",
     "notNow": "Tidak Sekarang"

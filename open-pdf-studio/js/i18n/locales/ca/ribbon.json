@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "Informació",
-    "aboutTitle": "Quant a Open PDF Studio",
+    "aboutTitle": "Quant a PT PDF Studio",
     "about": "Quant a",
     "keyboardShortcutsTitle": "Dreceres de teclat (F1)",
     "shortcuts": "Dreceres",
@@ -188,7 +188,7 @@
     "fileAssociation": "Associació de fitxers",
     "setDefaultPdf": "Estableix l'aplicació PDF per defecte",
     "fileAssociations": "Associacions de fitxers",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "Maklumat",
-    "aboutTitle": "Perihal Open PDF Studio",
+    "aboutTitle": "Perihal PT PDF Studio",
     "about": "Perihal",
     "keyboardShortcutsTitle": "Pintasan Papan Kekunci (F1)",
     "shortcuts": "Pintasan",
@@ -188,7 +188,7 @@
     "fileAssociation": "Perkaitan Fail",
     "setDefaultPdf": "Tetapkan Aplikasi PDF Lalai",
     "fileAssociations": "Perkaitan Fail",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

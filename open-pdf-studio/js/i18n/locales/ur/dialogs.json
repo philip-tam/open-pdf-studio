@@ -182,7 +182,7 @@
   },
   "update": {
     "title": "سافٹ ویئر اپ ڈیٹ",
-    "newVersionAvailable": "Open PDF Studio کا نیا ورژن دستیاب ہے۔",
+    "newVersionAvailable": "PT PDF Studio کا نیا ورژن دستیاب ہے۔",
     "currentVersion": "موجودہ ورژن:",
     "newVersion": "نیا ورژن:",
     "releaseNotes": "ریلیز نوٹس:",
@@ -289,7 +289,7 @@
   },
   "defaultPdfApp": {
     "title": "پہلے سے طے شدہ PDF ایپ",
-    "message": "Open PDF Studio PDF فائلیں کھولنے کے لیے پہلے سے طے شدہ ایپ نہیں ہے۔ کیا آپ اسے ڈیفالٹ بنانا چاہتے ہیں؟",
+    "message": "PT PDF Studio PDF فائلیں کھولنے کے لیے پہلے سے طے شدہ ایپ نہیں ہے۔ کیا آپ اسے ڈیفالٹ بنانا چاہتے ہیں؟",
     "setAsDefault": "ڈیفالٹ بنائیں",
     "dontAskAgain": "دوبارہ مت پوچھیں",
     "notNow": "ابھی نہیں"

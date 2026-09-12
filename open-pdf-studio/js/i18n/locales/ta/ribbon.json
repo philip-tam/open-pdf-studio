@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "தகவல்",
-    "aboutTitle": "Open PDF Studio பற்றி",
+    "aboutTitle": "PT PDF Studio பற்றி",
     "about": "பற்றி",
     "keyboardShortcutsTitle": "விசைப்பலகை குறுக்குவழிகள் (F1)",
     "shortcuts": "குறுக்குவழிகள்",
@@ -188,7 +188,7 @@
     "fileAssociation": "கோப்பு தொடர்பு",
     "setDefaultPdf": "இயல்புநிலை PDF பயன்பாட்டை அமை",
     "fileAssociations": "கோப்பு தொடர்புகள்",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

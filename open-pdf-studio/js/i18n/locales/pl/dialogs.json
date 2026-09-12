@@ -182,7 +182,7 @@
   },
   "update": {
     "title": "Aktualizacja oprogramowania",
-    "newVersionAvailable": "Dostępna jest nowa wersja Open PDF Studio.",
+    "newVersionAvailable": "Dostępna jest nowa wersja PT PDF Studio.",
     "currentVersion": "Bieżąca wersja:",
     "newVersion": "Nowa wersja:",
     "releaseNotes": "Informacje o wydaniu:",
@@ -289,7 +289,7 @@
   },
   "defaultPdfApp": {
     "title": "Domyślna aplikacja PDF",
-    "message": "Open PDF Studio nie jest ustawiony jako domyślna aplikacja do otwierania plików PDF. Czy chcesz ustawić go jako domyślną aplikację?",
+    "message": "PT PDF Studio nie jest ustawiony jako domyślna aplikacja do otwierania plików PDF. Czy chcesz ustawić go jako domyślną aplikację?",
     "setAsDefault": "Ustaw jako domyślną",
     "dontAskAgain": "Nie pytaj ponownie",
     "notNow": "Nie teraz"

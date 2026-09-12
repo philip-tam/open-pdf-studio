@@ -182,7 +182,7 @@
   },
   "update": {
     "title": "Ohjelmistopäivitys",
-    "newVersionAvailable": "Uusi versio Open PDF Studiosta on saatavilla.",
+    "newVersionAvailable": "Uusi versio PT PDF Studiosta on saatavilla.",
     "currentVersion": "Nykyinen versio:",
     "newVersion": "Uusi versio:",
     "releaseNotes": "Julkaisutiedot:",
@@ -289,7 +289,7 @@
   },
   "defaultPdfApp": {
     "title": "Oletus-PDF-sovellus",
-    "message": "Open PDF Studio ei ole asetettu oletussovellukseksi PDF-tiedostojen avaamiseen. Haluatko asettaa sen oletukseksi?",
+    "message": "PT PDF Studio ei ole asetettu oletussovellukseksi PDF-tiedostojen avaamiseen. Haluatko asettaa sen oletukseksi?",
     "setAsDefault": "Aseta oletukseksi",
     "dontAskAgain": "Älä kysy uudelleen",
     "notNow": "Ei nyt"

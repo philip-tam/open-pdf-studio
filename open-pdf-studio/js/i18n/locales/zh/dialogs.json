@@ -182,7 +182,7 @@
   },
   "update": {
     "title": "软件更新",
-    "newVersionAvailable": "Open PDF Studio 有新版本可用。",
+    "newVersionAvailable": "PT PDF Studio 有新版本可用。",
     "currentVersion": "当前版本：",
     "newVersion": "新版本：",
     "releaseNotes": "版本说明：",
@@ -289,7 +289,7 @@
   },
   "defaultPdfApp": {
     "title": "默认 PDF 应用",
-    "message": "Open PDF Studio 未被设为打开 PDF 文件的默认应用程序。是否要将其设为默认应用？",
+    "message": "PT PDF Studio 未被设为打开 PDF 文件的默认应用程序。是否要将其设为默认应用？",
     "setAsDefault": "设为默认",
     "dontAskAgain": "不再询问",
     "notNow": "暂时不"

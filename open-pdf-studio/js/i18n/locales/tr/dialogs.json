@@ -182,7 +182,7 @@
   },
   "update": {
     "title": "Yazılım Güncellemesi",
-    "newVersionAvailable": "Open PDF Studio'nun yeni bir sürümü mevcut.",
+    "newVersionAvailable": "PT PDF Studio'nun yeni bir sürümü mevcut.",
     "currentVersion": "Mevcut sürüm:",
     "newVersion": "Yeni sürüm:",
     "releaseNotes": "Sürüm Notları:",
@@ -289,7 +289,7 @@
   },
   "defaultPdfApp": {
     "title": "Varsayılan PDF Uygulaması",
-    "message": "Open PDF Studio, PDF dosyalarını açmak için varsayılan uygulama olarak ayarlanmamış. Varsayılan olarak ayarlamak ister misiniz?",
+    "message": "PT PDF Studio, PDF dosyalarını açmak için varsayılan uygulama olarak ayarlanmamış. Varsayılan olarak ayarlamak ister misiniz?",
     "setAsDefault": "Varsayılan Olarak Ayarla",
     "dontAskAgain": "Bir Daha Sorma",
     "notNow": "Şimdi Değil"

@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "Thông tin",
-    "aboutTitle": "Giới thiệu Open PDF Studio",
+    "aboutTitle": "Giới thiệu PT PDF Studio",
     "about": "Giới thiệu",
     "keyboardShortcutsTitle": "Phím tắt (F1)",
     "shortcuts": "Phím tắt",
@@ -188,7 +188,7 @@
     "fileAssociation": "Liên kết Tệp",
     "setDefaultPdf": "Đặt Ứng dụng PDF Mặc định",
     "fileAssociations": "Liên kết Tệp",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

@@ -182,7 +182,7 @@
   },
   "update": {
     "title": "ソフトウェアの更新",
-    "newVersionAvailable": "Open PDF Studio の新しいバージョンが利用可能です。",
+    "newVersionAvailable": "PT PDF Studio の新しいバージョンが利用可能です。",
     "currentVersion": "現在のバージョン：",
     "newVersion": "新しいバージョン：",
     "releaseNotes": "リリースノート：",
@@ -289,7 +289,7 @@
   },
   "defaultPdfApp": {
     "title": "既定の PDF アプリ",
-    "message": "Open PDF Studio は PDF ファイルを開く既定のアプリケーションとして設定されていません。既定のアプリケーションに設定しますか？",
+    "message": "PT PDF Studio は PDF ファイルを開く既定のアプリケーションとして設定されていません。既定のアプリケーションに設定しますか？",
     "setAsDefault": "既定に設定",
     "dontAskAgain": "今後は表示しない",
     "notNow": "今はしない"

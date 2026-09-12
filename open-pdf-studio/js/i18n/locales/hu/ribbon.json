@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "Információ",
-    "aboutTitle": "A Open PDF Studio névjegye",
+    "aboutTitle": "A PT PDF Studio névjegye",
     "about": "Névjegy",
     "keyboardShortcutsTitle": "Billentyűparancsok (F1)",
     "shortcuts": "Parancsok",
@@ -188,7 +188,7 @@
     "fileAssociation": "Fájltársítás",
     "setDefaultPdf": "Alapértelmezett PDF alkalmazás beállítása",
     "fileAssociations": "Fájltársítások",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

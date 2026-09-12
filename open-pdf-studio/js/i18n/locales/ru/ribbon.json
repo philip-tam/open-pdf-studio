@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "Информация",
-    "aboutTitle": "О программе Open PDF Studio",
+    "aboutTitle": "О программе PT PDF Studio",
     "about": "О программе",
     "keyboardShortcutsTitle": "Сочетания клавиш (F1)",
     "shortcuts": "Горячие клавиши",
@@ -188,7 +188,7 @@
     "fileAssociation": "Ассоциация файлов",
     "setDefaultPdf": "Установить приложение PDF по умолчанию",
     "fileAssociations": "Ассоциации файлов",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

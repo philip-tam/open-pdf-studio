@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "Bilgi",
-    "aboutTitle": "Open PDF Studio Hakkında",
+    "aboutTitle": "PT PDF Studio Hakkında",
     "about": "Hakkında",
     "keyboardShortcutsTitle": "Klavye Kısayolları (F1)",
     "shortcuts": "Kısayollar",
@@ -188,7 +188,7 @@
     "fileAssociation": "Dosya İlişkilendirme",
     "setDefaultPdf": "Varsayılan PDF Uygulamasını Ayarla",
     "fileAssociations": "Dosya İlişkilendirmeleri",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

@@ -182,7 +182,7 @@
   },
   "update": {
     "title": "تحديث البرنامج",
-    "newVersionAvailable": "يتوفر إصدار جديد من Open PDF Studio.",
+    "newVersionAvailable": "يتوفر إصدار جديد من PT PDF Studio.",
     "currentVersion": "الإصدار الحالي:",
     "newVersion": "الإصدار الجديد:",
     "releaseNotes": "ملاحظات الإصدار:",
@@ -289,7 +289,7 @@
   },
   "defaultPdfApp": {
     "title": "تطبيق PDF الافتراضي",
-    "message": "لم يتم تعيين Open PDF Studio كالتطبيق الافتراضي لفتح ملفات PDF. هل تريد تعيينه كافتراضي؟",
+    "message": "لم يتم تعيين PT PDF Studio كالتطبيق الافتراضي لفتح ملفات PDF. هل تريد تعيينه كافتراضي؟",
     "setAsDefault": "تعيين كافتراضي",
     "dontAskAgain": "لا تسأل مرة أخرى",
     "notNow": "ليس الآن"

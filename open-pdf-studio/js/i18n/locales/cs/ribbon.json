@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "Informace",
-    "aboutTitle": "O aplikaci Open PDF Studio",
+    "aboutTitle": "O aplikaci PT PDF Studio",
     "about": "O aplikaci",
     "keyboardShortcutsTitle": "Klávesové zkratky (F1)",
     "shortcuts": "Zkratky",
@@ -188,7 +188,7 @@
     "fileAssociation": "Přiřazení souborů",
     "setDefaultPdf": "Nastavit výchozí aplikaci pro PDF",
     "fileAssociations": "Přiřazení souborů",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "معلومات",
-    "aboutTitle": "Open PDF Studio کے بارے میں",
+    "aboutTitle": "PT PDF Studio کے بارے میں",
     "about": "کے بارے میں",
     "keyboardShortcutsTitle": "کی بورڈ شارٹ کٹس (F1)",
     "shortcuts": "شارٹ کٹس",
@@ -188,7 +188,7 @@
     "fileAssociation": "فائل ایسوسی ایشن",
     "setDefaultPdf": "پہلے سے طے شدہ PDF ایپلیکیشن مقرر کریں",
     "fileAssociations": "فائل ایسوسی ایشنز",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

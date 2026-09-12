@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "اطلاعات",
-    "aboutTitle": "درباره Open PDF Studio",
+    "aboutTitle": "درباره PT PDF Studio",
     "about": "درباره",
     "keyboardShortcutsTitle": "میان‌برهای صفحه‌کلید (F1)",
     "shortcuts": "میان‌برها",
@@ -188,7 +188,7 @@
     "fileAssociation": "اقتران فایل",
     "setDefaultPdf": "تنظیم برنامه PDF پیش‌فرض",
     "fileAssociations": "اقتران‌های فایل",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

@@ -182,7 +182,7 @@
   },
   "update": {
     "title": "Szoftverfrissítés",
-    "newVersionAvailable": "A Open PDF Studio új verziója érhető el.",
+    "newVersionAvailable": "A PT PDF Studio új verziója érhető el.",
     "currentVersion": "Jelenlegi verzió:",
     "newVersion": "Új verzió:",
     "releaseNotes": "Kiadási megjegyzések:",
@@ -289,7 +289,7 @@
   },
   "defaultPdfApp": {
     "title": "Alapértelmezett PDF alkalmazás",
-    "message": "A Open PDF Studio nem az alapértelmezett alkalmazás a PDF fájlok megnyitásához. Szeretné beállítani alapértelmezettként?",
+    "message": "A PT PDF Studio nem az alapértelmezett alkalmazás a PDF fájlok megnyitásához. Szeretné beállítani alapértelmezettként?",
     "setAsDefault": "Beállítás alapértelmezettként",
     "dontAskAgain": "Ne kérdezze többé",
     "notNow": "Most nem"

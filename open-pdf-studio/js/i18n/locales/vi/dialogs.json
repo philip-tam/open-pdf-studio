@@ -182,7 +182,7 @@
   },
   "update": {
     "title": "Cập nhật Phần mềm",
-    "newVersionAvailable": "Đã có phiên bản mới của Open PDF Studio.",
+    "newVersionAvailable": "Đã có phiên bản mới của PT PDF Studio.",
     "currentVersion": "Phiên bản hiện tại:",
     "newVersion": "Phiên bản mới:",
     "releaseNotes": "Ghi chú Phát hành:",
@@ -289,7 +289,7 @@
   },
   "defaultPdfApp": {
     "title": "Ứng dụng PDF Mặc định",
-    "message": "Open PDF Studio chưa được đặt làm ứng dụng mặc định để mở tệp PDF. Bạn có muốn đặt làm mặc định không?",
+    "message": "PT PDF Studio chưa được đặt làm ứng dụng mặc định để mở tệp PDF. Bạn có muốn đặt làm mặc định không?",
     "setAsDefault": "Đặt làm Mặc định",
     "dontAskAgain": "Không Hỏi lại",
     "notNow": "Không phải Bây giờ"

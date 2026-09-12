@@ -182,7 +182,7 @@
   },
   "update": {
     "title": "עדכון תוכנה",
-    "newVersionAvailable": "גרסה חדשה של Open PDF Studio זמינה.",
+    "newVersionAvailable": "גרסה חדשה של PT PDF Studio זמינה.",
     "currentVersion": "גרסה נוכחית:",
     "newVersion": "גרסה חדשה:",
     "releaseNotes": "הערות שחרור:",
@@ -289,7 +289,7 @@
   },
   "defaultPdfApp": {
     "title": "יישום PDF ברירת מחדל",
-    "message": "Open PDF Studio אינו מוגדר כיישום ברירת המחדל לפתיחת קבצי PDF. האם ברצונך להגדיר אותו כברירת מחדל?",
+    "message": "PT PDF Studio אינו מוגדר כיישום ברירת המחדל לפתיחת קבצי PDF. האם ברצונך להגדיר אותו כברירת מחדל?",
     "setAsDefault": "הגדר כברירת מחדל",
     "dontAskAgain": "אל תשאל שוב",
     "notNow": "לא כעת"

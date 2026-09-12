@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "তথ্য",
-    "aboutTitle": "Open PDF Studio সম্পর্কে",
+    "aboutTitle": "PT PDF Studio সম্পর্কে",
     "about": "সম্পর্কে",
     "keyboardShortcutsTitle": "কীবোর্ড শর্টকাট (F1)",
     "shortcuts": "শর্টকাট",
@@ -188,7 +188,7 @@
     "fileAssociation": "ফাইল সংযুক্তি",
     "setDefaultPdf": "ডিফল্ট PDF অ্যাপ্লিকেশন সেট করুন",
     "fileAssociations": "ফাইল সংযুক্তি",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

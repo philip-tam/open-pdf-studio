@@ -182,7 +182,7 @@
   },
   "update": {
     "title": "Programvareoppdatering",
-    "newVersionAvailable": "En ny versjon av Open PDF Studio er tilgjengelig.",
+    "newVersionAvailable": "En ny versjon av PT PDF Studio er tilgjengelig.",
     "currentVersion": "Gjeldende versjon:",
     "newVersion": "Ny versjon:",
     "releaseNotes": "Versjonsmerknader:",
@@ -289,7 +289,7 @@
   },
   "defaultPdfApp": {
     "title": "Standard PDF-program",
-    "message": "Open PDF Studio er ikke angitt som standardprogram for å åpne PDF-filer. Vil du angi det som standard?",
+    "message": "PT PDF Studio er ikke angitt som standardprogram for å åpne PDF-filer. Vil du angi det som standard?",
     "setAsDefault": "Angi som standard",
     "dontAskAgain": "Ikke spør igjen",
     "notNow": "Ikke nå"

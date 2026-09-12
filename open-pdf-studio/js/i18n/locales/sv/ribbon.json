@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "Information",
-    "aboutTitle": "Om Open PDF Studio",
+    "aboutTitle": "Om PT PDF Studio",
     "about": "Om",
     "keyboardShortcutsTitle": "Tangentbordsgenvägar (F1)",
     "shortcuts": "Genvägar",
@@ -188,7 +188,7 @@
     "fileAssociation": "Filassociation",
     "setDefaultPdf": "Ange standard-PDF-program",
     "fileAssociations": "Filassociationer",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {

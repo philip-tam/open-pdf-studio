@@ -177,7 +177,7 @@
   },
   "help": {
     "information": "מידע",
-    "aboutTitle": "אודות Open PDF Studio",
+    "aboutTitle": "אודות PT PDF Studio",
     "about": "אודות",
     "keyboardShortcutsTitle": "קיצורי מקלדת (F1)",
     "shortcuts": "קיצורים",
@@ -188,7 +188,7 @@
     "fileAssociation": "שיוך קבצים",
     "setDefaultPdf": "הגדרת יישום PDF ברירת מחדל",
     "fileAssociations": "שיוך קבצים",
-    "previousVersionTitle": "Install the previous version of Open PDF Studio",
+    "previousVersionTitle": "Install the previous version of PT PDF Studio",
     "previousVersion": "Previous version"
   },
   "format": {
