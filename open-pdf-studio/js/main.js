@@ -85,6 +85,7 @@ import { addRecentFile } from './mobile/recent-files.js';
 
 // Tauri API
 import { isTauri, isMobile, isDevMode, getOpenedFiles, loadSession, saveSession, fileExists, isDefaultPdfApp, openDefaultAppsSettings, extractFileName } from './core/platform.js';
+import { enterSimpleLayout } from './solid/stores/simpleLayoutStore.js';
 
 // Global promise queue — serializes all file loads across multiple openFiles() calls
 // (Windows single-instance plugin sends separate open-files events per file)
@@ -230,6 +231,15 @@ async function init() {
 
   // Restore properties panel visibility from preferences
   initPropertiesPanel();
+
+  // Start every desktop launch in the compact layout (ribbon minimized,
+  // left panel and properties panel collapsed) so the page gets the space
+  // instead of the full editing chrome. Placed AFTER initPropertiesPanel()
+  // so it isn't clobbered by that call's preference restore. Session-only —
+  // see simpleLayoutStore.js — every panel here is still one click away.
+  if (!mobile) {
+    enterSimpleLayout();
+  }
 
   // Restore tool palette visibility, mode and position from preferences
   initPaletteOrder();

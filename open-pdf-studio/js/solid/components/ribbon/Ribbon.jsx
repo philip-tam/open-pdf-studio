@@ -11,6 +11,7 @@ import ArrangeTab from './ArrangeTab.jsx';
 import ImageTab from './ImageTab.jsx';
 import { activeTab, setActiveTab, contextualTabsVisible } from '../../stores/ribbonStore.js';
 import { imageSelected } from '../../stores/imageEditStore.js';
+import { simpleLayout, setSimpleLayout } from '../../stores/simpleLayoutStore.js';
 import { openAppMenu } from '../../../ui/chrome/menus.js';
 import { state } from '../../../core/state.js';
 import { savePreferences } from '../../../core/preferences.js';
@@ -24,8 +25,17 @@ export default function Ribbon() {
   const commentActive = () =>
     activeTab() === 'comment' || activeTab() === 'measure';
 
-  const ribbonCollapsed = () => state.preferences.ribbonCollapsed === true;
+  // simpleLayout() collapses the ribbon for this launch only (opened a PDF
+  // from outside the app — see simpleLayoutStore.js) without touching the
+  // persisted preference, so it never leaks into a normal launch. The
+  // toggle button exits that session-only mode on click instead of writing
+  // a preference that wouldn't actually change what ribbonCollapsed() reads.
+  const ribbonCollapsed = () => state.preferences.ribbonCollapsed === true || simpleLayout();
   const toggleCollapsed = () => {
+    if (simpleLayout()) {
+      setSimpleLayout(false);
+      return;
+    }
     state.preferences.ribbonCollapsed = !ribbonCollapsed();
     savePreferences();
   };
