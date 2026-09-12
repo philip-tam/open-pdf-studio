@@ -173,7 +173,8 @@
     "addHeaderFooter": "Ongeza Kichwa/Kiguu",
     "headerFooter": "Kichwa/Kiguu",
     "manageWatermarks": "Simamia Alama za Maji",
-    "manage": "Simamia"
+    "manage": "Simamia",
+    "ocr": "Recognize Text (OCR)"
   },
   "help": {
     "information": "Taarifa",

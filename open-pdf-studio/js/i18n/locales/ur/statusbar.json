@@ -80,5 +80,14 @@
     "holesPhaseHint": "سوراخ کے لیے کلک کریں · Enter یا دائیں کلک = مکمل"
   },
   "boxWidthAbbr": "چ",
-  "boxHeightAbbr": "ا"
+  "boxHeightAbbr": "ا",
+  "ocr": {
+    "progress": {
+      "starting": "Recognizing text...",
+      "page": "Recognizing text on page {{page}}...",
+      "done": "Recognized {{count}} words",
+      "doneAll": "Recognized {{count}} words across {{pages}} pages",
+      "failed": "Text recognition failed"
+    }
+  }
 }

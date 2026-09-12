@@ -173,7 +173,8 @@
     "addHeaderFooter": "إضافة رأس/تذييل",
     "headerFooter": "رأس/تذييل",
     "manageWatermarks": "إدارة العلامات المائية",
-    "manage": "إدارة"
+    "manage": "إدارة",
+    "ocr": "Recognize Text (OCR)"
   },
   "help": {
     "information": "معلومات",

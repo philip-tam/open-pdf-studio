@@ -173,7 +173,8 @@
     "addHeaderFooter": "Tilføj sidehoved/sidefod",
     "headerFooter": "Sidehoved/sidefod",
     "manageWatermarks": "Administrer vandmærker",
-    "manage": "Administrer"
+    "manage": "Administrer",
+    "ocr": "Recognize Text (OCR)"
   },
   "help": {
     "information": "Information",

@@ -173,7 +173,8 @@
     "addHeaderFooter": "Üstbilgi/Altbilgi Ekle",
     "headerFooter": "Üstbilgi/Altbilgi",
     "manageWatermarks": "Filigranları Yönet",
-    "manage": "Yönet"
+    "manage": "Yönet",
+    "ocr": "Recognize Text (OCR)"
   },
   "help": {
     "information": "Bilgi",

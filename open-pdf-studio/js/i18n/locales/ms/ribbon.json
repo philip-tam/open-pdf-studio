@@ -173,7 +173,8 @@
     "addHeaderFooter": "Tambah Pengepala/Pengaki",
     "headerFooter": "Pengepala/Pengaki",
     "manageWatermarks": "Urus Tera Air",
-    "manage": "Urus"
+    "manage": "Urus",
+    "ocr": "Recognize Text (OCR)"
   },
   "help": {
     "information": "Maklumat",

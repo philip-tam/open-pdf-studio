@@ -173,7 +173,8 @@
     "addHeaderFooter": "Lisää ylätunniste/alatunniste",
     "headerFooter": "Ylätunniste/Alatunniste",
     "manageWatermarks": "Hallitse vesileimoja",
-    "manage": "Hallitse"
+    "manage": "Hallitse",
+    "ocr": "Recognize Text (OCR)"
   },
   "help": {
     "information": "Tiedot",

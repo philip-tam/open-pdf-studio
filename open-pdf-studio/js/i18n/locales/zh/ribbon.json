@@ -173,7 +173,8 @@
     "addHeaderFooter": "添加页眉/页脚",
     "headerFooter": "页眉/页脚",
     "manageWatermarks": "管理水印",
-    "manage": "管理"
+    "manage": "管理",
+    "ocr": "Recognize Text (OCR)"
   },
   "help": {
     "information": "信息",

@@ -79,5 +79,14 @@
     "holesPhaseHint": "クリックで開口部を追加 · Enterまたは右クリック＝完了"
   },
   "boxWidthAbbr": "幅",
-  "boxHeightAbbr": "高"
+  "boxHeightAbbr": "高",
+  "ocr": {
+    "progress": {
+      "starting": "Recognizing text...",
+      "page": "Recognizing text on page {{page}}...",
+      "done": "Recognized {{count}} words",
+      "doneAll": "Recognized {{count}} words across {{pages}} pages",
+      "failed": "Text recognition failed"
+    }
+  }
 }

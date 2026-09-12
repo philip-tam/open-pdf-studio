@@ -173,7 +173,8 @@
     "addHeaderFooter": "Kopf-/Fußzeile hinzufügen",
     "headerFooter": "Kopf-/Fußzeile",
     "manageWatermarks": "Wasserzeichen verwalten",
-    "manage": "Verwalten"
+    "manage": "Verwalten",
+    "ocr": "Recognize Text (OCR)"
   },
   "help": {
     "information": "Informationen",

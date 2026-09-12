@@ -173,7 +173,8 @@
     "addHeaderFooter": "Aggiungi intestazione/piè di pagina",
     "headerFooter": "Intestazione/Piè",
     "manageWatermarks": "Gestisci filigrane",
-    "manage": "Gestisci"
+    "manage": "Gestisci",
+    "ocr": "Recognize Text (OCR)"
   },
   "help": {
     "information": "Informazioni",

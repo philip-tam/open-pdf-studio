@@ -1,6 +1,6 @@
 [package]
 name = "open-pdf-studio"
-version = "0.2.0"
+version = "0.3.0"
 description = "A free, open-source PDF annotation editor"
 authors = ["OpenAEC Foundation"]
 license = "MIT"
@@ -65,6 +65,11 @@ axum = "0.8"
 # count, etc). Pinned to match `open-pdf-render`'s transitive version so the
 # resolver picks a single lopdf in Cargo.lock.
 lopdf = "0.34"
+
+# OCR proof-of-concept (Traditional Chinese + English) — see js/... OCR plan.
+# build-tesseract: compiles Tesseract + Leptonica from source instead of
+# requiring them preinstalled on the build machine.
+tesseract-rs = { version = "0.1", features = ["build-tesseract"] }
 
 [target.'cfg(not(target_os = "android"))'.dependencies]
 tauri-plugin-updater = "2"
