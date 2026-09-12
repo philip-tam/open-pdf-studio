@@ -62,7 +62,7 @@ jobs:
               // markers worden door de in-app "Wat is nieuw"-dialog geparsed
               // (js/help/release-notes.js) zodat de NL-tab echte Nederlandse
               // tekst toont in plaats van de Engelse fallback (#240).
-              body: `## 🇳🇱 Nederlands\n\n### Wat is nieuw in ${version}\n\nGratis, open-source PDF-annotatie-editor gebouwd met Tauri.\n\n### Downloads\n- **Windows (systeem)**: download de \`*_x64-setup.exe\`-installer voor installatie voor alle gebruikers (admin vereist)\n- **Windows (gebruiker)**: download de \`*_x64_user-setup.exe\`-installer voor alleen de huidige gebruiker (geen admin nodig)\n- **macOS**: download het \`.dmg\`-bestand (universeel - Intel en Apple Silicon)\n- **Linux**: download het \`.deb\`-pakket, de \`.AppImage\` of de \`.snap\` (ook beschikbaar in de [Snap Store](https://snapcraft.io/open-pdf-studio))\n\n### Functies\n- PDF's bekijken en navigeren\n- Tekst selecteren en zoeken\n- Annotaties: markeren, onderstrepen, doorhalen\n- Tekengereedschappen: vrije hand, vormen, tekst\n- Meerdere documenten in tabbladen\n- Miniatuurnavigatie\n- Sessieherstel\n\n---\n\n## 🇬🇧 English\n\n### What's New in ${version}\n\nFree, open-source PDF annotation editor built with Tauri.\n\n### Downloads\n- **Windows (System)**: Download the \`*_x64-setup.exe\` installer for system-wide installation (requires admin)\n- **Windows (User)**: Download the \`*_x64_user-setup.exe\` installer for current user only (no admin required)\n- **macOS**: Download the \`.dmg\` file (universal - supports Intel and Apple Silicon)\n- **Linux**: Download the \`.deb\` package, \`.AppImage\`, or \`.snap\` (also available on the [Snap Store](https://snapcraft.io/open-pdf-studio))\n\n### Features\n- PDF viewing and navigation\n- Text selection and search\n- Annotations: highlight, underline, strikethrough\n- Drawing tools: freehand, shapes, text\n- Multi-tab document support\n- Thumbnail navigation\n- Session restore`,
+              body: `## 🇳🇱 Nederlands\n\n### Wat is nieuw in ${version}\n\nGratis, open-source PDF-annotatie-editor gebouwd met Tauri.\n\n### Downloads\n- **Windows (systeem)**: download de \`*_x64-setup.exe\`-installer voor installatie voor alle gebruikers (admin vereist)\n- **Windows (gebruiker)**: download de \`*_x64_user-setup.exe\`-installer voor alleen de huidige gebruiker (geen admin nodig)\n- **macOS**: download het \`.dmg\`-bestand (Apple Silicon / arm64)\n- **Linux**: download het \`.deb\`-pakket, de \`.AppImage\` of de \`.snap\` (ook beschikbaar in de [Snap Store](https://snapcraft.io/open-pdf-studio))\n\n### Functies\n- PDF's bekijken en navigeren\n- Tekst selecteren en zoeken\n- Annotaties: markeren, onderstrepen, doorhalen\n- Tekengereedschappen: vrije hand, vormen, tekst\n- Meerdere documenten in tabbladen\n- Miniatuurnavigatie\n- Sessieherstel\n\n---\n\n## 🇬🇧 English\n\n### What's New in ${version}\n\nFree, open-source PDF annotation editor built with Tauri.\n\n### Downloads\n- **Windows (System)**: Download the \`*_x64-setup.exe\` installer for system-wide installation (requires admin)\n- **Windows (User)**: Download the \`*_x64_user-setup.exe\` installer for current user only (no admin required)\n- **macOS**: Download the \`.dmg\` file (Apple Silicon / arm64)\n- **Linux**: Download the \`.deb\` package, \`.AppImage\`, or \`.snap\` (also available on the [Snap Store](https://snapcraft.io/open-pdf-studio))\n\n### Features\n- PDF viewing and navigation\n- Text selection and search\n- Annotations: highlight, underline, strikethrough\n- Drawing tools: freehand, shapes, text\n- Multi-tab document support\n- Thumbnail navigation\n- Session restore`,
               draft: true,
               prerelease: false
             });
@@ -79,8 +79,13 @@ jobs:
           - platform: 'ubuntu-22.04'
             args: ''
             target: 'linux'
+          # arm64-only, not universal: tesseract-rs's from-source Tesseract/
+          # Leptonica build doesn't cross-compile cleanly for a universal
+          # (arm64+x86_64 lipo'd) macOS binary — the x86_64 link pass picks
+          # up arm64-only object files and fails. This fork only needs to
+          # run on Apple Silicon, so building native arm64 sidesteps it.
           - platform: 'macos-26'
-            args: '--target universal-apple-darwin'
+            args: '--target aarch64-apple-darwin'
             target: 'macos'
           - platform: 'windows-latest'
             args: ''
@@ -135,9 +140,9 @@ jobs:
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install Rust targets (macOS universal)
+      - name: Install Rust targets (macOS)
         if: matrix.target == 'macos'
-        run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
+        run: rustup target add aarch64-apple-darwin
 
       - name: Install dependencies (Ubuntu only)
         if: matrix.target == 'linux'
@@ -203,20 +208,13 @@ jobs:
           tar xzf /tmp/pdfium-linux.tgz -C /tmp lib/libpdfium.so
           cp /tmp/lib/libpdfium.so src-tauri/binaries/linux-x64/libpdfium.so
 
-      - name: Build pdfium-worker sidecar (macOS universal)
+      - name: Build pdfium-worker sidecar (macOS)
         if: matrix.target == 'macos'
         working-directory: .
         run: |
           cargo build --release -p pdfium-worker --target aarch64-apple-darwin
-          cargo build --release -p pdfium-worker --target x86_64-apple-darwin
           mkdir -p open-pdf-studio/src-tauri/binaries
-          # tauri-build validates the sidecar PER ARCH during the per-target
-          # cargo builds of a universal bundle, so all three names must exist.
           cp target/aarch64-apple-darwin/release/pdfium-worker open-pdf-studio/src-tauri/binaries/pdfium-worker-aarch64-apple-darwin
-          cp target/x86_64-apple-darwin/release/pdfium-worker open-pdf-studio/src-tauri/binaries/pdfium-worker-x86_64-apple-darwin
-          lipo -create -output open-pdf-studio/src-tauri/binaries/pdfium-worker-universal-apple-darwin \
-            target/aarch64-apple-darwin/release/pdfium-worker \
-            target/x86_64-apple-darwin/release/pdfium-worker
 
       # macOS bundelt in-proc PDFium: tauri.macos.conf.json verwijst naar
       # binaries/macos-universal/libpdfium.dylib. Universal (arm64+x86_64)
@@ -301,11 +299,10 @@ jobs:
           includeUpdaterJson: true
 
       # Compile once. Bundling is a separate phase so a temporary failure in
-      # the external notarization service can be retried without rebuilding
-      # both macOS architectures.
+      # the external notarization service can be retried without recompiling.
       - name: Build macOS app without bundles
         if: matrix.target == 'macos' && steps.signing.outputs.has_apple == 'true'
-        run: npm run tauri -- build --target universal-apple-darwin --no-bundle
+        run: npm run tauri -- build --target aarch64-apple-darwin --no-bundle
 
       - name: Upload macOS release assets
         if: matrix.target == 'macos' && steps.signing.outputs.has_apple == 'true'
@@ -326,7 +323,7 @@ jobs:
         with:
           projectPath: open-pdf-studio
           tauriScript: node scripts/macos-notarization-retry.mjs
-          args: --target universal-apple-darwin
+          args: --target aarch64-apple-darwin
           releaseId: ${{ needs.create-release.outputs.release_id }}
           includeUpdaterJson: true
 
@@ -336,7 +333,7 @@ jobs:
       # since it isn't notarized (right-click > Open, or `xattr -cr` it).
       - name: Build unsigned macOS bundle (no Apple certificate)
         if: matrix.target == 'macos' && steps.signing.outputs.has_apple != 'true'
-        run: npm run tauri -- build --target universal-apple-darwin
+        run: npm run tauri -- build --target aarch64-apple-darwin
 
       - name: Upload unsigned macOS assets
         if: matrix.target == 'macos' && steps.signing.outputs.has_apple != 'true'
@@ -346,7 +343,7 @@ jobs:
         run: |
           set -euo pipefail
           VERSION="${{ needs.create-release.outputs.version }}"
-          DMG_PATH="$(find ../target/universal-apple-darwin/release/bundle/dmg -name '*.dmg' -print -quit)"
+          DMG_PATH="$(find ../target/aarch64-apple-darwin/release/bundle/dmg -name '*.dmg' -print -quit)"
           test -n "$DMG_PATH"
           gh release upload "$VERSION" "$DMG_PATH" --clobber --repo "${{ github.repository }}"
 
@@ -354,7 +351,7 @@ jobs:
         if: matrix.target == 'macos' && steps.signing.outputs.has_apple == 'true'
         run: |
           set -euo pipefail
-          DMG_PATH="$(find ../target/universal-apple-darwin/release/bundle/dmg -name '*.dmg' -print -quit)"
+          DMG_PATH="$(find ../target/aarch64-apple-darwin/release/bundle/dmg -name '*.dmg' -print -quit)"
           test -n "$DMG_PATH"
           # Tauri ruimt de .app op nadat de dmg gebouwd is ("Cleaning ..." in
           # het bundel-log) — de losse bundle/macos-map bestaat hier dus niet
