@@ -48,7 +48,12 @@ jobs:
               repo: context.repo.repo,
               per_page: 100,
             });
-            const hergebruik = bestaande.find((r) => r.tag_name === version);
+            // Draft releases keep a random "untagged-..." tag_name until
+            // published (GitHub only materializes the real tag on publish),
+            // so tag_name never matches `version` for a draft re-run via
+            // workflow_dispatch — match by release NAME too, or every
+            // re-dispatch created a duplicate draft instead of reusing one.
+            const hergebruik = bestaande.find((r) => r.tag_name === version || r.name === `Open PDF Studio ${version}`);
             if (hergebruik) {
               core.info(`Release voor ${version} bestaat al (id ${hergebruik.id}) — hergebruiken.`);
               return hergebruik.id;
