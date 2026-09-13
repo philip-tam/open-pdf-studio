@@ -40,6 +40,20 @@ export default function Ribbon() {
     savePreferences();
   };
 
+  // Clicking a tab is a clear "show me this content" signal — while
+  // collapsed, switching the active tab alone left the ribbon body hidden,
+  // so the click silently did nothing visible (looked broken). Expand
+  // first, same as clicking the collapse toggle would.
+  function selectTab(tabId) {
+    if (simpleLayout()) {
+      setSimpleLayout(false);
+    } else if (state.preferences.ribbonCollapsed === true) {
+      state.preferences.ribbonCollapsed = false;
+      savePreferences();
+    }
+    setActiveTab(tabId);
+  }
+
   return (
     <>
       <div class="ribbon-tabs">
@@ -47,30 +61,30 @@ export default function Ribbon() {
           onClick={() => openAppMenu()} />
         <RibbonTab label={t('tabs.home')} dataTab="home"
           isActive={activeTab() === 'home'}
-          onClick={() => setActiveTab('home')} />
+          onClick={() => selectTab('home')} />
         <RibbonTab label={t('tabs.view')} dataTab="view"
           isActive={activeTab() === 'view'}
-          onClick={() => setActiveTab('view')} />
+          onClick={() => selectTab('view')} />
         <RibbonTab label={t('tabs.drawing')} dataTab="drawing"
           isActive={activeTab() === 'drawing'}
-          onClick={() => setActiveTab('drawing')} />
+          onClick={() => selectTab('drawing')} />
         <RibbonTab label={t('tabs.comment')} dataTab="comment"
           isActive={commentActive()}
-          onClick={() => setActiveTab('comment')} />
+          onClick={() => selectTab('comment')} />
         <RibbonTab label={t('tabs.organize')} dataTab="organize"
           isActive={activeTab() === 'organize'}
-          onClick={() => setActiveTab('organize')} />
+          onClick={() => selectTab('organize')} />
         <RibbonTab label={t('tabs.help')} dataTab="help"
           isActive={activeTab() === 'help'}
-          onClick={() => setActiveTab('help')} />
+          onClick={() => selectTab('help')} />
         <Show when={contextualTabsVisible()}>
           <span class="ribbon-tab-separator contextual-tabs visible" id="contextual-tabs-separator"></span>
           <RibbonTab label={t('tabs.format')} dataTab="format" isContextual={true} id="tab-format-btn"
             isActive={activeTab() === 'format'}
-            onClick={() => setActiveTab('format')} />
+            onClick={() => selectTab('format')} />
           <RibbonTab label={t('tabs.arrange')} dataTab="arrange" isContextual={true} id="tab-arrange-btn"
             isActive={activeTab() === 'arrange'}
-            onClick={() => setActiveTab('arrange')} />
+            onClick={() => selectTab('arrange')} />
         </Show>
         <Show when={imageSelected()}>
           <Show when={!contextualTabsVisible()}>
@@ -78,7 +92,7 @@ export default function Ribbon() {
           </Show>
           <RibbonTab label={t('tabs.image')} dataTab="image" isContextual={true} id="tab-image-btn"
             isActive={activeTab() === 'image'}
-            onClick={() => setActiveTab('image')} />
+            onClick={() => selectTab('image')} />
         </Show>
         {/* Collapse/expand toggle (issue #278): hides the ribbon body so only
             the tab strip remains. State is remembered in preferences. */}
