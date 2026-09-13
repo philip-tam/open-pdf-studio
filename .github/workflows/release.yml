@@ -62,7 +62,7 @@ jobs:
               // markers worden door de in-app "Wat is nieuw"-dialog geparsed
               // (js/help/release-notes.js) zodat de NL-tab echte Nederlandse
               // tekst toont in plaats van de Engelse fallback (#240).
-              body: `## 🇳🇱 Nederlands\n\n### Wat is nieuw in ${version}\n\nGratis, open-source PDF-annotatie-editor gebouwd met Tauri.\n\n### Downloads\n- **Windows (systeem)**: download de \`*_x64-setup.exe\`-installer voor installatie voor alle gebruikers (admin vereist)\n- **Windows (gebruiker)**: download de \`*_x64_user-setup.exe\`-installer voor alleen de huidige gebruiker (geen admin nodig)\n- **macOS**: download het \`.dmg\`-bestand (Apple Silicon / arm64)\n- **Linux**: download het \`.deb\`-pakket, de \`.AppImage\` of de \`.snap\` (ook beschikbaar in de [Snap Store](https://snapcraft.io/open-pdf-studio))\n\n### Functies\n- PDF's bekijken en navigeren\n- Tekst selecteren en zoeken\n- Annotaties: markeren, onderstrepen, doorhalen\n- Tekengereedschappen: vrije hand, vormen, tekst\n- Meerdere documenten in tabbladen\n- Miniatuurnavigatie\n- Sessieherstel\n\n---\n\n## 🇬🇧 English\n\n### What's New in ${version}\n\nFree, open-source PDF annotation editor built with Tauri.\n\n### Downloads\n- **Windows (System)**: Download the \`*_x64-setup.exe\` installer for system-wide installation (requires admin)\n- **Windows (User)**: Download the \`*_x64_user-setup.exe\` installer for current user only (no admin required)\n- **macOS**: Download the \`.dmg\` file (Apple Silicon / arm64)\n- **Linux**: Download the \`.deb\` package, \`.AppImage\`, or \`.snap\` (also available on the [Snap Store](https://snapcraft.io/open-pdf-studio))\n\n### Features\n- PDF viewing and navigation\n- Text selection and search\n- Annotations: highlight, underline, strikethrough\n- Drawing tools: freehand, shapes, text\n- Multi-tab document support\n- Thumbnail navigation\n- Session restore`,
+              body: `## 🇳🇱 Nederlands\n\n### Wat is nieuw in ${version}\n\nGratis, open-source PDF-annotatie-editor gebouwd met Tauri.\n\n### Downloads\n- **macOS**: download het \`.dmg\`-bestand (Apple Silicon / arm64)\n- **Linux**: download het \`.deb\`-pakket, de \`.AppImage\` of de \`.snap\` (ook beschikbaar in de [Snap Store](https://snapcraft.io/open-pdf-studio))\n\n### Functies\n- PDF's bekijken en navigeren\n- Tekst selecteren en zoeken\n- Annotaties: markeren, onderstrepen, doorhalen\n- Tekengereedschappen: vrije hand, vormen, tekst\n- Meerdere documenten in tabbladen\n- Miniatuurnavigatie\n- Sessieherstel\n\n---\n\n## 🇬🇧 English\n\n### What's New in ${version}\n\nFree, open-source PDF annotation editor built with Tauri.\n\n### Downloads\n- **macOS**: Download the \`.dmg\` file (Apple Silicon / arm64)\n- **Linux**: Download the \`.deb\` package, \`.AppImage\`, or \`.snap\` (also available on the [Snap Store](https://snapcraft.io/open-pdf-studio))\n\n### Features\n- PDF viewing and navigation\n- Text selection and search\n- Annotations: highlight, underline, strikethrough\n- Drawing tools: freehand, shapes, text\n- Multi-tab document support\n- Thumbnail navigation\n- Session restore`,
               draft: true,
               prerelease: false
             });
@@ -87,12 +87,6 @@ jobs:
           - platform: 'macos-26'
             args: '--target aarch64-apple-darwin'
             target: 'macos'
-          - platform: 'windows-latest'
-            args: ''
-            target: 'windows-system'
-          - platform: 'windows-latest'
-            args: ''
-            target: 'windows-user'
 
     runs-on: ${{ matrix.platform }}
     env:
@@ -155,40 +149,7 @@ jobs:
 
       # The PDFium worker pool runs as a Tauri sidecar (bundle.externalBin).
       # Tauri requires binaries/pdfium-worker-<target-triple> to exist at
-      # build time on EVERY desktop platform, so build the workspace crate
-      # first and drop it in with the right triple suffix.
-      - name: Build pdfium-worker sidecar (Windows)
-        if: contains(matrix.target, 'windows')
-        shell: pwsh
-        working-directory: .
-        run: |
-          cargo build --release -p pdfium-worker
-          New-Item -ItemType Directory -Force open-pdf-studio/src-tauri/binaries | Out-Null
-          Copy-Item target/release/pdfium-worker.exe open-pdf-studio/src-tauri/binaries/pdfium-worker-x86_64-pc-windows-msvc.exe -Force
-
-      # Sign the pdfium-worker sidecar BEFORE Tauri bundles it into the installer.
-      # The installer-signing step below only signs the installer + main exe; the
-      # sidecar is extracted to disk UNSIGNED, which some AV engines flag as a
-      # heuristic false-positive and quarantine (Symantec Heur.AdvML.B, #245).
-      # Signing it here means the extracted worker.exe carries a trusted signature.
-      - name: Authenticode sign pdfium-worker sidecar (Windows)
-        if: contains(matrix.target, 'windows') && steps.signing.outputs.has_azure == 'true'
-        uses: azure/trusted-signing-action@v1
-        with:
-          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          endpoint: ${{ secrets.AZURE_ENDPOINT }}
-          signing-account-name: ${{ secrets.AZURE_TRUSTED_SIGNING_ACCOUNT_NAME }}
-          certificate-profile-name: ${{ secrets.AZURE_CERTIFICATE_PROFILE_NAME }}
-          cache-dependencies: false
-          files-folder: ${{ github.workspace }}/open-pdf-studio/src-tauri/binaries
-          files-folder-filter: exe
-          files-folder-depth: 1
-          file-digest: SHA256
-          timestamp-rfc3161: http://timestamp.acs.microsoft.com
-          timestamp-digest: SHA256
-
+      # build time on every desktop platform.
       - name: Build pdfium-worker sidecar (Linux)
         if: matrix.target == 'linux'
         working-directory: .
@@ -258,29 +219,6 @@ jobs:
           codesign -dv --verbose=2 src-tauri/binaries/macos-universal/libpdfium.dylib
           rm -f "$RUNNER_TEMP/dylib-cert.p12"
 
-      - name: Set user install mode
-        if: matrix.target == 'windows-user'
-        shell: pwsh
-        run: |
-          $conf = Get-Content src-tauri/tauri.conf.json -Raw | ConvertFrom-Json
-          $conf.bundle.windows.nsis.installMode = "currentUser"
-          $conf | ConvertTo-Json -Depth 10 | Set-Content src-tauri/tauri.conf.json
-
-      # WebView2Loader.dll is committed in src-tauri/ and bundled via
-      # bundle.resources — just verify it's there. (The old pre-build step
-      # searched src-tauri/target, which no longer exists since the crate
-      # moved into the workspace: the target dir lives at the repo root.)
-      - name: Verify WebView2Loader.dll resource (Windows)
-        if: contains(matrix.target, 'windows')
-        shell: pwsh
-        run: |
-          if (Test-Path 'src-tauri/WebView2Loader.dll') {
-            Write-Output "OK: src-tauri/WebView2Loader.dll present (bundled as resource)"
-          } else {
-            Write-Error "src-tauri/WebView2Loader.dll missing - NSIS bundle would lack the loader"
-            exit 1
-          }
-
       - name: Write App Store Connect API key (macOS)
         if: matrix.target == 'macos' && steps.signing.outputs.has_apple == 'true'
         shell: bash
@@ -288,7 +226,7 @@ jobs:
           printf '%s' "${{ secrets.APPLE_API_KEY_CONTENT }}" > "${{ runner.temp }}/apple-api-key.p8"
 
       - name: Build Tauri app (with release upload)
-        if: matrix.target != 'windows-user' && matrix.target != 'macos'
+        if: matrix.target == 'linux'
         uses: tauri-apps/tauri-action@action-v0.6.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -372,122 +310,10 @@ jobs:
           xcrun stapler validate "$APP_PATH"
           bash scripts/macos-startup-smoke.sh "$APP_PATH"
 
-      - name: Build Tauri app (user installer)
-        if: matrix.target == 'windows-user'
-        uses: tauri-apps/tauri-action@action-v0.6.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          projectPath: open-pdf-studio
-          args: ${{ matrix.args }}
-
-      - name: Authenticode sign Windows installer
-        if: contains(matrix.target, 'windows') && steps.signing.outputs.has_azure == 'true'
-        uses: azure/trusted-signing-action@v1
-        with:
-          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          endpoint: ${{ secrets.AZURE_ENDPOINT }}
-          signing-account-name: ${{ secrets.AZURE_TRUSTED_SIGNING_ACCOUNT_NAME }}
-          certificate-profile-name: ${{ secrets.AZURE_CERTIFICATE_PROFILE_NAME }}
-          cache-dependencies: false
-          # Workspace target dir lives at the repo root (src-tauri is a member)
-          files-folder: ${{ github.workspace }}/target/release/bundle/nsis
-          files-folder-filter: exe
-          files-folder-depth: 1
-          file-digest: SHA256
-          timestamp-rfc3161: http://timestamp.acs.microsoft.com
-          timestamp-digest: SHA256
-
-      - name: Re-sign updater artifacts after Authenticode signing
-        if: matrix.target == 'windows-system' && steps.signing.outputs.has_azure == 'true' && steps.signing.outputs.has_updater_key == 'true'
-        shell: pwsh
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          $VERSION = "${{ needs.create-release.outputs.version }}"
-          # Workspace target dir lives at the repo root (src-tauri is a member)
-          $NSIS_DIR = "$env:GITHUB_WORKSPACE/target/release/bundle/nsis"
-
-          $EXE = Get-ChildItem "$NSIS_DIR/*-setup.exe" | Select-Object -First 1
-          $ZIP = Get-ChildItem "$NSIS_DIR/*.nsis.zip" | Select-Object -First 1
-
-          Write-Host "Signed exe: $($EXE.Name)"
-          Write-Host "Old zip: $($ZIP.Name)"
-
-          # Re-create .nsis.zip with the Authenticode-signed exe
-          # Use ZipFile API with Deflate compression (Compress-Archive can use
-          # Deflate64 which Tauri's updater does not support)
-          $ZIP_PATH = $ZIP.FullName
-          Remove-Item $ZIP_PATH
-          Add-Type -AssemblyName System.IO.Compression.FileSystem
-          $archive = [System.IO.Compression.ZipFile]::Open($ZIP_PATH, 'Create')
-          [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, $EXE.FullName, $EXE.Name, [System.IO.Compression.CompressionLevel]::Optimal)
-          $archive.Dispose()
-
-          # Re-generate updater signatures for both files
-          # tauri signer sign writes a .sig file next to the input file
-          npx tauri signer sign "$($EXE.FullName)" --private-key "$env:TAURI_SIGNING_PRIVATE_KEY" --password "$env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD"
-          npx tauri signer sign "$($ZIP.FullName)" --private-key "$env:TAURI_SIGNING_PRIVATE_KEY" --password "$env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD"
-
-          # Read the generated .sig files
-          $EXE_SIG = Get-Content "$($EXE.FullName).sig" -Raw
-          $ZIP_SIG = Get-Content "$($ZIP.FullName).sig" -Raw
-
-          Write-Host "New exe signature: $($EXE_SIG.Substring(0, 50))..."
-          Write-Host "New zip signature: $($ZIP_SIG.Substring(0, 50))..."
-
-          # Download latest.json from release, update Windows signatures
-          gh release download $VERSION --pattern "latest.json" --output latest.json --clobber --repo "${{ github.repository }}"
-
-          $latest = Get-Content latest.json -Raw | ConvertFrom-Json
-
-          foreach ($key in @('windows-x86_64')) {
-            if ($latest.platforms.PSObject.Properties[$key]) {
-              $latest.platforms.$key.signature = $ZIP_SIG
-              Write-Host "Updated signature for $key"
-            }
-          }
-          foreach ($key in @('windows-x86_64-nsis')) {
-            if ($latest.platforms.PSObject.Properties[$key]) {
-              $latest.platforms.$key.signature = $EXE_SIG
-              Write-Host "Updated signature for $key"
-            }
-          }
-
-          $latest | ConvertTo-Json -Depth 10 | Set-Content latest.json -NoNewline
-
-          # Re-upload all modified files
-          gh release upload $VERSION "$($EXE.FullName)" --clobber --repo "${{ github.repository }}"
-          gh release upload $VERSION "$($EXE.FullName).sig" --clobber --repo "${{ github.repository }}"
-          gh release upload $VERSION "$($ZIP.FullName)" --clobber --repo "${{ github.repository }}"
-          gh release upload $VERSION "$($ZIP.FullName).sig" --clobber --repo "${{ github.repository }}"
-          gh release upload $VERSION latest.json --clobber --repo "${{ github.repository }}"
-
-          Write-Host "All Windows artifacts re-uploaded with correct signatures"
-
-      - name: Upload user installer to release
-        if: matrix.target == 'windows-user'
-        shell: pwsh
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          $VERSION = "${{ needs.create-release.outputs.version }}"
-          # Workspace target dir lives at the repo root (src-tauri is a member)
-          $NSIS_DIR = "$env:GITHUB_WORKSPACE/target/release/bundle/nsis"
-          $EXE = Get-ChildItem "$NSIS_DIR/*-setup.exe" | Select-Object -First 1
-          # Rename: "Open PDF Studio_x.y.z_x64-setup.exe" -> "Open PDF Studio_x.y.z_x64_user-setup.exe"
-          $NEW_NAME = $EXE.Name -replace '_x64-setup\.exe$', '_x64_user-setup.exe'
-          $NEW_PATH = Join-Path $EXE.DirectoryName $NEW_NAME
-          Rename-Item $EXE.FullName $NEW_PATH
-          gh release upload $VERSION "$NEW_PATH" --clobber --repo "${{ github.repository }}"
-          Write-Host "Uploaded user installer: $NEW_NAME"
-
   build-android:
     needs: create-release
     # Non-blocking: a failed Android build must NOT hold back the desktop
-    # release (Windows/Linux/macOS). It uploads its APK independently.
+    # release (Linux/macOS). It uploads its APK independently.
     continue-on-error: true
     permissions:
       contents: write
