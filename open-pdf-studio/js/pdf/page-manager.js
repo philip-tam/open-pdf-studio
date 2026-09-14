@@ -253,7 +253,7 @@ export async function reloadFromBytes(newBytes, annotations, rotations, targetPa
   await setViewMode(
     doc?.facingSpread && doc?.viewMode === 'continuous' ? 'facing'
     : doc?.bookSpread && doc?.viewMode === 'continuous' ? 'book'
-    : (doc?.viewMode || 'single')
+    : (doc?.viewMode || 'continuous')
   );
   clearThumbnailCache(doc.id);
   generateThumbnails();

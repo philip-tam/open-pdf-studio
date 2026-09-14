@@ -180,7 +180,7 @@ export function buildToolContext(e, coords) {
     state,
     prefs: state.preferences,
     scale: ctxScale,
-    viewMode: ctxDoc?.viewMode || 'single',
+    viewMode: ctxDoc?.viewMode || 'continuous',
 
     // Snapping
     snap: (x, y, excludeId, extraPoints) => performSnap(x, y, ctxDoc?.annotations || [], coords.pageNum, ctxScale, excludeId, extraPoints),

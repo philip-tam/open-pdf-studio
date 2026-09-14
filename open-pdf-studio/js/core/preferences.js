@@ -40,12 +40,15 @@ export async function loadPreferences() {
       // Tekstvak: oude standaard-tekstgrootte 14 → 8 (alleen de onaangeroerde
       // oude default; een zelfgekozen grootte blijft staan).
       if (loaded.textboxFontSize === 14) loaded.textboxFontSize = 8;
-      // Enkelpagina is de standaard-weergavemodus. 'continuous' was korte
-      // tijd de default voor nieuwe installaties; omdat deze voorkeur nergens
-      // in de UI instelbaar is, is een opgeslagen 'continuous' altijd die
-      // oude default en geen gebruikerskeuze — terugzetten.
-      if (loaded.defaultViewMode === undefined || loaded.defaultViewMode === 'continuous') {
-        loaded.defaultViewMode = 'single';
+      // Doorlopend scrollen is nu de standaard-weergavemodus (voorheen
+      // enkelpagina, waarbij één muiswiel-tik meteen een hele pagina
+      // wisselde i.p.v. vloeiend scrollen). Omdat deze voorkeur nergens in
+      // de UI blijvend instelbaar is (ViewTab's knoppen wijzigen alleen de
+      // huidige documentweergave, niet deze voorkeur), is een opgeslagen
+      // 'single' altijd de oude default en geen bewuste gebruikerskeuze —
+      // terugzetten naar de nieuwe default.
+      if (loaded.defaultViewMode === undefined || loaded.defaultViewMode === 'single') {
+        loaded.defaultViewMode = 'continuous';
       }
       // Merge with defaults to ensure all keys exist
       state.preferences = { ...DEFAULT_PREFERENCES, ...loaded };

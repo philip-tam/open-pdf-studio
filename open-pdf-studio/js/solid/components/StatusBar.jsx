@@ -134,12 +134,12 @@ export default function StatusBar() {
     const doc = state.documents[state.activeDocumentIndex];
     return localizeNumber(Math.round((doc ? doc.scale : 1.5) * 100)) + '%';
   };
-  const viewMode = () => state.documents[state.activeDocumentIndex]?.viewMode || 'single';
+  const viewMode = () => state.documents[state.activeDocumentIndex]?.viewMode || 'continuous';
   const bookSpread = () => !!state.documents[state.activeDocumentIndex]?.bookSpread;
   const facingSpread = () => !!state.documents[state.activeDocumentIndex]?.facingSpread;
   const annotationText = () => {
     const annotations = state.documents[state.activeDocumentIndex]?.annotations || [];
-    if ((state.documents[state.activeDocumentIndex]?.viewMode || 'single') === 'continuous') {
+    if ((state.documents[state.activeDocumentIndex]?.viewMode || 'continuous') === 'continuous') {
       return localizeNumber(annotations.length);
     }
     const pageCount = annotations.filter(a => a.page === (state.documents[state.activeDocumentIndex]?.currentPage || 1)).length;

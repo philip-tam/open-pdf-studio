@@ -11,7 +11,7 @@ export function createDocument(filePath: string | null = null): DocumentState {
     pdfDoc: null,
     currentPage: 1,
     scale: 1.5,
-    viewMode: 'single',
+    viewMode: 'continuous',
     annotations: [],
     textEdits: [],
     watermarks: [],

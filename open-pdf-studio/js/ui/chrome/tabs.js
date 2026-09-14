@@ -32,9 +32,9 @@ export function createTab(filePath = null, autoSwitch = true) {
 
   // Create new document
   const doc = createDocument(filePath);
-  // Weergavemodus uit de voorkeuren; enkelpagina is de standaard
+  // Weergavemodus uit de voorkeuren; doorlopend scrollen is de standaard
   // (createDocument zelf blijft een pure helper).
-  doc.viewMode = state.preferences?.defaultViewMode === 'continuous' ? 'continuous' : 'single';
+  doc.viewMode = state.preferences?.defaultViewMode === 'single' ? 'single' : 'continuous';
   state.documents.push(doc);
 
   // Switch to the new tab

@@ -45,10 +45,10 @@ export default function ViewTab() {
       <AdaptiveGroups>
         <RibbonGroup label={t('view.pageDisplay')}>
           <RibbonButton id="single-page" title={t('view.singlePage')} icon={singlePageIcon} label={t('view.single')}
-            disabled={noPdf()} active={(state.documents[state.activeDocumentIndex]?.viewMode || 'single') === 'single'}
+            disabled={noPdf()} active={(state.documents[state.activeDocumentIndex]?.viewMode || 'continuous') === 'single'}
             onClick={() => setViewMode('single')} />
           <RibbonButton id="continuous" title={t('view.continuousTitle')} icon={continuousIcon} label={t('view.continuous')}
-            active={(state.documents[state.activeDocumentIndex]?.viewMode || 'single') === 'continuous'
+            active={(state.documents[state.activeDocumentIndex]?.viewMode || 'continuous') === 'continuous'
               && !state.documents[state.activeDocumentIndex]?.bookSpread
               && !state.documents[state.activeDocumentIndex]?.facingSpread}
             disabled={noPdf()} onClick={() => setViewMode('continuous')} />

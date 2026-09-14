@@ -45,10 +45,12 @@ export const DEFAULT_PREFERENCES: Preferences = {
   // Theme
   theme: 'default',
 
-  // Enkelpagina is de standaard-weergavemodus; opgeslagen 'continuous'
-  // (de kortstondige oude default, nergens instelbaar in de UI) wordt bij
-  // het laden teruggezet (zie preferences.js).
-  defaultViewMode: 'single',
+  // Continuous scroll is the default display mode — matches the common
+  // "scroll smoothly through the document" expectation (e.g. Acrobat's own
+  // default) rather than Single's one-wheel-tick-jumps-a-whole-page
+  // behaviour. See ViewTab.jsx's "Single"/"Continuous" buttons to switch
+  // per document.
+  defaultViewMode: 'continuous',
 
   // General — authorName defaults to '' (resolved to OS username at load time)
   authorName: '',
