@@ -35,9 +35,15 @@ export default function CropMarginsDialog(props) {
     }
   };
 
+  const handleSelectManually = async () => {
+    close();
+    const { startFreeformCrop } = await import('../../../tools/crop-select.js');
+    startFreeformCrop();
+  };
+
   const footer = (
     <>
-      <div></div>
+      <button id="crop-margins-select-manually" class="pref-btn pref-btn-secondary" onClick={handleSelectManually}>{t('cropMargins.selectManually')}</button>
       <div class="crop-margins-footer-right">
         <button class="pref-btn pref-btn-primary" onClick={handleCrop}>{tCommon('crop')}</button>
         <button class="pref-btn pref-btn-secondary" onClick={close}>{tCommon('cancel')}</button>

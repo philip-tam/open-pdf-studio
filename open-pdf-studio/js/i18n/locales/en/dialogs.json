@@ -386,7 +386,8 @@
     "threshold": "Threshold:",
     "info": "{{count}} page(s) in document. CropBox preserves the original content — fully reversible with Undo.",
     "noContent": "No content detected — all selected pages appear to be blank.",
-    "resultWithSkipped": "Cropped {{cropped}} page(s). Skipped {{skipped}} blank page(s)."
+    "resultWithSkipped": "Cropped {{cropped}} page(s). Skipped {{skipped}} blank page(s).",
+    "selectManually": "Select Area on Page…"
   },
   "resizePages": {
     "title": "Resize Pages",

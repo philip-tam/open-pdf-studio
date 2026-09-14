@@ -394,7 +394,8 @@
     "threshold": "Drempel:",
     "info": "{{count}} pagina('s) in document. CropBox behoudt de originele inhoud — volledig omkeerbaar met Ongedaan maken.",
     "noContent": "Geen inhoud gedetecteerd — alle geselecteerde pagina's lijken leeg te zijn.",
-    "resultWithSkipped": "{{cropped}} pagina('s) bijgesneden. {{skipped}} lege pagina('s) overgeslagen."
+    "resultWithSkipped": "{{cropped}} pagina('s) bijgesneden. {{skipped}} lege pagina('s) overgeslagen.",
+    "selectManually": "Selecteer gebied op pagina…"
   },
   "resizePages": {
     "title": "Paginaformaat wijzigen",

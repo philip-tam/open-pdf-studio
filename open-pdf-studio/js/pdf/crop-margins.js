@@ -108,21 +108,21 @@ async function detectContentBounds(pageNum, threshold) {
 }
 
 /**
- * Compute a PDF CropBox from pixel bounds, accounting for page rotation.
- * @param {{minX: number, minY: number, maxX: number, maxY: number, width: number, height: number, scale: number}} bounds
+ * Compute a PDF CropBox from fractional page-space bounds (0..1, top-left
+ * origin — canvas convention), accounting for page rotation. Shared by the
+ * auto-detect path (fractions of the scanned content bounds) and the
+ * freeform/manual selection path (fractions of the user's drag rectangle).
+ * @param {number} fracLeft
+ * @param {number} fracTop
+ * @param {number} fracRight
+ * @param {number} fracBottom
  * @param {import('pdf-lib').PDFPage} pdfPage - The pdf-lib page
  * @param {number} paddingPt - Padding in PDF points
  * @returns {{x: number, y: number, width: number, height: number}}
  */
-function computeCropBox(bounds, pdfPage, paddingPt) {
+export function cropBoxFromFractions(fracLeft, fracTop, fracRight, fracBottom, pdfPage, paddingPt) {
   const mediaBox = pdfPage.getMediaBox();
   const rotation = pdfPage.getRotation().angle % 360;
-
-  // Convert pixel bounds to fractional positions (0..1)
-  const fracLeft = bounds.minX / bounds.width;
-  const fracRight = bounds.maxX / bounds.width;
-  const fracTop = bounds.minY / bounds.height;
-  const fracBottom = bounds.maxY / bounds.height;
 
   let cropX, cropY, cropW, cropH;
 
@@ -233,7 +233,11 @@ export async function cropMargins(applyTo, rangeStr, paddingMm, threshold) {
 
     for (const [pageNum, bounds] of boundsMap) {
       const pdfPage = pages[pageNum - 1];
-      const crop = computeCropBox(bounds, pdfPage, paddingPt);
+      const crop = cropBoxFromFractions(
+        bounds.minX / bounds.width, bounds.minY / bounds.height,
+        bounds.maxX / bounds.width, bounds.maxY / bounds.height,
+        pdfPage, paddingPt
+      );
       pdfPage.setCropBox(crop.x, crop.y, crop.width, crop.height);
     }
 
@@ -260,6 +264,65 @@ export async function cropMargins(applyTo, rangeStr, paddingMm, threshold) {
       cropped: boundsMap.size,
       skipped: pageNumbers.length - boundsMap.size,
     };
+  } finally {
+    hideLoading();
+  }
+}
+
+/**
+ * Crop a single page to an exact, user-selected rectangle (freeform/manual
+ * crop — the mouse-drag counterpart to the auto-detect `cropMargins` above).
+ * @param {number} pageNum - 1-based page number
+ * @param {{x: number, y: number, w: number, h: number, pageW: number, pageH: number}} appRect
+ *   Selection rect in app-space (page points, top-left origin), already
+ *   clamped to the page — see `selectionToAppRect`/`clampAppRect` in
+ *   tools/screenshot.js, reused by tools/crop-select.js.
+ * @returns {Promise<boolean>} whether the crop was applied
+ */
+export async function cropToSelection(pageNum, appRect) {
+  if (!getActiveDocument()?.pdfDoc) return false;
+  if (!appRect || !(appRect.w >= 1) || !(appRect.h >= 1)) return false;
+
+  const cacheKey = getCacheKey();
+  const currentBytes = getCachedPdfBytes(cacheKey);
+  if (!currentBytes) return false;
+
+  const doc = getActiveDocument();
+  const oldAnnotations = doc.annotations.map((a) => ({ ...a }));
+  const oldRotations = { ...doc.pageRotations };
+  const oldPage = doc.currentPage;
+
+  showLoading('Applying crop...');
+  try {
+    const pdfDoc = await PDFDocument.load(currentBytes, { ignoreEncryption: true });
+    const pdfPage = pdfDoc.getPages()[pageNum - 1];
+    if (!pdfPage) return false;
+
+    const fracLeft = appRect.x / appRect.pageW;
+    const fracRight = (appRect.x + appRect.w) / appRect.pageW;
+    const fracTop = appRect.y / appRect.pageH;
+    const fracBottom = (appRect.y + appRect.h) / appRect.pageH;
+    const crop = cropBoxFromFractions(fracLeft, fracTop, fracRight, fracBottom, pdfPage, 0);
+    pdfPage.setCropBox(crop.x, crop.y, crop.width, crop.height);
+
+    const newBytes = new Uint8Array(await pdfDoc.save());
+    const newAnnotations = oldAnnotations;
+    const newRotations = { ...oldRotations };
+    const targetPage = doc.currentPage;
+
+    await reloadFromBytes(newBytes, newAnnotations, newRotations, targetPage);
+    recordPageStructure(
+      currentBytes,
+      oldAnnotations,
+      oldRotations,
+      oldPage,
+      newBytes,
+      newAnnotations,
+      newRotations,
+      targetPage
+    );
+
+    return true;
   } finally {
     hideLoading();
   }

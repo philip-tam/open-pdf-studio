@@ -40,7 +40,7 @@ function canvasToBlob(canvas, mimeType = 'image/png') {
   });
 }
 
-function getCurrentCanvases() {
+export function getCurrentCanvases() {
   if (getActiveDocument()?.viewMode === 'continuous') {
     const doc = getActiveDocument();
     const wrapper = document.querySelector(`.page-wrapper[data-page="${doc ? doc.currentPage : 1}"]`);
@@ -485,3 +485,8 @@ export async function placeLastScreenshotAsOverlay() {
     updateStatusMessage('Failed to place overlay');
   }
 }
+
+// Re-exported for the freeform crop tool (tools/crop-select.js), which reuses
+// the same drag-select overlay and rect-to-page-space conversion instead of
+// duplicating it.
+export { _selectionToAppRect as selectionToAppRect, _clampAppRect as clampAppRect };
