@@ -334,5 +334,12 @@
       "chi_tra": "Čínština (tradičná)",
       "chi_tra+eng": "Čínština (tradičná) + angličtina"
     }
+  },
+  "straighten": {
+    "title": "Narovnať Stránku",
+    "apply": "Narovnať",
+    "angleInfo": "Uhol korekcie: {{angle}}°",
+    "done": "Narovnaných {{count}} strán o {{angle}}°",
+    "alreadyStraight": "Čiara je už rovná — korekcia nie je potrebná."
   }
 }

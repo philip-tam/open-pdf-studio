@@ -334,5 +334,12 @@
       "chi_tra": "Chinesisch (traditionell)",
       "chi_tra+eng": "Chinesisch (traditionell) + Englisch"
     }
+  },
+  "straighten": {
+    "title": "Seite Begradigen",
+    "apply": "Begradigen",
+    "angleInfo": "Korrekturwinkel: {{angle}}°",
+    "done": "{{count}} Seite(n) um {{angle}}° begradigt",
+    "alreadyStraight": "Linie ist bereits gerade — keine Korrektur nötig."
   }
 }

@@ -334,5 +334,12 @@
       "chi_tra": "Xinès (tradicional)",
       "chi_tra+eng": "Xinès (tradicional) + Anglès"
     }
+  },
+  "straighten": {
+    "title": "Redreça la Pàgina",
+    "apply": "Redreça",
+    "angleInfo": "Angle de correcció: {{angle}}°",
+    "done": "{{count}} pàgina(es) redreçada(es) {{angle}}°",
+    "alreadyStraight": "La línia ja és recta — no cal cap correcció."
   }
 }

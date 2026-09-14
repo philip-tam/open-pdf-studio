@@ -491,5 +491,12 @@
       "chi_tra": "Chinese (Traditional)",
       "chi_tra+eng": "Chinese (Traditional) + English"
     }
+  },
+  "straighten": {
+    "title": "Straighten Page",
+    "apply": "Straighten",
+    "angleInfo": "Correction angle: {{angle}}°",
+    "done": "Straightened {{count}} page(s) by {{angle}}°",
+    "alreadyStraight": "Line is already straight — no correction needed."
   }
 }

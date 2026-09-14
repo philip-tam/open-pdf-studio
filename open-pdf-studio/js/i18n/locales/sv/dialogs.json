@@ -334,5 +334,12 @@
       "chi_tra": "Kinesiska (traditionell)",
       "chi_tra+eng": "Kinesiska (traditionell) + engelska"
     }
+  },
+  "straighten": {
+    "title": "Räta Ut Sidan",
+    "apply": "Räta ut",
+    "angleInfo": "Korrigeringsvinkel: {{angle}}°",
+    "done": "{{count}} sida/sidor rätade med {{angle}}°",
+    "alreadyStraight": "Linjen är redan rak — ingen korrigering behövs."
   }
 }

@@ -174,7 +174,8 @@
     "headerFooter": "כותרת עליונה/תחתונה",
     "manageWatermarks": "ניהול סימני מים",
     "manage": "ניהול",
-    "ocr": "Recognize Text (OCR)"
+    "ocr": "Recognize Text (OCR)",
+    "straighten": "יישור עמוד"
   },
   "help": {
     "information": "מידע",

@@ -174,7 +174,8 @@
     "headerFooter": "Intestazione/Piè",
     "manageWatermarks": "Gestisci filigrane",
     "manage": "Gestisci",
-    "ocr": "Recognize Text (OCR)"
+    "ocr": "Recognize Text (OCR)",
+    "straighten": "Raddrizza Pagina"
   },
   "help": {
     "information": "Informazioni",

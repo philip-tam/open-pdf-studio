@@ -174,7 +174,8 @@
     "headerFooter": "Encabezado/Pie",
     "manageWatermarks": "Administrar marcas de agua",
     "manage": "Administrar",
-    "ocr": "Recognize Text (OCR)"
+    "ocr": "Recognize Text (OCR)",
+    "straighten": "Enderezar Página"
   },
   "help": {
     "information": "Información",

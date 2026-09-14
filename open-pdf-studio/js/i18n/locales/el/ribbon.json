@@ -174,7 +174,8 @@
     "headerFooter": "Κεφαλίδα/Υποσέλιδο",
     "manageWatermarks": "Διαχείριση υδατογραφημάτων",
     "manage": "Διαχείριση",
-    "ocr": "Recognize Text (OCR)"
+    "ocr": "Recognize Text (OCR)",
+    "straighten": "Ισιώστε τη Σελίδα"
   },
   "help": {
     "information": "Πληροφορίες",

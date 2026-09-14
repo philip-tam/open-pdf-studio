@@ -334,5 +334,12 @@
       "chi_tra": "Chiński (tradycyjny)",
       "chi_tra+eng": "Chiński (tradycyjny) + angielski"
     }
+  },
+  "straighten": {
+    "title": "Wyprostuj Stronę",
+    "apply": "Wyprostuj",
+    "angleInfo": "Kąt korekty: {{angle}}°",
+    "done": "Wyprostowano {{count}} stron(y) o {{angle}}°",
+    "alreadyStraight": "Linia jest już prosta — korekta niepotrzebna."
   }
 }

@@ -334,5 +334,12 @@
       "chi_tra": "Chino (tradicional)",
       "chi_tra+eng": "Chino (tradicional) + inglés"
     }
+  },
+  "straighten": {
+    "title": "Enderezar Página",
+    "apply": "Enderezar",
+    "angleInfo": "Ángulo de corrección: {{angle}}°",
+    "done": "{{count}} página(s) enderezada(s) {{angle}}°",
+    "alreadyStraight": "La línea ya está recta — no se necesita corrección."
   }
 }

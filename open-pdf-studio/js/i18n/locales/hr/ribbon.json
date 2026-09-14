@@ -174,7 +174,8 @@
     "headerFooter": "Zaglavlje/Podnožje",
     "manageWatermarks": "Upravljaj vodenim žigovima",
     "manage": "Upravljaj",
-    "ocr": "Recognize Text (OCR)"
+    "ocr": "Recognize Text (OCR)",
+    "straighten": "Ispravi Stranicu"
   },
   "help": {
     "information": "Informacije",

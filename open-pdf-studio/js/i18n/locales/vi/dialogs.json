@@ -334,5 +334,12 @@
       "chi_tra": "Tiếng Trung (Phồn thể)",
       "chi_tra+eng": "Tiếng Trung (Phồn thể) + Tiếng Anh"
     }
+  },
+  "straighten": {
+    "title": "Làm Thẳng Trang",
+    "apply": "Làm Thẳng",
+    "angleInfo": "Góc hiệu chỉnh: {{angle}}°",
+    "done": "Đã làm thẳng {{count}} trang với góc {{angle}}°",
+    "alreadyStraight": "Đường thẳng đã ngay ngắn — không cần hiệu chỉnh."
   }
 }

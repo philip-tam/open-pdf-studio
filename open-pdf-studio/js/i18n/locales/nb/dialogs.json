@@ -334,5 +334,12 @@
       "chi_tra": "Kinesisk (tradisjonell)",
       "chi_tra+eng": "Kinesisk (tradisjonell) + engelsk"
     }
+  },
+  "straighten": {
+    "title": "Rett Opp Siden",
+    "apply": "Rett opp",
+    "angleInfo": "Korreksjonsvinkel: {{angle}}°",
+    "done": "{{count}} side(r) rettet opp med {{angle}}°",
+    "alreadyStraight": "Linjen er allerede rett — ingen korreksjon nødvendig."
   }
 }

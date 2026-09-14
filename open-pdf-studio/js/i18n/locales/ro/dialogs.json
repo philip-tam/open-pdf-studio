@@ -334,5 +334,12 @@
       "chi_tra": "Chineză (tradițională)",
       "chi_tra+eng": "Chineză (tradițională) + engleză"
     }
+  },
+  "straighten": {
+    "title": "Îndreaptă Pagina",
+    "apply": "Îndreaptă",
+    "angleInfo": "Unghi de corecție: {{angle}}°",
+    "done": "{{count}} pagină(i) îndreptată(e) cu {{angle}}°",
+    "alreadyStraight": "Linia este deja dreaptă — nu este nevoie de corecție."
   }
 }

@@ -174,7 +174,8 @@
     "headerFooter": "رأس/تذييل",
     "manageWatermarks": "إدارة العلامات المائية",
     "manage": "إدارة",
-    "ocr": "Recognize Text (OCR)"
+    "ocr": "Recognize Text (OCR)",
+    "straighten": "تسوية الصفحة"
   },
   "help": {
     "information": "معلومات",

@@ -334,5 +334,12 @@
       "chi_tra": "Tionghoa (Tradisional)",
       "chi_tra+eng": "Tionghoa (Tradisional) + Inggris"
     }
+  },
+  "straighten": {
+    "title": "Luruskan Halaman",
+    "apply": "Luruskan",
+    "angleInfo": "Sudut koreksi: {{angle}}°",
+    "done": "{{count}} halaman diluruskan sebesar {{angle}}°",
+    "alreadyStraight": "Garis sudah lurus — tidak perlu koreksi."
   }
 }

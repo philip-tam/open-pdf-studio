@@ -334,5 +334,12 @@
       "chi_tra": "Kichina (cha Jadi)",
       "chi_tra+eng": "Kichina (cha Jadi) + Kiingereza"
     }
+  },
+  "straighten": {
+    "title": "Nyoosha Ukurasa",
+    "apply": "Nyoosha",
+    "angleInfo": "Pembe ya urekebishaji: {{angle}}°",
+    "done": "Kurasa {{count}} zimenyooshwa kwa {{angle}}°",
+    "alreadyStraight": "Mstari tayari umenyooka — hakuna marekebisho yanayohitajika."
   }
 }

@@ -24,6 +24,7 @@ import CalibrationDialog from './dialogs/CalibrationDialog.jsx';
 import ScaleDialog from './dialogs/ScaleDialog.jsx';
 import CropMarginsDialog from './dialogs/CropMarginsDialog.jsx';
 import OcrLanguageDialog from './dialogs/OcrLanguageDialog.jsx';
+import StraightenDialog from './dialogs/StraightenDialog.jsx';
 import ResizePagesDialog from './dialogs/ResizePagesDialog.jsx';
 import CompressDialog from './dialogs/CompressDialog.jsx';
 import FeedbackDialog from './dialogs/FeedbackDialog.jsx';
@@ -79,6 +80,7 @@ const DIALOG_MAP = {
   'scale': ScaleDialog,
   'crop-margins': CropMarginsDialog,
   'ocr-language': OcrLanguageDialog,
+  'straighten-page': StraightenDialog,
   'resize-pages': ResizePagesDialog,
   'compress': CompressDialog,
   'feedback': FeedbackDialog,

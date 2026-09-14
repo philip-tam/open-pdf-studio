@@ -269,7 +269,8 @@
     "compressLabel": "Compress",
     "reorderPages": "Reorder",
     "reorderPagesTitle": "Open thumbnails to drag pages into a new order",
-    "ocr": "Recognize Text (OCR)"
+    "ocr": "Recognize Text (OCR)",
+    "straighten": "Straighten Page"
   },
   "help": {
     "settings": "Settings",
