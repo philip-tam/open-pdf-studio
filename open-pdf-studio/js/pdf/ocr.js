@@ -18,8 +18,8 @@ async function ocrOnePage(filePath, pageIndex, lang) {
 }
 
 /** OCR the current page only. `lang`: a Tesseract language spec (e.g.
- *  'eng', 'chi_tra+eng') or 'auto' (default) to detect each page's script
- *  and pick automatically — see src-tauri/src/ocr.rs's detect_page_lang. */
+ *  'eng', 'chi_tra+eng') or 'auto' (default), which resolves to the
+ *  combined Chinese+English pass — see src-tauri/src/ocr.rs's AUTO_LANG. */
 export async function ocrCurrentPage(lang = 'auto') {
   const doc = getActiveDocument();
   if (!doc || !doc.filePath || !doc.pdfDoc) return;
@@ -32,15 +32,12 @@ export async function ocrCurrentPage(lang = 'auto') {
     markDocumentModified();
     finishPrintProgress(i18next.t('ocr.progress.done', { ns: 'statusbar', count: words.length }) || `Recognized ${words.length} words`);
   } catch (e) {
-    console.warn('OCR failed:', e);
+    console.warn('OCR failed:', e?.message || e, e?.stack || '');
     failPrintProgress(i18next.t('ocr.progress.failed', { ns: 'statusbar' }) || 'Text recognition failed');
   }
 }
 
-/** OCR every page of the current document. `lang`: see ocrCurrentPage —
- *  'auto' (default) detects each page's script independently, so a
- *  document that mixes English-only and Chinese pages gets the right
- *  recognition model per page rather than one language for the whole run. */
+/** OCR every page of the current document. `lang`: see ocrCurrentPage. */
 export async function ocrAllPages(lang = 'auto') {
   const doc = getActiveDocument();
   if (!doc || !doc.filePath || !doc.pdfDoc) return;
@@ -62,7 +59,7 @@ export async function ocrAllPages(lang = 'auto') {
     markDocumentModified();
     finishPrintProgress(i18next.t('ocr.progress.doneAll', { ns: 'statusbar', pages: total, count: totalWords }) || `Recognized ${totalWords} words across ${total} pages`);
   } catch (e) {
-    console.warn('OCR failed:', e);
+    console.warn('OCR failed:', e?.message || e, e?.stack || '');
     failPrintProgress(i18next.t('ocr.progress.failed', { ns: 'statusbar' }) || 'Text recognition failed');
   }
 }
