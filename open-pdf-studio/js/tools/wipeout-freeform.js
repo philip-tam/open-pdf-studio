@@ -64,7 +64,6 @@ function createWipeoutPolygon(points) {
     fillColor: '#ffffff',
     lineWidth: 0,
     opacity: 1,
-    locked: true,
   });
 }
 
