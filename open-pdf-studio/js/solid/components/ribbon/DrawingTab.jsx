@@ -238,7 +238,7 @@ export function DrawingGroups() {
             dezelfde preference (state.preferences.wipeoutBrushRadiusMm). */}
         <Show when={state.currentTool === 'wipeoutBrush'}>
           <RibbonGroup label={t('drawing.wipeoutBrush')}>
-            <label class="ribbon-slider-option" style={{ display: 'flex', 'align-items': 'center', gap: '6px' }}>
+            <label class="ribbon-slider-option">
               <span>{t('drawing.wipeoutBrushRadius')}</span>
               <input
                 type="range"
@@ -248,7 +248,7 @@ export function DrawingGroups() {
                 value={state.preferences.wipeoutBrushRadiusMm ?? 6}
                 onInput={(e) => { state.preferences.wipeoutBrushRadiusMm = parseFloat(e.target.value); savePreferences(); }}
               />
-              <span style={{ 'min-width': '3.5em', 'text-align': 'right' }}>
+              <span class="ribbon-slider-value">
                 {(state.preferences.wipeoutBrushRadiusMm ?? 6).toFixed(1)} mm
               </span>
             </label>

@@ -1492,3 +1492,52 @@
   flex: 0 0 auto;
 }
 .ribbon-checkbox-option span { cursor: pointer; }
+
+.ribbon-slider-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 4px;
+  align-self: center;
+  font-size: 11px;
+  color: var(--theme-ribbon-group-label, #333);
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+}
+.ribbon-slider-option input[type="range"] {
+  width: 70px;
+  height: 4px;
+  margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--theme-hover);
+  border-radius: 2px;
+  outline: none;
+  flex: 0 0 auto;
+  cursor: pointer;
+}
+.ribbon-slider-option input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--theme-active);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1px solid var(--theme-surface);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.ribbon-slider-option input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: var(--theme-active);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1px solid var(--theme-surface);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.ribbon-slider-option .ribbon-slider-value {
+  min-width: 3.5em;
+  text-align: right;
+}
