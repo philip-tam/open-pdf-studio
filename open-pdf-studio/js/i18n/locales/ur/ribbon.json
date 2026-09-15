@@ -176,7 +176,7 @@
     "manage": "انتظام",
     "ocr": "Recognize Text (OCR)",
     "straighten": "صفحہ سیدھا کریں",
-    "dewarp": "صفحہ کی خمیدگی درست کریں"
+    "shiftPage": "صفحہ منتقل کریں"
   },
   "help": {
     "information": "معلومات",

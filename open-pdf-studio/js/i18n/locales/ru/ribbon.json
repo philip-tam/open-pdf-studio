@@ -176,7 +176,7 @@
     "manage": "Управление",
     "ocr": "Recognize Text (OCR)",
     "straighten": "Выровнять Страницу",
-    "dewarp": "Выпрямление Страницы"
+    "shiftPage": "Сдвинуть страницу"
   },
   "help": {
     "information": "Информация",

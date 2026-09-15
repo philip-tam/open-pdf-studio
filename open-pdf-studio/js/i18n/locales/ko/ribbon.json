@@ -176,7 +176,7 @@
     "manage": "관리",
     "ocr": "Recognize Text (OCR)",
     "straighten": "페이지 똑바로 하기",
-    "dewarp": "페이지 왜곡 보정"
+    "shiftPage": "페이지 이동"
   },
   "help": {
     "information": "정보",

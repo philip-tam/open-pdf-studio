@@ -176,7 +176,7 @@
     "manage": "Zarządzaj",
     "ocr": "Recognize Text (OCR)",
     "straighten": "Wyprostuj Stronę",
-    "dewarp": "Korekta Wypaczenia Strony"
+    "shiftPage": "Przesuń stronę"
   },
   "help": {
     "information": "Informacje",

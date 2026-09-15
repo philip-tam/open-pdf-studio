@@ -176,7 +176,7 @@
     "manage": "إدارة",
     "ocr": "Recognize Text (OCR)",
     "straighten": "تسوية الصفحة",
-    "dewarp": "تصحيح انحناء الصفحة"
+    "shiftPage": "إزاحة الصفحة"
   },
   "help": {
     "information": "معلومات",

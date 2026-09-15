@@ -342,15 +342,22 @@
     "done": "{{count}} pàgina(es) redreçada(es) {{angle}}°",
     "alreadyStraight": "La línia ja és recta — no cal cap correcció."
   },
-  "dewarp": {
-    "title": "Corregeix la Corba",
-    "info": "Feu clic en punts al llarg d'una línia que hauria de ser recta però es corba (p. ex. a prop del llom del llibre), després premeu Retorn. La pàgina es tornarà a dibuixar com una imatge — el text deixarà de ser seleccionable tret que executeu l'OCR després.",
-    "apply": "Aplica",
-    "applying": "S'està aplicant…",
-    "previewLoading": "Generant vista prèvia…",
-    "previewFailed": "No s'ha pogut generar la vista prèvia.",
-    "done": "Pàgina corregida",
-    "failed": "Ha fallat — la corba guia necessita almenys 3 punts",
-    "curveCorrection": "Corba {{index}}: corregeix fins a {{mm}} mm"
+  "shiftPage": {
+    "title": "Shift Page",
+    "info": "Nudge the page content left/right/up/down by an exact amount — useful when a scan or copy drifted off-center.",
+    "apply": "Shift",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "reset": "Reset",
+    "horizontal": "Horizontal (mm):",
+    "vertical": "Vertical (mm):",
+    "allPages": "All pages",
+    "evenPages": "Even pages",
+    "oddPages": "Odd pages",
+    "fromPage": "From page:",
+    "noShift": "No shift entered — nothing to apply.",
+    "dragInfo": "Drag the preview to shift the page, or enter exact millimeter offsets below."
   }
 }

@@ -176,7 +176,7 @@
     "manage": "Gestiona",
     "ocr": "Recognize Text (OCR)",
     "straighten": "Redreça la Pàgina",
-    "dewarp": "Corregeix la Corba"
+    "shiftPage": "Desplaça la pàgina"
   },
   "help": {
     "information": "Informació",

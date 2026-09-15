@@ -176,7 +176,7 @@
     "manage": "Gérer",
     "ocr": "Recognize Text (OCR)",
     "straighten": "Redresser la Page",
-    "dewarp": "Dévoiler la Page"
+    "shiftPage": "Décaler la page"
   },
   "help": {
     "information": "Informations",

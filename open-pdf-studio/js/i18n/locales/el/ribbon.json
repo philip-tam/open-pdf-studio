@@ -176,7 +176,7 @@
     "manage": "Διαχείριση",
     "ocr": "Recognize Text (OCR)",
     "straighten": "Ισιώστε τη Σελίδα",
-    "dewarp": "Διόρθωση Καμπύλωσης"
+    "shiftPage": "Μετατόπιση σελίδας"
   },
   "help": {
     "information": "Πληροφορίες",

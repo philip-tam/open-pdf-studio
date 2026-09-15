@@ -342,15 +342,22 @@
     "done": "{{count}} halaman diluruskan sebanyak {{angle}}°",
     "alreadyStraight": "Garisan sudah lurus — tiada pembetulan diperlukan."
   },
-  "dewarp": {
-    "title": "Betulkan Lengkung Halaman",
-    "info": "Klik titik di sepanjang garisan yang sepatutnya lurus tetapi melengkung (cth. berhampiran jilid buku), kemudian tekan Enter. Halaman akan dilukis semula sebagai imej — teks tidak lagi boleh dipilih melainkan anda menjalankan OCR selepas itu.",
-    "apply": "Guna Pakai",
-    "applying": "Sedang menggunakan…",
-    "previewLoading": "Menjana pratonton…",
-    "previewFailed": "Tidak dapat menjana pratonton.",
-    "done": "Halaman dibetulkan",
-    "failed": "Gagal — lengkung panduan memerlukan sekurang-kurangnya 3 titik",
-    "curveCorrection": "Lengkung {{index}}: membetulkan sehingga {{mm}} mm"
+  "shiftPage": {
+    "title": "Shift Page",
+    "info": "Nudge the page content left/right/up/down by an exact amount — useful when a scan or copy drifted off-center.",
+    "apply": "Shift",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "reset": "Reset",
+    "horizontal": "Horizontal (mm):",
+    "vertical": "Vertical (mm):",
+    "allPages": "All pages",
+    "evenPages": "Even pages",
+    "oddPages": "Odd pages",
+    "fromPage": "From page:",
+    "noShift": "No shift entered — nothing to apply.",
+    "dragInfo": "Drag the preview to shift the page, or enter exact millimeter offsets below."
   }
 }

@@ -342,15 +342,22 @@
     "done": "Исправљено {{count}} страница за {{angle}}°",
     "alreadyStraight": "Линија је већ права — корекција није потребна."
   },
-  "dewarp": {
-    "title": "Исправка Искривљења",
-    "info": "Кликните тачке дуж линије која би требало да буде права, али је искривљена (нпр. близу хрпта књиге), затим притисните Enter. Страница ће бити поново нацртана као слика — текст неће бити могуће означити осим ако накнадно не покренете OCR.",
-    "apply": "Примени",
-    "applying": "Примењује се…",
-    "previewLoading": "Прављење прегледа…",
-    "previewFailed": "Преглед није могао да се направи.",
-    "done": "Страница исправљена",
-    "failed": "Неуспех — водећа крива захтева најмање 3 тачке",
-    "curveCorrection": "Крива {{index}}: исправка до {{mm}} mm"
+  "shiftPage": {
+    "title": "Shift Page",
+    "info": "Nudge the page content left/right/up/down by an exact amount — useful when a scan or copy drifted off-center.",
+    "apply": "Shift",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "reset": "Reset",
+    "horizontal": "Horizontal (mm):",
+    "vertical": "Vertical (mm):",
+    "allPages": "All pages",
+    "evenPages": "Even pages",
+    "oddPages": "Odd pages",
+    "fromPage": "From page:",
+    "noShift": "No shift entered — nothing to apply.",
+    "dragInfo": "Drag the preview to shift the page, or enter exact millimeter offsets below."
   }
 }

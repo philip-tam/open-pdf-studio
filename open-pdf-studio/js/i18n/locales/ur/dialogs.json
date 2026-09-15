@@ -342,15 +342,22 @@
     "done": "{{count}} صفحات کو {{angle}}° سیدھا کیا گیا",
     "alreadyStraight": "لائن پہلے سے سیدھی ہے — کسی اصلاح کی ضرورت نہیں۔"
   },
-  "dewarp": {
-    "title": "صفحہ کی خمیدگی درست کریں",
-    "info": "ایک ایسی لائن کے ساتھ پوائنٹس پر کلک کریں جو سیدھی ہونی چاہیے مگر خمیدہ ہے (مثلاً کتاب کی جلد کے قریب)، پھر Enter دبائیں۔ صفحہ تصویر کے طور پر دوبارہ بنایا جائے گا — بعد میں OCR چلائے بغیر متن منتخب نہیں کیا جا سکے گا۔",
-    "apply": "لاگو کریں",
-    "applying": "لاگو ہو رہا ہے…",
-    "previewLoading": "پیش نظارہ بن رہا ہے…",
-    "previewFailed": "پیش نظارہ نہیں بن سکا۔",
-    "done": "صفحہ درست کر دیا گیا",
-    "failed": "ناکام — رہنما وکر کو کم از کم 3 پوائنٹس چاہئیں",
-    "curveCorrection": "منحنی {{index}}: {{mm}} ملی میٹر تک اصلاح"
+  "shiftPage": {
+    "title": "Shift Page",
+    "info": "Nudge the page content left/right/up/down by an exact amount — useful when a scan or copy drifted off-center.",
+    "apply": "Shift",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "reset": "Reset",
+    "horizontal": "Horizontal (mm):",
+    "vertical": "Vertical (mm):",
+    "allPages": "All pages",
+    "evenPages": "Even pages",
+    "oddPages": "Odd pages",
+    "fromPage": "From page:",
+    "noShift": "No shift entered — nothing to apply.",
+    "dragInfo": "Drag the preview to shift the page, or enter exact millimeter offsets below."
   }
 }

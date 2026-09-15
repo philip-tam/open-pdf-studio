@@ -342,15 +342,22 @@
     "done": "จัดหน้าให้ตรง {{count}} หน้า ด้วยมุม {{angle}}°",
     "alreadyStraight": "เส้นตรงอยู่แล้ว — ไม่จำเป็นต้องแก้ไข"
   },
-  "dewarp": {
-    "title": "แก้ไขความโค้งของหน้า",
-    "info": "คลิกจุดตามแนวเส้นที่ควรจะตรงแต่กลับโค้ง (เช่น ใกล้สันหนังสือ) แล้วกด Enter หน้าจะถูกวาดใหม่เป็นรูปภาพ — ข้อความจะเลือกไม่ได้เว้นแต่คุณจะรัน OCR ภายหลัง",
-    "apply": "นำไปใช้",
-    "applying": "กำลังนำไปใช้…",
-    "previewLoading": "กำลังสร้างตัวอย่าง…",
-    "previewFailed": "ไม่สามารถสร้างตัวอย่างได้",
-    "done": "แก้ไขความโค้งของหน้าแล้ว",
-    "failed": "ล้มเหลว — เส้นโค้งนำทางต้องการอย่างน้อย 3 จุด",
-    "curveCorrection": "เส้นโค้ง {{index}}: แก้ไขสูงสุด {{mm}} มม."
+  "shiftPage": {
+    "title": "Shift Page",
+    "info": "Nudge the page content left/right/up/down by an exact amount — useful when a scan or copy drifted off-center.",
+    "apply": "Shift",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "reset": "Reset",
+    "horizontal": "Horizontal (mm):",
+    "vertical": "Vertical (mm):",
+    "allPages": "All pages",
+    "evenPages": "Even pages",
+    "oddPages": "Odd pages",
+    "fromPage": "From page:",
+    "noShift": "No shift entered — nothing to apply.",
+    "dragInfo": "Drag the preview to shift the page, or enter exact millimeter offsets below."
   }
 }

@@ -176,7 +176,7 @@
     "manage": "Керувати",
     "ocr": "Recognize Text (OCR)",
     "straighten": "Вирівняти Сторінку",
-    "dewarp": "Виправлення Викривлення"
+    "shiftPage": "Зсунути сторінку"
   },
   "help": {
     "information": "Інформація",

@@ -342,15 +342,22 @@
     "done": "{{count}} side(r) rettet med {{angle}}°",
     "alreadyStraight": "Linjen er allerede lige — ingen korrektion nødvendig."
   },
-  "dewarp": {
-    "title": "Ret Sidekrumning",
-    "info": "Klik punkter langs en linje, der burde være lige, men bugter sig (f.eks. nær bogens ryg), og tryk derefter Enter. Siden tegnes om som et billede — tekst bliver ikke længere markerbar, medmindre du kører OCR bagefter.",
-    "apply": "Anvend",
-    "applying": "Anvender…",
-    "previewLoading": "Genererer forhåndsvisning…",
-    "previewFailed": "Kunne ikke generere forhåndsvisning.",
-    "done": "Side rettet",
-    "failed": "Mislykkedes — styrekurven kræver mindst 3 punkter",
-    "curveCorrection": "Kurve {{index}}: retter op til {{mm}} mm"
+  "shiftPage": {
+    "title": "Shift Page",
+    "info": "Nudge the page content left/right/up/down by an exact amount — useful when a scan or copy drifted off-center.",
+    "apply": "Shift",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "reset": "Reset",
+    "horizontal": "Horizontal (mm):",
+    "vertical": "Vertical (mm):",
+    "allPages": "All pages",
+    "evenPages": "Even pages",
+    "oddPages": "Odd pages",
+    "fromPage": "From page:",
+    "noShift": "No shift entered — nothing to apply.",
+    "dragInfo": "Drag the preview to shift the page, or enter exact millimeter offsets below."
   }
 }

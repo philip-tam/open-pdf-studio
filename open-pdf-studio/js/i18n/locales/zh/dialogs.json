@@ -342,15 +342,22 @@
     "done": "已拉直 {{count}} 頁，角度 {{angle}}°",
     "alreadyStraight": "線條已經是直的，無需校正。"
   },
-  "dewarp": {
-    "title": "頁面去彎曲",
-    "info": "沿著本應是直線卻彎曲的線（例如書脊附近）點擊多個點，然後按 Enter。頁面將重新繪製為圖片——之後文字將無法選取，除非您再執行 OCR。",
-    "apply": "套用",
-    "applying": "套用中…",
-    "previewLoading": "正在產生預覽…",
-    "previewFailed": "無法產生預覽。",
-    "done": "頁面已校正",
-    "failed": "校正失敗——引導曲線至少需要 3 個點",
-    "curveCorrection": "曲線 {{index}}：最多校正 {{mm}} mm"
+  "shiftPage": {
+    "title": "Shift Page",
+    "info": "Nudge the page content left/right/up/down by an exact amount — useful when a scan or copy drifted off-center.",
+    "apply": "Shift",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "reset": "Reset",
+    "horizontal": "Horizontal (mm):",
+    "vertical": "Vertical (mm):",
+    "allPages": "All pages",
+    "evenPages": "Even pages",
+    "oddPages": "Odd pages",
+    "fromPage": "From page:",
+    "noShift": "No shift entered — nothing to apply.",
+    "dragInfo": "Drag the preview to shift the page, or enter exact millimeter offsets below."
   }
 }

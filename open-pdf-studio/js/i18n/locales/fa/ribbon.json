@@ -176,7 +176,7 @@
     "manage": "مدیریت",
     "ocr": "Recognize Text (OCR)",
     "straighten": "صاف کردن صفحه",
-    "dewarp": "اصلاح خمیدگی صفحه"
+    "shiftPage": "جابه‌جایی صفحه"
   },
   "help": {
     "information": "اطلاعات",

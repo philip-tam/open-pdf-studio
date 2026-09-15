@@ -342,15 +342,22 @@
     "done": "{{count}} sida/sidor rätade med {{angle}}°",
     "alreadyStraight": "Linjen är redan rak — ingen korrigering behövs."
   },
-  "dewarp": {
-    "title": "Rätta Sidkrökning",
-    "info": "Klicka punkter längs en linje som borde vara rak men böjs (t.ex. nära bokens rygg), tryck sedan Enter. Sidan ritas om som en bild — text blir inte längre markerbar om du inte kör OCR efteråt.",
-    "apply": "Verkställ",
-    "applying": "Verkställer…",
-    "previewLoading": "Genererar förhandsvisning…",
-    "previewFailed": "Kunde inte generera förhandsvisning.",
-    "done": "Sidan rättad",
-    "failed": "Misslyckades — styrkurvan behöver minst 3 punkter",
-    "curveCorrection": "Kurva {{index}}: rättar upp till {{mm}} mm"
+  "shiftPage": {
+    "title": "Shift Page",
+    "info": "Nudge the page content left/right/up/down by an exact amount — useful when a scan or copy drifted off-center.",
+    "apply": "Shift",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "reset": "Reset",
+    "horizontal": "Horizontal (mm):",
+    "vertical": "Vertical (mm):",
+    "allPages": "All pages",
+    "evenPages": "Even pages",
+    "oddPages": "Odd pages",
+    "fromPage": "From page:",
+    "noShift": "No shift entered — nothing to apply.",
+    "dragInfo": "Drag the preview to shift the page, or enter exact millimeter offsets below."
   }
 }

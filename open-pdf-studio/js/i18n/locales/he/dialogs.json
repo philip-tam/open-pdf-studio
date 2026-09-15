@@ -342,15 +342,22 @@
     "done": "יושרו {{count}} עמודים בזווית {{angle}}°",
     "alreadyStraight": "הקו כבר ישר — אין צורך בתיקון."
   },
-  "dewarp": {
-    "title": "יישור עיקום עמוד",
-    "info": "לחצו על נקודות לאורך קו שאמור להיות ישר אך מתעקל (למשל ליד שדרת הספר), ואז הקישו Enter. העמוד יצויר מחדש כתמונה — הטקסט לא יהיה ניתן לבחירה אלא אם תריצו OCR לאחר מכן.",
-    "apply": "החל",
-    "applying": "מחיל…",
-    "previewLoading": "יוצר תצוגה מקדימה…",
-    "previewFailed": "לא ניתן היה ליצור תצוגה מקדימה.",
-    "done": "עיקום העמוד תוקן",
-    "failed": "נכשל — קו ההנחיה זקוק לפחות ל-3 נקודות",
-    "curveCorrection": "עקומה {{index}}: תיקון עד {{mm}} מ״מ"
+  "shiftPage": {
+    "title": "Shift Page",
+    "info": "Nudge the page content left/right/up/down by an exact amount — useful when a scan or copy drifted off-center.",
+    "apply": "Shift",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "reset": "Reset",
+    "horizontal": "Horizontal (mm):",
+    "vertical": "Vertical (mm):",
+    "allPages": "All pages",
+    "evenPages": "Even pages",
+    "oddPages": "Odd pages",
+    "fromPage": "From page:",
+    "noShift": "No shift entered — nothing to apply.",
+    "dragInfo": "Drag the preview to shift the page, or enter exact millimeter offsets below."
   }
 }

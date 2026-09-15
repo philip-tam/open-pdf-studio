@@ -176,7 +176,7 @@
     "manage": "管理",
     "ocr": "Recognize Text (OCR)",
     "straighten": "拉直頁面",
-    "dewarp": "頁面去彎曲"
+    "shiftPage": "移動頁面"
   },
   "help": {
     "information": "信息",

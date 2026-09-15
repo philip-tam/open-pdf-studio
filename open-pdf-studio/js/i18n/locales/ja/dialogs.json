@@ -342,15 +342,22 @@
     "done": "{{count}} ページを {{angle}}° 補正しました",
     "alreadyStraight": "線はすでにまっすぐです。補正の必要はありません。"
   },
-  "dewarp": {
-    "title": "ページの歪み補正",
-    "info": "本来まっすぐなはずが曲がっている線（例：本のノド付近）に沿って点をクリックし、Enterキーを押してください。ページは画像として再描画されます — その後OCRを実行しない限り、テキストは選択できなくなります。",
-    "apply": "適用",
-    "applying": "適用中…",
-    "previewLoading": "プレビューを生成中…",
-    "previewFailed": "プレビューを生成できませんでした。",
-    "done": "ページの歪みを補正しました",
-    "failed": "補正に失敗しました — ガイド曲線には少なくとも3点が必要です",
-    "curveCorrection": "カーブ {{index}}：最大 {{mm}} mm 補正"
+  "shiftPage": {
+    "title": "Shift Page",
+    "info": "Nudge the page content left/right/up/down by an exact amount — useful when a scan or copy drifted off-center.",
+    "apply": "Shift",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "reset": "Reset",
+    "horizontal": "Horizontal (mm):",
+    "vertical": "Vertical (mm):",
+    "allPages": "All pages",
+    "evenPages": "Even pages",
+    "oddPages": "Odd pages",
+    "fromPage": "From page:",
+    "noShift": "No shift entered — nothing to apply.",
+    "dragInfo": "Drag the preview to shift the page, or enter exact millimeter offsets below."
   }
 }

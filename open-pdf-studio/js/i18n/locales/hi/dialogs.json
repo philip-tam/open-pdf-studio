@@ -342,15 +342,22 @@
     "done": "{{count}} पृष्ठ {{angle}}° से सीधे किए गए",
     "alreadyStraight": "रेखा पहले से ही सीधी है — किसी सुधार की आवश्यकता नहीं।"
   },
-  "dewarp": {
-    "title": "पृष्ठ वक्रता सुधार",
-    "info": "एक ऐसी रेखा के साथ बिंदुओं पर क्लिक करें जो सीधी होनी चाहिए पर मुड़ी हुई है (जैसे किताब की बाइंडिंग के पास), फिर Enter दबाएँ। पृष्ठ को एक चित्र के रूप में फिर से बनाया जाएगा — बाद में OCR चलाए बिना टेक्स्ट चयन योग्य नहीं रहेगा।",
-    "apply": "लागू करें",
-    "applying": "लागू हो रहा है…",
-    "previewLoading": "पूर्वावलोकन बन रहा है…",
-    "previewFailed": "पूर्वावलोकन नहीं बन सका।",
-    "done": "पृष्ठ ठीक कर दिया गया",
-    "failed": "विफल — गाइड वक्र के लिए कम से कम 3 बिंदु चाहिए",
-    "curveCorrection": "वक्र {{index}}: {{mm}} मिमी तक सुधार"
+  "shiftPage": {
+    "title": "Shift Page",
+    "info": "Nudge the page content left/right/up/down by an exact amount — useful when a scan or copy drifted off-center.",
+    "apply": "Shift",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "reset": "Reset",
+    "horizontal": "Horizontal (mm):",
+    "vertical": "Vertical (mm):",
+    "allPages": "All pages",
+    "evenPages": "Even pages",
+    "oddPages": "Odd pages",
+    "fromPage": "From page:",
+    "noShift": "No shift entered — nothing to apply.",
+    "dragInfo": "Drag the preview to shift the page, or enter exact millimeter offsets below."
   }
 }

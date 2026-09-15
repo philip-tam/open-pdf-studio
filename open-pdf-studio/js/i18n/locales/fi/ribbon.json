@@ -176,7 +176,7 @@
     "manage": "Hallitse",
     "ocr": "Recognize Text (OCR)",
     "straighten": "Suorista Sivu",
-    "dewarp": "Sivun Kaarevuuden Korjaus"
+    "shiftPage": "Siirrä sivua"
   },
   "help": {
     "information": "Tiedot",

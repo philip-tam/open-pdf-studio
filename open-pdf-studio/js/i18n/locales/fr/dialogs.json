@@ -342,15 +342,22 @@
     "done": "{{count}} page(s) redressée(s) de {{angle}}°",
     "alreadyStraight": "La ligne est déjà droite — aucune correction nécessaire."
   },
-  "dewarp": {
-    "title": "Dévoiler la Page",
-    "info": "Cliquez des points le long d'une ligne qui devrait être droite mais qui courbe (par ex. près de la reliure), puis appuyez sur Entrée. La page est redessinée comme une image — le texte ne sera plus sélectionnable sauf si vous lancez l'OCR ensuite.",
-    "apply": "Appliquer",
-    "applying": "Application…",
-    "previewLoading": "Génération de l'aperçu…",
-    "previewFailed": "Impossible de générer un aperçu.",
-    "done": "Page corrigée",
-    "failed": "Échec — la courbe guide nécessite au moins 3 points",
-    "curveCorrection": "Courbe {{index}} : correction jusqu'à {{mm}} mm"
+  "shiftPage": {
+    "title": "Shift Page",
+    "info": "Nudge the page content left/right/up/down by an exact amount — useful when a scan or copy drifted off-center.",
+    "apply": "Shift",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "reset": "Reset",
+    "horizontal": "Horizontal (mm):",
+    "vertical": "Vertical (mm):",
+    "allPages": "All pages",
+    "evenPages": "Even pages",
+    "oddPages": "Odd pages",
+    "fromPage": "From page:",
+    "noShift": "No shift entered — nothing to apply.",
+    "dragInfo": "Drag the preview to shift the page, or enter exact millimeter offsets below."
   }
 }

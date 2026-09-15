@@ -176,7 +176,7 @@
     "manage": "Quản lý",
     "ocr": "Recognize Text (OCR)",
     "straighten": "Làm Thẳng Trang",
-    "dewarp": "Chỉnh Cong Trang"
+    "shiftPage": "Dịch chuyển trang"
   },
   "help": {
     "information": "Thông tin",

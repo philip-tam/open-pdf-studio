@@ -342,15 +342,22 @@
     "done": "{{count}} pagina/e raddrizzata/e di {{angle}}°",
     "alreadyStraight": "La linea è già dritta — nessuna correzione necessaria."
   },
-  "dewarp": {
-    "title": "Correggi Curvatura",
-    "info": "Fai clic su punti lungo una linea che dovrebbe essere dritta ma si curva (es. vicino al dorso del libro), poi premi Invio. La pagina viene ridisegnata come immagine — il testo non sarà più selezionabile a meno di eseguire l'OCR in seguito.",
-    "apply": "Applica",
-    "applying": "Applicazione…",
-    "previewLoading": "Generazione anteprima…",
-    "previewFailed": "Impossibile generare l'anteprima.",
-    "done": "Pagina corretta",
-    "failed": "Operazione fallita — la curva guida richiede almeno 3 punti",
-    "curveCorrection": "Curva {{index}}: corregge fino a {{mm}} mm"
+  "shiftPage": {
+    "title": "Shift Page",
+    "info": "Nudge the page content left/right/up/down by an exact amount — useful when a scan or copy drifted off-center.",
+    "apply": "Shift",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "reset": "Reset",
+    "horizontal": "Horizontal (mm):",
+    "vertical": "Vertical (mm):",
+    "allPages": "All pages",
+    "evenPages": "Even pages",
+    "oddPages": "Odd pages",
+    "fromPage": "From page:",
+    "noShift": "No shift entered — nothing to apply.",
+    "dragInfo": "Drag the preview to shift the page, or enter exact millimeter offsets below."
   }
 }

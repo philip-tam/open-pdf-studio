@@ -342,15 +342,22 @@
     "done": "{{count}} sivu(a) suoristettu {{angle}}°",
     "alreadyStraight": "Viiva on jo suora — korjausta ei tarvita."
   },
-  "dewarp": {
-    "title": "Sivun Kaarevuuden Korjaus",
-    "info": "Napsauta pisteitä viivaa pitkin, jonka pitäisi olla suora mutta kaartuu (esim. kirjan selän lähellä), ja paina sitten Enter. Sivu piirretään uudelleen kuvana — teksti ei ole enää valittavissa, ellet suorita OCR:ää jälkeenpäin.",
-    "apply": "Käytä",
-    "applying": "Käytetään…",
-    "previewLoading": "Luodaan esikatselua…",
-    "previewFailed": "Esikatselua ei voitu luoda.",
-    "done": "Sivu korjattu",
-    "failed": "Epäonnistui — ohjauskäyrä tarvitsee vähintään 3 pistettä",
-    "curveCorrection": "Käyrä {{index}}: korjaa enintään {{mm}} mm"
+  "shiftPage": {
+    "title": "Shift Page",
+    "info": "Nudge the page content left/right/up/down by an exact amount — useful when a scan or copy drifted off-center.",
+    "apply": "Shift",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "reset": "Reset",
+    "horizontal": "Horizontal (mm):",
+    "vertical": "Vertical (mm):",
+    "allPages": "All pages",
+    "evenPages": "Even pages",
+    "oddPages": "Odd pages",
+    "fromPage": "From page:",
+    "noShift": "No shift entered — nothing to apply.",
+    "dragInfo": "Drag the preview to shift the page, or enter exact millimeter offsets below."
   }
 }

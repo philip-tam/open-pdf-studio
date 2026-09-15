@@ -342,15 +342,22 @@
     "done": "Изправени {{count}} страница(и) с {{angle}}°",
     "alreadyStraight": "Линията вече е права — не е нужна корекция."
   },
-  "dewarp": {
-    "title": "Коригиране на Извивката",
-    "info": "Щракнете точки по линия, която трябва да е права, но се извива (напр. близо до гърба на книгата), после натиснете Enter. Страницата ще бъде пренарисувана като изображение — текстът вече няма да може да се избира, освен ако впоследствие не изпълните OCR.",
-    "apply": "Приложи",
-    "applying": "Прилага се…",
-    "previewLoading": "Генериране на преглед…",
-    "previewFailed": "Прегледът не можа да бъде генериран.",
-    "done": "Страницата е коригирана",
-    "failed": "Неуспешно — водещата крива изисква поне 3 точки",
-    "curveCorrection": "Крива {{index}}: корекция до {{mm}} мм"
+  "shiftPage": {
+    "title": "Shift Page",
+    "info": "Nudge the page content left/right/up/down by an exact amount — useful when a scan or copy drifted off-center.",
+    "apply": "Shift",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "reset": "Reset",
+    "horizontal": "Horizontal (mm):",
+    "vertical": "Vertical (mm):",
+    "allPages": "All pages",
+    "evenPages": "Even pages",
+    "oddPages": "Odd pages",
+    "fromPage": "From page:",
+    "noShift": "No shift entered — nothing to apply.",
+    "dragInfo": "Drag the preview to shift the page, or enter exact millimeter offsets below."
   }
 }

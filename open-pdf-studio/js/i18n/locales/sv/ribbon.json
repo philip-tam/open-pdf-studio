@@ -176,7 +176,7 @@
     "manage": "Hantera",
     "ocr": "Recognize Text (OCR)",
     "straighten": "Räta Ut Sidan",
-    "dewarp": "Rätta Sidkrökning"
+    "shiftPage": "Flytta sida"
   },
   "help": {
     "information": "Information",

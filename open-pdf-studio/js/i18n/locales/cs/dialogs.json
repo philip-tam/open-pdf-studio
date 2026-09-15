@@ -342,15 +342,22 @@
     "done": "Narovnáno {{count}} stránek o {{angle}}°",
     "alreadyStraight": "Čára je již rovná — korekce není potřeba."
   },
-  "dewarp": {
-    "title": "Oprava Zakřivení Stránky",
-    "info": "Klikněte na body podél čáry, která by měla být rovná, ale je zakřivená (např. u hřbetu knihy), poté stiskněte Enter. Stránka bude překreslena jako obrázek — text pak nebude vybratelný, pokud následně nespustíte OCR.",
-    "apply": "Použít",
-    "applying": "Používá se…",
-    "previewLoading": "Vytváření náhledu…",
-    "previewFailed": "Náhled se nepodařilo vytvořit.",
-    "done": "Stránka opravena",
-    "failed": "Selhalo — vodicí křivka vyžaduje alespoň 3 body",
-    "curveCorrection": "Křivka {{index}}: oprava až {{mm}} mm"
+  "shiftPage": {
+    "title": "Shift Page",
+    "info": "Nudge the page content left/right/up/down by an exact amount — useful when a scan or copy drifted off-center.",
+    "apply": "Shift",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "reset": "Reset",
+    "horizontal": "Horizontal (mm):",
+    "vertical": "Vertical (mm):",
+    "allPages": "All pages",
+    "evenPages": "Even pages",
+    "oddPages": "Odd pages",
+    "fromPage": "From page:",
+    "noShift": "No shift entered — nothing to apply.",
+    "dragInfo": "Drag the preview to shift the page, or enter exact millimeter offsets below."
   }
 }

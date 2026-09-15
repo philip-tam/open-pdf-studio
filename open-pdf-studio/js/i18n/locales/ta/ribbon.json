@@ -176,7 +176,7 @@
     "manage": "நிர்வகி",
     "ocr": "Recognize Text (OCR)",
     "straighten": "பக்கத்தை நேராக்கு",
-    "dewarp": "பக்க வளைவு திருத்தம்"
+    "shiftPage": "பக்கத்தை நகர்த்து"
   },
   "help": {
     "information": "தகவல்",

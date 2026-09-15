@@ -176,7 +176,7 @@
     "manage": "ניהול",
     "ocr": "Recognize Text (OCR)",
     "straighten": "יישור עמוד",
-    "dewarp": "יישור עיקום עמוד"
+    "shiftPage": "הזזת עמוד"
   },
   "help": {
     "information": "מידע",

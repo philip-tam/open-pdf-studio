@@ -342,15 +342,22 @@
     "done": "{{count}} oldal kiegyenesítve {{angle}}°-kal",
     "alreadyStraight": "A vonal már egyenes — nincs szükség javításra."
   },
-  "dewarp": {
-    "title": "Oldal Görbület Javítása",
-    "info": "Kattintson pontokra egy olyan vonal mentén, amelynek egyenesnek kellene lennie, de görbül (pl. a könyvgerinc közelében), majd nyomja meg az Entert. Az oldal képként lesz újrarajzolva — a szöveg ezután nem lesz kijelölhető, hacsak utólag nem futtat OCR-t.",
-    "apply": "Alkalmaz",
-    "applying": "Alkalmazás…",
-    "previewLoading": "Előnézet készítése…",
-    "previewFailed": "Nem sikerült előnézetet készíteni.",
-    "done": "Oldal javítva",
-    "failed": "Sikertelen — a vezetőgörbéhez legalább 3 pont szükséges",
-    "curveCorrection": "Görbe {{index}}: legfeljebb {{mm}} mm javítás"
+  "shiftPage": {
+    "title": "Shift Page",
+    "info": "Nudge the page content left/right/up/down by an exact amount — useful when a scan or copy drifted off-center.",
+    "apply": "Shift",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "reset": "Reset",
+    "horizontal": "Horizontal (mm):",
+    "vertical": "Vertical (mm):",
+    "allPages": "All pages",
+    "evenPages": "Even pages",
+    "oddPages": "Odd pages",
+    "fromPage": "From page:",
+    "noShift": "No shift entered — nothing to apply.",
+    "dragInfo": "Drag the preview to shift the page, or enter exact millimeter offsets below."
   }
 }

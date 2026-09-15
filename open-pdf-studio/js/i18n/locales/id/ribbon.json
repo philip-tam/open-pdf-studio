@@ -176,7 +176,7 @@
     "manage": "Kelola",
     "ocr": "Recognize Text (OCR)",
     "straighten": "Luruskan Halaman",
-    "dewarp": "Perbaiki Lengkungan Halaman"
+    "shiftPage": "Geser halaman"
   },
   "help": {
     "information": "Informasi",

@@ -342,15 +342,22 @@
     "done": "{{count}} Seite(n) um {{angle}}° begradigt",
     "alreadyStraight": "Linie ist bereits gerade — keine Korrektur nötig."
   },
-  "dewarp": {
-    "title": "Seite Entzerren",
-    "info": "Klicken Sie Punkte entlang einer Linie, die gerade sein sollte, aber gekrümmt ist (z. B. am Buchfalz), und drücken Sie Enter. Die Seite wird als Bild neu gezeichnet — Text ist danach nicht mehr auswählbar, außer Sie führen anschließend OCR aus.",
-    "apply": "Anwenden",
-    "applying": "Wird angewendet…",
-    "previewLoading": "Vorschau wird erstellt…",
-    "previewFailed": "Vorschau konnte nicht erstellt werden.",
-    "done": "Seite entzerrt",
-    "failed": "Entzerren fehlgeschlagen — die Hilfslinie braucht mindestens 3 Punkte",
-    "curveCorrection": "Kurve {{index}}: korrigiert bis zu {{mm}} mm"
+  "shiftPage": {
+    "title": "Shift Page",
+    "info": "Nudge the page content left/right/up/down by an exact amount — useful when a scan or copy drifted off-center.",
+    "apply": "Shift",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "reset": "Reset",
+    "horizontal": "Horizontal (mm):",
+    "vertical": "Vertical (mm):",
+    "allPages": "All pages",
+    "evenPages": "Even pages",
+    "oddPages": "Odd pages",
+    "fromPage": "From page:",
+    "noShift": "No shift entered — nothing to apply.",
+    "dragInfo": "Drag the preview to shift the page, or enter exact millimeter offsets below."
   }
 }

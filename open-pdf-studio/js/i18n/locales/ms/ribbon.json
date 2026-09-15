@@ -176,7 +176,7 @@
     "manage": "Urus",
     "ocr": "Recognize Text (OCR)",
     "straighten": "Luruskan Halaman",
-    "dewarp": "Betulkan Lengkung Halaman"
+    "shiftPage": "Alih halaman"
   },
   "help": {
     "information": "Maklumat",

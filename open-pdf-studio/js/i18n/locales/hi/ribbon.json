@@ -176,7 +176,7 @@
     "manage": "प्रबंधित करें",
     "ocr": "Recognize Text (OCR)",
     "straighten": "पृष्ठ सीधा करें",
-    "dewarp": "पृष्ठ वक्रता सुधार"
+    "shiftPage": "पृष्ठ स्थानांतरित करें"
   },
   "help": {
     "information": "जानकारी",

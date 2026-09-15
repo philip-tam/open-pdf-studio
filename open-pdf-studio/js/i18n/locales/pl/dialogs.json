@@ -342,15 +342,22 @@
     "done": "Wyprostowano {{count}} stron(y) o {{angle}}°",
     "alreadyStraight": "Linia jest już prosta — korekta niepotrzebna."
   },
-  "dewarp": {
-    "title": "Korekta Wypaczenia Strony",
-    "info": "Kliknij punkty wzdłuż linii, która powinna być prosta, ale jest wygięta (np. przy grzbiecie książki), a następnie naciśnij Enter. Strona zostanie ponownie narysowana jako obraz — tekst nie będzie już zaznaczalny, chyba że uruchomisz potem OCR.",
-    "apply": "Zastosuj",
-    "applying": "Stosowanie…",
-    "previewLoading": "Generowanie podglądu…",
-    "previewFailed": "Nie udało się wygenerować podglądu.",
-    "done": "Strona poprawiona",
-    "failed": "Niepowodzenie — krzywa prowadząca wymaga co najmniej 3 punktów",
-    "curveCorrection": "Krzywa {{index}}: korekta do {{mm}} mm"
+  "shiftPage": {
+    "title": "Shift Page",
+    "info": "Nudge the page content left/right/up/down by an exact amount — useful when a scan or copy drifted off-center.",
+    "apply": "Shift",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "reset": "Reset",
+    "horizontal": "Horizontal (mm):",
+    "vertical": "Vertical (mm):",
+    "allPages": "All pages",
+    "evenPages": "Even pages",
+    "oddPages": "Odd pages",
+    "fromPage": "From page:",
+    "noShift": "No shift entered — nothing to apply.",
+    "dragInfo": "Drag the preview to shift the page, or enter exact millimeter offsets below."
   }
 }

@@ -176,7 +176,7 @@
     "manage": "Kezelés",
     "ocr": "Recognize Text (OCR)",
     "straighten": "Oldal Egyenesítése",
-    "dewarp": "Oldal Görbület Javítása"
+    "shiftPage": "Oldal eltolása"
   },
   "help": {
     "information": "Információ",

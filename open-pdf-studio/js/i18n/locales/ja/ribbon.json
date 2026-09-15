@@ -176,7 +176,7 @@
     "manage": "管理",
     "ocr": "Recognize Text (OCR)",
     "straighten": "ページを補正",
-    "dewarp": "ページの歪み補正"
+    "shiftPage": "ページをシフト"
   },
   "help": {
     "information": "情報",

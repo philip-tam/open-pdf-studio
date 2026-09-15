@@ -176,7 +176,7 @@
     "manage": "Administrare",
     "ocr": "Recognize Text (OCR)",
     "straighten": "Îndreaptă Pagina",
-    "dewarp": "Corectare Curbură Pagină"
+    "shiftPage": "Deplasează pagina"
   },
   "help": {
     "information": "Informatii",

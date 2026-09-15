@@ -342,15 +342,22 @@
     "done": "{{count}}개 페이지를 {{angle}}° 보정했습니다",
     "alreadyStraight": "선이 이미 똑바릅니다 — 보정이 필요하지 않습니다."
   },
-  "dewarp": {
-    "title": "페이지 왜곡 보정",
-    "info": "곧아야 하지만 휘어진 선(예: 책 제본 부분 근처)을 따라 점을 클릭한 다음 Enter를 누르세요. 페이지가 이미지로 다시 그려집니다 — 이후 OCR을 실행하지 않으면 텍스트를 선택할 수 없습니다.",
-    "apply": "적용",
-    "applying": "적용 중…",
-    "previewLoading": "미리보기 생성 중…",
-    "previewFailed": "미리보기를 생성하지 못했습니다.",
-    "done": "페이지 보정 완료",
-    "failed": "실패 — 안내 곡선에는 최소 3개의 점이 필요합니다",
-    "curveCorrection": "곡선 {{index}}: 최대 {{mm}}mm 보정"
+  "shiftPage": {
+    "title": "Shift Page",
+    "info": "Nudge the page content left/right/up/down by an exact amount — useful when a scan or copy drifted off-center.",
+    "apply": "Shift",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "reset": "Reset",
+    "horizontal": "Horizontal (mm):",
+    "vertical": "Vertical (mm):",
+    "allPages": "All pages",
+    "evenPages": "Even pages",
+    "oddPages": "Odd pages",
+    "fromPage": "From page:",
+    "noShift": "No shift entered — nothing to apply.",
+    "dragInfo": "Drag the preview to shift the page, or enter exact millimeter offsets below."
   }
 }

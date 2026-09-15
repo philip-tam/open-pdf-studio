@@ -176,7 +176,7 @@
     "manage": "Verwalten",
     "ocr": "Recognize Text (OCR)",
     "straighten": "Seite Begradigen",
-    "dewarp": "Seite Entzerren"
+    "shiftPage": "Seite verschieben"
   },
   "help": {
     "information": "Informationen",

@@ -176,7 +176,7 @@
     "manage": "Yönet",
     "ocr": "Recognize Text (OCR)",
     "straighten": "Sayfayı Düzelt",
-    "dewarp": "Sayfa Eğrilik Düzeltme"
+    "shiftPage": "Sayfayı kaydır"
   },
   "help": {
     "information": "Bilgi",

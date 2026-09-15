@@ -176,7 +176,7 @@
     "manage": "จัดการ",
     "ocr": "Recognize Text (OCR)",
     "straighten": "จัดหน้าให้ตรง",
-    "dewarp": "แก้ไขความโค้งของหน้า"
+    "shiftPage": "เลื่อนหน้า"
   },
   "help": {
     "information": "ข้อมูล",

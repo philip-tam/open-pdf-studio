@@ -499,15 +499,22 @@
     "done": "Straightened {{count}} page(s) by {{angle}}°",
     "alreadyStraight": "Line is already straight — no correction needed."
   },
-  "dewarp": {
-    "title": "Page Dewarp",
-    "info": "Click points along a line that should be straight but curves (e.g. near a book's gutter), then press Enter. The page is redrawn as an image — text becomes non-selectable unless you run OCR afterward.",
-    "apply": "Apply",
-    "applying": "Applying…",
-    "previewLoading": "Generating preview…",
-    "previewFailed": "Couldn't generate a preview.",
-    "done": "Page dewarped",
-    "failed": "Dewarp failed — the guide curve needs at least 3 points",
-    "curveCorrection": "Curve {{index}}: correcting up to {{mm}} mm"
+  "shiftPage": {
+    "title": "Shift Page",
+    "info": "Nudge the page content left/right/up/down by an exact amount — useful when a scan or copy drifted off-center.",
+    "apply": "Shift",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "reset": "Reset",
+    "horizontal": "Horizontal (mm):",
+    "vertical": "Vertical (mm):",
+    "allPages": "All pages",
+    "evenPages": "Even pages",
+    "oddPages": "Odd pages",
+    "fromPage": "From page:",
+    "noShift": "No shift entered — nothing to apply.",
+    "dragInfo": "Drag the preview to shift the page, or enter exact millimeter offsets below."
   }
 }

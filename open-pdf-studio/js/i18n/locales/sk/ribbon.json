@@ -176,7 +176,7 @@
     "manage": "Spravovať",
     "ocr": "Recognize Text (OCR)",
     "straighten": "Narovnať Stránku",
-    "dewarp": "Oprava Zakrivenia Stránky"
+    "shiftPage": "Posunúť stránku"
   },
   "help": {
     "information": "Informácie",

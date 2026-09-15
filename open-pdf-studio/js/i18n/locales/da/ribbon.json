@@ -176,7 +176,7 @@
     "manage": "Administrer",
     "ocr": "Recognize Text (OCR)",
     "straighten": "Ret Side",
-    "dewarp": "Ret Sidekrumning"
+    "shiftPage": "Forskyd side"
   },
   "help": {
     "information": "Information",

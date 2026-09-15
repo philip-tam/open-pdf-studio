@@ -176,7 +176,7 @@
     "manage": "Administrer",
     "ocr": "Recognize Text (OCR)",
     "straighten": "Rett Opp Siden",
-    "dewarp": "Rett Sidekrumning"
+    "shiftPage": "Forskyv side"
   },
   "help": {
     "information": "Informasjon",

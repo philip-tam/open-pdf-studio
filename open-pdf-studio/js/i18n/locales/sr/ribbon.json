@@ -176,7 +176,7 @@
     "manage": "Управљај",
     "ocr": "Recognize Text (OCR)",
     "straighten": "Исправи Страницу",
-    "dewarp": "Исправка Искривљења"
+    "shiftPage": "Помери страницу"
   },
   "help": {
     "information": "Информације",

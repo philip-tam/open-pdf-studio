@@ -342,15 +342,22 @@
     "done": "{{count}} பக்கங்கள் {{angle}}° நேராக்கப்பட்டன",
     "alreadyStraight": "கோடு ஏற்கனவே நேராக உள்ளது — திருத்தம் தேவையில்லை."
   },
-  "dewarp": {
-    "title": "பக்க வளைவு திருத்தம்",
-    "info": "நேராக இருக்க வேண்டிய ஆனால் வளைந்திருக்கும் ஒரு கோட்டில் (எ.கா. புத்தக நூலின் அருகில்) புள்ளிகளை கிளிக் செய்யவும், பின் Enter அழுத்தவும். பக்கம் ஒரு படமாக மீண்டும் வரையப்படும் — பின்னர் OCR இயக்காவிட்டால் உரை தேர்ந்தெடுக்க முடியாது.",
-    "apply": "பயன்படுத்து",
-    "applying": "பயன்படுத்துகிறது…",
-    "previewLoading": "முன்னோட்டம் உருவாக்கப்படுகிறது…",
-    "previewFailed": "முன்னோட்டத்தை உருவாக்க முடியவில்லை.",
-    "done": "பக்கம் திருத்தப்பட்டது",
-    "failed": "தோல்வி — வழிகாட்டி வளைவுக்கு குறைந்தது 3 புள்ளிகள் தேவை",
-    "curveCorrection": "வளைவு {{index}}: {{mm}} மிமீ வரை திருத்தம்"
+  "shiftPage": {
+    "title": "Shift Page",
+    "info": "Nudge the page content left/right/up/down by an exact amount — useful when a scan or copy drifted off-center.",
+    "apply": "Shift",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "reset": "Reset",
+    "horizontal": "Horizontal (mm):",
+    "vertical": "Vertical (mm):",
+    "allPages": "All pages",
+    "evenPages": "Even pages",
+    "oddPages": "Odd pages",
+    "fromPage": "From page:",
+    "noShift": "No shift entered — nothing to apply.",
+    "dragInfo": "Drag the preview to shift the page, or enter exact millimeter offsets below."
   }
 }
