@@ -318,7 +318,7 @@
     "symbolScale": "มาตราส่วน",
     "symbolScaleTitle": "ขนาดที่ใช้วางสัญลักษณ์ใหม่",
     "symbolScaleCustom": "มาตราส่วนกำหนดเอง",
-    "wipeoutRect": "ลบสี (สี่เหลี่ยมมุมผ้า)",
-    "wipeoutFreeform": "ลบสี (รูปทรงอิสระ)"
+    "wipeoutBrush": "แปรงลบสี",
+    "wipeoutBrushRadius": "รัศมี:"
   }
 }

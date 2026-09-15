@@ -318,7 +318,7 @@
     "symbolScale": "Målestokk",
     "symbolScaleTitle": "Størrelsen et nytt symbol plasseres i",
     "symbolScaleCustom": "Egendefinert målestokk",
-    "wipeoutRect": "Overmaling (Rektangel)",
-    "wipeoutFreeform": "Overmaling (Fri form)"
+    "wipeoutBrush": "Overmalingspensel",
+    "wipeoutBrushRadius": "Radius:"
   }
 }

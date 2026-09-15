@@ -318,7 +318,7 @@
     "symbolScale": "Mittakaava",
     "symbolScaleTitle": "Koko, jossa uusi symboli sijoitetaan",
     "symbolScaleCustom": "Mukautettu mittakaava",
-    "wipeoutRect": "Peitto (Suorakulmio)",
-    "wipeoutFreeform": "Peitto (Vapaa muoto)"
+    "wipeoutBrush": "Peittosivellin",
+    "wipeoutBrushRadius": "Säde:"
   }
 }

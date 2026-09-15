@@ -318,7 +318,7 @@
     "symbolScale": "Échelle",
     "symbolScaleTitle": "Taille à laquelle un nouveau symbole est placé",
     "symbolScaleCustom": "Échelle personnalisée",
-    "wipeoutRect": "Correcteur (Rectangle)",
-    "wipeoutFreeform": "Correcteur (Forme libre)"
+    "wipeoutBrush": "Pinceau correcteur",
+    "wipeoutBrushRadius": "Rayon :"
   }
 }

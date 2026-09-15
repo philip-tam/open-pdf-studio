@@ -318,7 +318,7 @@
     "symbolScale": "축척",
     "symbolScaleTitle": "새 기호를 배치할 때의 크기",
     "symbolScaleCustom": "사용자 지정 축척",
-    "wipeoutRect": "지우기 (사각형)",
-    "wipeoutFreeform": "지우기 (자유 형태)"
+    "wipeoutBrush": "지우개 브러시",
+    "wipeoutBrushRadius": "반경:"
   }
 }

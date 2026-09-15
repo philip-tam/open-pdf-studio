@@ -318,7 +318,7 @@
     "symbolScale": "Skala",
     "symbolScaleTitle": "Saiz simbol baharu diletakkan",
     "symbolScaleCustom": "Skala tersuai",
-    "wipeoutRect": "Padam Putih (Segi Empat)",
-    "wipeoutFreeform": "Padam Putih (Bebas)"
+    "wipeoutBrush": "Berus Padam Putih",
+    "wipeoutBrushRadius": "Jejari:"
   }
 }

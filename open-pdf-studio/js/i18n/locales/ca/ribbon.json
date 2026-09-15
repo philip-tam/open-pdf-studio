@@ -318,7 +318,7 @@
     "symbolScale": "Escala",
     "symbolScaleTitle": "Mida amb què es col·loca un símbol nou",
     "symbolScaleCustom": "Escala personalitzada",
-    "wipeoutRect": "Blanqueig (Rectangle)",
-    "wipeoutFreeform": "Blanqueig (Forma lliure)"
+    "wipeoutBrush": "Pinzell de blanqueig",
+    "wipeoutBrushRadius": "Radi:"
   }
 }

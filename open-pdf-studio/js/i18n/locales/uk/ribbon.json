@@ -318,7 +318,7 @@
     "symbolScale": "Масштаб",
     "symbolScaleTitle": "Розмір, у якому розміщується новий символ",
     "symbolScaleCustom": "Власний масштаб",
-    "wipeoutRect": "Вибілювання (Прямокутник)",
-    "wipeoutFreeform": "Вибілювання (Довільна форма)"
+    "wipeoutBrush": "Пензель вибілювання",
+    "wipeoutBrushRadius": "Радіус:"
   }
 }

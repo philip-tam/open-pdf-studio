@@ -318,7 +318,7 @@
     "symbolScale": "Skala",
     "symbolScaleTitle": "Ukuran penempatan simbol baru",
     "symbolScaleCustom": "Skala kustom",
-    "wipeoutRect": "Hapus Putih (Persegi)",
-    "wipeoutFreeform": "Hapus Putih (Bebas)"
+    "wipeoutBrush": "Kuas Hapus Putih",
+    "wipeoutBrushRadius": "Radius:"
   }
 }

@@ -318,7 +318,7 @@
     "symbolScale": "Scară",
     "symbolScaleTitle": "Dimensiunea la care este plasat un simbol nou",
     "symbolScaleCustom": "Scară personalizată",
-    "wipeoutRect": "Albire (Dreptunghi)",
-    "wipeoutFreeform": "Albire (Formă liberă)"
+    "wipeoutBrush": "Pensulă de albire",
+    "wipeoutBrushRadius": "Rază:"
   }
 }

@@ -318,7 +318,7 @@
     "symbolScale": "स्केल",
     "symbolScaleTitle": "वह आकार जिस पर नया प्रतीक रखा जाता है",
     "symbolScaleCustom": "कस्टम स्केल",
-    "wipeoutRect": "वाइपआउट (आयत)",
-    "wipeoutFreeform": "वाइपआउट (मुक्त आकार)"
+    "wipeoutBrush": "वाइपआउट ब्रश",
+    "wipeoutBrushRadius": "त्रिज्या:"
   }
 }

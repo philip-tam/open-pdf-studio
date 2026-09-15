@@ -473,8 +473,8 @@
     "symbolScale": "Schaal",
     "symbolScaleTitle": "Maat waarop een nieuw symbool geplaatst wordt",
     "symbolScaleCustom": "Eigen schaal",
-    "wipeoutRect": "Whiteout (Rechthoek)",
-    "wipeoutFreeform": "Whiteout (Vrije vorm)"
+    "wipeoutBrush": "Whiteout-penseel",
+    "wipeoutBrushRadius": "Straal:"
   },
   "theme": {
     "system": "Systeem (Automatisch)",

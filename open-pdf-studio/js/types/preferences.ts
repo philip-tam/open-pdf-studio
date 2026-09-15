@@ -98,6 +98,9 @@ export interface Preferences {
   drawLineWidth: number;
   drawOpacity: number;
 
+  // Wipeout Brush defaults
+  wipeoutBrushRadiusMm: number;
+
   // Line defaults
   lineStrokeColor: string;
   lineLineWidth: number;

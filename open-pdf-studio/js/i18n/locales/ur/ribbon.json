@@ -318,7 +318,7 @@
     "symbolScale": "پیمانہ",
     "symbolScaleTitle": "وہ سائز جس پر نیا نشان رکھا جاتا ہے",
     "symbolScaleCustom": "حسب ضرورت پیمانہ",
-    "wipeoutRect": "وائپ اوٹ (مستطیل)",
-    "wipeoutFreeform": "وائپ آوٹ (آزاد شکل)"
+    "wipeoutBrush": "وائپ آوٹ برش",
+    "wipeoutBrushRadius": "ریڈیس:"
   }
 }

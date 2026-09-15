@@ -318,7 +318,7 @@
     "symbolScale": "Scala",
     "symbolScaleTitle": "Dimensione con cui viene posizionato un nuovo simbolo",
     "symbolScaleCustom": "Scala personalizzata",
-    "wipeoutRect": "Correttore (Rettangolo)",
-    "wipeoutFreeform": "Correttore (Forma libera)"
+    "wipeoutBrush": "Pennello correttore",
+    "wipeoutBrushRadius": "Raggio:"
   }
 }

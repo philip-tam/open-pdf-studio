@@ -160,6 +160,9 @@ export const DEFAULT_PREFERENCES: Preferences = {
   drawLineWidth: 2,
   drawOpacity: 100,
 
+  // Wipeout Brush defaults
+  wipeoutBrushRadiusMm: 6,
+
   // Line defaults
   lineStrokeColor: '#FF0000',
   lineLineWidth: 2,

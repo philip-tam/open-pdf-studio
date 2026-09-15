@@ -318,7 +318,7 @@
     "symbolScale": "比例",
     "symbolScaleTitle": "放置新符号时的尺寸",
     "symbolScaleCustom": "自定义比例",
-    "wipeoutRect": "白化（矩形）",
-    "wipeoutFreeform": "白化（自由形状）"
+    "wipeoutBrush": "白化笔刷",
+    "wipeoutBrushRadius": "半径："
   }
 }

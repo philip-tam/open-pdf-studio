@@ -318,7 +318,7 @@
     "symbolScale": "Размера",
     "symbolScaleTitle": "Величина у којој се поставља нови симбол",
     "symbolScaleCustom": "Прилагођена размера",
-    "wipeoutRect": "Бељење (Правоугао)",
-    "wipeoutFreeform": "Бељење (Слободни облик)"
+    "wipeoutBrush": "Четкица за бељење",
+    "wipeoutBrushRadius": "Полупречник:"
   }
 }
