@@ -317,6 +317,8 @@
     "vectorSnippetPasteTitle": "کاٹا گیا حصہ یہاں چسپاں کریں، ویکٹر ڈیٹا برقرار رکھتے ہوئے",
     "symbolScale": "پیمانہ",
     "symbolScaleTitle": "وہ سائز جس پر نیا نشان رکھا جاتا ہے",
-    "symbolScaleCustom": "حسب ضرورت پیمانہ"
+    "symbolScaleCustom": "حسب ضرورت پیمانہ",
+    "wipeoutRect": "وائپ اوٹ (مستطیل)",
+    "wipeoutFreeform": "وائپ آوٹ (آزاد شکل)"
   }
 }

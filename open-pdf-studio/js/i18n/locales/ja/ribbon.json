@@ -317,6 +317,8 @@
     "vectorSnippetPasteTitle": "切り抜いた領域をベクターデータのままここに貼り付けます",
     "symbolScale": "尺度",
     "symbolScaleTitle": "新しいシンボルを配置するときのサイズ",
-    "symbolScaleCustom": "カスタム尺度"
+    "symbolScaleCustom": "カスタム尺度",
+    "wipeoutRect": "修正（長方形）",
+    "wipeoutFreeform": "修正（自由形）"
   }
 }

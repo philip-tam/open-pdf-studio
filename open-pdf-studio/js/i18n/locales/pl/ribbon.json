@@ -317,6 +317,8 @@
     "vectorSnippetPasteTitle": "Wklej tutaj wycięty obszar, zachowując dane wektorowe",
     "symbolScale": "Skala",
     "symbolScaleTitle": "Rozmiar, w jakim umieszczany jest nowy symbol",
-    "symbolScaleCustom": "Skala niestandardowa"
+    "symbolScaleCustom": "Skala niestandardowa",
+    "wipeoutRect": "Wybielenie (Prostokąt)",
+    "wipeoutFreeform": "Wybielenie (Dowolny kształt)"
   }
 }

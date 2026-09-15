@@ -317,6 +317,8 @@
     "vectorSnippetPasteTitle": "Вставить сюда вырезанную область с сохранением векторных данных",
     "symbolScale": "Масштаб",
     "symbolScaleTitle": "Размер, в котором размещается новый символ",
-    "symbolScaleCustom": "Свой масштаб"
+    "symbolScaleCustom": "Свой масштаб",
+    "wipeoutRect": "Замазывание (Прямоугольник)",
+    "wipeoutFreeform": "Замазывание (Произвольная форма)"
   }
 }

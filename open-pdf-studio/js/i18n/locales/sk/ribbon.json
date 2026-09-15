@@ -317,6 +317,8 @@
     "vectorSnippetPasteTitle": "Vložte sem vystrihnutú oblasť so zachovaním vektorových údajov",
     "symbolScale": "Mierka",
     "symbolScaleTitle": "Veľkosť, v ktorej sa umiestni nový symbol",
-    "symbolScaleCustom": "Vlastná mierka"
+    "symbolScaleCustom": "Vlastná mierka",
+    "wipeoutRect": "Vybielenie (Obdĺžnik)",
+    "wipeoutFreeform": "Vybielenie (Voľný tvar)"
   }
 }

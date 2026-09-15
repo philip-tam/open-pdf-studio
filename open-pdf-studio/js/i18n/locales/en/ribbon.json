@@ -472,7 +472,9 @@
     "vectorSnippetPasteTitle": "Paste the cut area here, keeping its vector data",
     "symbolScale": "Scale",
     "symbolScaleTitle": "Size at which a new symbol is placed",
-    "symbolScaleCustom": "Custom scale"
+    "symbolScaleCustom": "Custom scale",
+    "wipeoutRect": "Wipeout (Rectangle)",
+    "wipeoutFreeform": "Wipeout (Freeform)"
   },
   "theme": {
     "system": "System (Auto Detect)",

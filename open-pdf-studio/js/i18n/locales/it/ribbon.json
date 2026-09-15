@@ -317,6 +317,8 @@
     "vectorSnippetPasteTitle": "Incolla qui l'area ritagliata, conservandone i dati vettoriali",
     "symbolScale": "Scala",
     "symbolScaleTitle": "Dimensione con cui viene posizionato un nuovo simbolo",
-    "symbolScaleCustom": "Scala personalizzata"
+    "symbolScaleCustom": "Scala personalizzata",
+    "wipeoutRect": "Correttore (Rettangolo)",
+    "wipeoutFreeform": "Correttore (Forma libera)"
   }
 }

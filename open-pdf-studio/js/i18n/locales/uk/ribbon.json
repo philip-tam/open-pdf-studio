@@ -317,6 +317,8 @@
     "vectorSnippetPasteTitle": "Вставте сюди вирізану область зі збереженням векторних даних",
     "symbolScale": "Масштаб",
     "symbolScaleTitle": "Розмір, у якому розміщується новий символ",
-    "symbolScaleCustom": "Власний масштаб"
+    "symbolScaleCustom": "Власний масштаб",
+    "wipeoutRect": "Вибілювання (Прямокутник)",
+    "wipeoutFreeform": "Вибілювання (Довільна форма)"
   }
 }

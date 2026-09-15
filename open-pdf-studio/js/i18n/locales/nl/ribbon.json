@@ -472,7 +472,9 @@
     "vectorSnippetPasteTitle": "Plak het geknipte gebied hier, met behoud van vectordata",
     "symbolScale": "Schaal",
     "symbolScaleTitle": "Maat waarop een nieuw symbool geplaatst wordt",
-    "symbolScaleCustom": "Eigen schaal"
+    "symbolScaleCustom": "Eigen schaal",
+    "wipeoutRect": "Whiteout (Rechthoek)",
+    "wipeoutFreeform": "Whiteout (Vrije vorm)"
   },
   "theme": {
     "system": "Systeem (Automatisch)",

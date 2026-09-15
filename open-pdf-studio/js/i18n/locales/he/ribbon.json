@@ -317,6 +317,8 @@
     "vectorSnippetPasteTitle": "הדבק כאן את האזור הגזור, תוך שמירה על הנתונים הווקטוריים",
     "symbolScale": "קנה מידה",
     "symbolScaleTitle": "הגודל שבו ממוקם סמל חדש",
-    "symbolScaleCustom": "קנה מידה מותאם"
+    "symbolScaleCustom": "קנה מידה מותאם",
+    "wipeoutRect": "מחיקה (מלבן)",
+    "wipeoutFreeform": "מחיקה (צורה חופשית)"
   }
 }

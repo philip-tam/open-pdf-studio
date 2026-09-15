@@ -317,6 +317,8 @@
     "vectorSnippetPasteTitle": "Den ausgeschnittenen Bereich hier einfügen, Vektordaten bleiben erhalten",
     "symbolScale": "Maßstab",
     "symbolScaleTitle": "Größe, in der ein neues Symbol platziert wird",
-    "symbolScaleCustom": "Eigener Maßstab"
+    "symbolScaleCustom": "Eigener Maßstab",
+    "wipeoutRect": "Whiteout (Rechteck)",
+    "wipeoutFreeform": "Whiteout (Freiform)"
   }
 }

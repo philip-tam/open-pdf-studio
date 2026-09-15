@@ -52,6 +52,10 @@ export const resizePagesIcon = `<svg fill="none" stroke="currentColor" viewBox="
 
 export const straightenIcon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1" stroke-width="2" transform="rotate(-6 12 12)"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 17l18-4"/><circle cx="3" cy="17" r="1.4" fill="currentColor" stroke="none"/><circle cx="21" cy="13" r="1.4" fill="currentColor" stroke="none"/></svg>`;
 
+export const wipeoutRectIcon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1" stroke-width="2"/><rect x="7" y="9" width="10" height="6" rx="0.5" fill="currentColor" stroke="none"/></svg>`;
+
+export const wipeoutFreeformIcon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1" stroke-width="2"/><path d="M8 14c-1-2 0-4 2-4.5c0-2 3-3 4-1c2-0.5 3.5 1 2.5 2.5c1.5 1 1 3.5-1 3.5c-0.5 1.5-3 1.5-3.5 0c-2 0.5-3.5-1-4-0.5z" fill="currentColor" stroke="none"/></svg>`;
+
 // --- Home tab: Navigate ---
 
 export const firstPageIcon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>`;

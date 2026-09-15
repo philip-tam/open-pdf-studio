@@ -317,6 +317,8 @@
     "vectorSnippetPasteTitle": "Налепите овде исечену област уз очување векторских података",
     "symbolScale": "Размера",
     "symbolScaleTitle": "Величина у којој се поставља нови симбол",
-    "symbolScaleCustom": "Прилагођена размера"
+    "symbolScaleCustom": "Прилагођена размера",
+    "wipeoutRect": "Бељење (Правоугао)",
+    "wipeoutFreeform": "Бељење (Слободни облик)"
   }
 }
