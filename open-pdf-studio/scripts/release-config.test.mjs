@@ -197,10 +197,16 @@ test('macOS bundling rejects invalid retry configuration', async () => {
 });
 
 test('release workflows compile macOS once and retry only the bundle phase', async () => {
-  for (const name of ['release.yml', 'nightly.yml']) {
+  // release.yml is arm64-only (see "macOS release build: arm64-only instead
+  // of universal"); nightly.yml still builds the universal binary.
+  const targetsByWorkflow = {
+    'release.yml': 'aarch64-apple-darwin',
+    'nightly.yml': 'universal-apple-darwin',
+  };
+  for (const [name, target] of Object.entries(targetsByWorkflow)) {
     const workflow = await readFile(path.join(repoDir, '.github', 'workflows', name), 'utf8');
     assert.match(workflow, /Build macOS app without bundles/);
-    assert.match(workflow, /--target universal-apple-darwin --no-bundle/);
+    assert.match(workflow, new RegExp(`--target ${target} --no-bundle`));
     assert.match(workflow, /node scripts\/macos-notarization-retry\.mjs/);
     assert.match(workflow, /Upload macOS release assets/);
     assert.doesNotMatch(workflow, /retryAttempts:/);
