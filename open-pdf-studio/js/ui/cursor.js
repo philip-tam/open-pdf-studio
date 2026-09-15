@@ -34,11 +34,39 @@ const _eraserCursor = (() => {
   return `url("data:image/svg+xml,${encodeURIComponent(svg)}") 10 10, crosshair`;
 })();
 
+const MM_TO_POINTS = 72 / 25.4;
+// Cursor images have a practical OS/browser size ceiling — well past this,
+// some browsers silently fall back to the default arrow instead of erroring.
+// Clamping still leaves the circle roughly indicative at extreme zoom+radius
+// combinations, which matters more than pixel-perfect sizing there.
+const WIPEOUT_CURSOR_MAX_RADIUS_PX = 64;
+
+// Wipeout Brush cursor: a circle showing the brush's actual felt size (the
+// user's chosen radius, tools/tools/wipeout-brush-tool.js's
+// wipeoutBrushRadiusMm preference, converted through the current zoom) —
+// unlike the ink-eraser's cursor above, this one is NOT a fixed size, since
+// the brush radius is itself user-adjustable. Same white-halo/dark-ring
+// styling for visibility on both light and dark page content, per the
+// user's "light colour circle frame" request.
+function _wipeoutBrushCursor(scale) {
+  const radiusMm = state.preferences.wipeoutBrushRadiusMm ?? 6;
+  const radiusPx = Math.min(WIPEOUT_CURSOR_MAX_RADIUS_PX, Math.max(4, Math.round(radiusMm * MM_TO_POINTS * (scale || 1.5))));
+  const size = radiusPx * 2 + 6;
+  const c = size / 2;
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">` +
+    `<circle cx="${c}" cy="${c}" r="${radiusPx}" fill="none" stroke="white" stroke-width="2.5"/>` +
+    `<circle cx="${c}" cy="${c}" r="${radiusPx}" fill="none" stroke="black" stroke-width="1" stroke-opacity="0.5"/>` +
+    `</svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}") ${c} ${c}, crosshair`;
+}
+
 // Resolve the default cursor for a tool (no hover, no drag, no override).
 function _toolCursor(tool) {
   switch (tool) {
     case 'select':         return 'default';
     case 'eraser':         return _eraserCursor;
+    case 'wipeoutBrush':   return _wipeoutBrushCursor(getActiveDocument()?.scale);
     case 'selectComments': return 'text';
     case 'hand':           return 'grab';
     case 'text':
