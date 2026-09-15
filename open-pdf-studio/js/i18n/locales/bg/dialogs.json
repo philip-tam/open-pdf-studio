@@ -14,7 +14,8 @@
     "titleBlock": "Title block",
     "noTitleBlock": "No title block",
     "addTitleBlock": "Add your own title block (PDF)",
-    "openTitleBlocksFolder": "Open title blocks folder"
+    "openTitleBlocksFolder": "Open title blocks folder",
+    "style": "Стил"
   },
   "print": {
     "title": "Печат",
@@ -323,6 +324,13 @@
     "title": "Изберете параметричен символ",
     "cancel": "Cancel"
   },
+  "straighten": {
+    "title": "Изправяне на Страница",
+    "apply": "Изправи",
+    "angleInfo": "Ъгъл на корекция: {{angle}}°",
+    "done": "Изправени {{count}} страница(и) с {{angle}}°",
+    "alreadyStraight": "Линията вече е права — не е нужна корекция."
+  },
   "ocrLanguage": {
     "title": "Разпознаване на текст (OCR)",
     "run": "Разпознай",
@@ -334,13 +342,6 @@
       "chi_tra": "Китайски (традиционен)",
       "chi_tra+eng": "Китайски (традиционен) + Английски"
     }
-  },
-  "straighten": {
-    "title": "Изправяне на Страница",
-    "apply": "Изправи",
-    "angleInfo": "Ъгъл на корекция: {{angle}}°",
-    "done": "Изправени {{count}} страница(и) с {{angle}}°",
-    "alreadyStraight": "Линията вече е права — не е нужна корекция."
   },
   "shiftPage": {
     "title": "Shift Page",

@@ -14,7 +14,8 @@
     "titleBlock": "Title block",
     "noTitleBlock": "No title block",
     "addTitleBlock": "Add your own title block (PDF)",
-    "openTitleBlocksFolder": "Open title blocks folder"
+    "openTitleBlocksFolder": "Open title blocks folder",
+    "style": "樣式"
   },
   "print": {
     "title": "打印",
@@ -323,6 +324,13 @@
     "title": "选择参数化符号",
     "cancel": "Cancel"
   },
+  "straighten": {
+    "title": "拉直頁面",
+    "apply": "拉直",
+    "angleInfo": "校正角度：{{angle}}°",
+    "done": "已拉直 {{count}} 頁，角度 {{angle}}°",
+    "alreadyStraight": "線條已經是直的，無需校正。"
+  },
   "ocrLanguage": {
     "title": "文字識別（OCR）",
     "run": "識別",
@@ -334,13 +342,6 @@
       "chi_tra": "中文（繁體）",
       "chi_tra+eng": "中文（繁體）＋英文"
     }
-  },
-  "straighten": {
-    "title": "拉直頁面",
-    "apply": "拉直",
-    "angleInfo": "校正角度：{{angle}}°",
-    "done": "已拉直 {{count}} 頁，角度 {{angle}}°",
-    "alreadyStraight": "線條已經是直的，無需校正。"
   },
   "shiftPage": {
     "title": "Shift Page",

@@ -60,6 +60,9 @@
   "viewBook": "Two Pages",
   "viewFacing": "Two Pages Side by Side",
   "filledAreaSketch": {
+    "undoPoint": "Αναίρεση σημείου",
+    "undoPointTitle": "Αφαίρεση τελευταίου σημείου (Backspace)",
+    "holesPhaseHint": "Κλικ για άνοιγμα · Enter ή δεξί κλικ = τέλος",
     "line": "Γραμμή",
     "lineTitle": "Ευθύγραμμο τμήμα",
     "arc": "Τόξο",
@@ -74,10 +77,7 @@
     "outerClosed": "Εξωτερικό περίγραμμα κλειστό ✓ · ανοίγματα: {{count}}",
     "drawingHole": " · σχεδίαση ανοίγματος ({{count}} σημείο/α)",
     "outerOpenClosable": "Εξωτερικό περίγραμμα ανοιχτό — {{count}} σημεία (κλείνει)",
-    "outerOpen": "Εξωτερικό περίγραμμα ανοιχτό — {{count}} σημείο/α",
-    "undoPoint": "Αναίρεση σημείου",
-    "undoPointTitle": "Αφαίρεση τελευταίου σημείου (Backspace)",
-    "holesPhaseHint": "Κλικ για άνοιγμα · Enter ή δεξί κλικ = τέλος"
+    "outerOpen": "Εξωτερικό περίγραμμα ανοιχτό — {{count}} σημείο/α"
   },
   "boxWidthAbbr": "Π",
   "boxHeightAbbr": "Υ",

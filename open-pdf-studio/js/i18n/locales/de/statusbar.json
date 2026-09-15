@@ -59,6 +59,9 @@
   "viewBook": "Two Pages",
   "viewFacing": "Two Pages Side by Side",
   "filledAreaSketch": {
+    "undoPoint": "Punkt zurücknehmen",
+    "undoPointTitle": "Letzten Punkt entfernen (Rücktaste)",
+    "holesPhaseHint": "Klicken für eine Öffnung · Eingabe oder Rechtsklick = fertig",
     "line": "Linie",
     "lineTitle": "Gerades Segment",
     "arc": "Bogen",
@@ -73,10 +76,7 @@
     "outerClosed": "Außenkontur geschlossen ✓ · Öffnungen: {{count}}",
     "drawingHole": "Öffnung wird gezeichnet, Punkte: {{count}}",
     "outerOpenClosable": "Außenkontur offen (schließbar) · Punkte: {{count}}",
-    "outerOpen": "Außenkontur offen · Punkte: {{count}}",
-    "undoPoint": "Punkt zurücknehmen",
-    "undoPointTitle": "Letzten Punkt entfernen (Rücktaste)",
-    "holesPhaseHint": "Klicken für eine Öffnung · Eingabe oder Rechtsklick = fertig"
+    "outerOpen": "Außenkontur offen · Punkte: {{count}}"
   },
   "boxWidthAbbr": "B",
   "boxHeightAbbr": "H",

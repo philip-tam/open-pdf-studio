@@ -1026,7 +1026,7 @@ const result = {};
                   // de PDF-notatie; voor het parsen de gedecodeerde tekst.
                   const rcDecoded = (typeof rcRaw.decodeText === 'function') ? rcRaw.decodeText()
                     : (typeof rcRaw.asString === 'function') ? rcRaw.asString() : rcStr.replace(/^\(|\)$/g, '');
-                  // Some authoring tools (e.g. Acrobat's XFA-style RC) end every
+                  // Some authoring tools (XFA-style RC) end every
                   // paragraph with BOTH a trailing \r AND its own <p>/<div>
                   // block — belt-and-suspenders encoding of the same line
                   // break. parseEditorDom (shared with the live editor, where

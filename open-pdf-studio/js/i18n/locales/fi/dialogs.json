@@ -14,7 +14,8 @@
     "titleBlock": "Title block",
     "noTitleBlock": "No title block",
     "addTitleBlock": "Add your own title block (PDF)",
-    "openTitleBlocksFolder": "Open title blocks folder"
+    "openTitleBlocksFolder": "Open title blocks folder",
+    "style": "Tyyli"
   },
   "print": {
     "title": "Tulosta",
@@ -323,6 +324,13 @@
     "title": "Valitse parametrinen symboli",
     "cancel": "Cancel"
   },
+  "straighten": {
+    "title": "Suorista Sivu",
+    "apply": "Suorista",
+    "angleInfo": "Korjauskulma: {{angle}}°",
+    "done": "{{count}} sivu(a) suoristettu {{angle}}°",
+    "alreadyStraight": "Viiva on jo suora — korjausta ei tarvita."
+  },
   "ocrLanguage": {
     "title": "Tekstintunnistus (OCR)",
     "run": "Tunnista",
@@ -334,13 +342,6 @@
       "chi_tra": "Kiina (perinteinen)",
       "chi_tra+eng": "Kiina (perinteinen) + englanti"
     }
-  },
-  "straighten": {
-    "title": "Suorista Sivu",
-    "apply": "Suorista",
-    "angleInfo": "Korjauskulma: {{angle}}°",
-    "done": "{{count}} sivu(a) suoristettu {{angle}}°",
-    "alreadyStraight": "Viiva on jo suora — korjausta ei tarvita."
   },
   "shiftPage": {
     "title": "Shift Page",

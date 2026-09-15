@@ -60,6 +60,9 @@
   "viewBook": "Two Pages",
   "viewFacing": "Two Pages Side by Side",
   "filledAreaSketch": {
+    "undoPoint": "Zpět bod",
+    "undoPointTitle": "Odebrat poslední bod (Backspace)",
+    "holesPhaseHint": "Klikněte pro otvor · Enter nebo pravé tlačítko = hotovo",
     "line": "Čára",
     "lineTitle": "Přímý segment",
     "arc": "Oblouk",
@@ -74,10 +77,7 @@
     "outerClosed": "Vnější obrys uzavřen ✓ · otvory: {{count}}",
     "drawingHole": "kreslení otvoru, bodů: {{count}}",
     "outerOpenClosable": "Vnější obrys otevřen (lze uzavřít) · bodů: {{count}}",
-    "outerOpen": "Vnější obrys otevřen · bodů: {{count}}",
-    "undoPoint": "Zpět bod",
-    "undoPointTitle": "Odebrat poslední bod (Backspace)",
-    "holesPhaseHint": "Klikněte pro otvor · Enter nebo pravé tlačítko = hotovo"
+    "outerOpen": "Vnější obrys otevřen · bodů: {{count}}"
   },
   "boxWidthAbbr": "Š",
   "boxHeightAbbr": "V",

@@ -14,7 +14,8 @@
     "titleBlock": "Title block",
     "noTitleBlock": "No title block",
     "addTitleBlock": "Add your own title block (PDF)",
-    "openTitleBlocksFolder": "Open title blocks folder"
+    "openTitleBlocksFolder": "Open title blocks folder",
+    "style": "Stil"
   },
   "print": {
     "title": "Yazdır",
@@ -323,6 +324,13 @@
     "title": "Parametrik sembol seç",
     "cancel": "Cancel"
   },
+  "straighten": {
+    "title": "Sayfayı Düzelt",
+    "apply": "Düzelt",
+    "angleInfo": "Düzeltme açısı: {{angle}}°",
+    "done": "{{count}} sayfa {{angle}}° düzeltildi",
+    "alreadyStraight": "Çizgi zaten düz — düzeltmeye gerek yok."
+  },
   "ocrLanguage": {
     "title": "Metin Tanıma (OCR)",
     "run": "Tanı",
@@ -334,13 +342,6 @@
       "chi_tra": "Çince (Geleneksel)",
       "chi_tra+eng": "Çince (Geleneksel) + İngilizce"
     }
-  },
-  "straighten": {
-    "title": "Sayfayı Düzelt",
-    "apply": "Düzelt",
-    "angleInfo": "Düzeltme açısı: {{angle}}°",
-    "done": "{{count}} sayfa {{angle}}° düzeltildi",
-    "alreadyStraight": "Çizgi zaten düz — düzeltmeye gerek yok."
   },
   "shiftPage": {
     "title": "Shift Page",

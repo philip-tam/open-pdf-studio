@@ -174,8 +174,8 @@
     "headerFooter": "Üstbilgi/Altbilgi",
     "manageWatermarks": "Filigranları Yönet",
     "manage": "Yönet",
-    "ocr": "Recognize Text (OCR)",
     "straighten": "Sayfayı Düzelt",
+    "ocr": "Recognize Text (OCR)",
     "shiftPage": "Sayfayı kaydır"
   },
   "help": {

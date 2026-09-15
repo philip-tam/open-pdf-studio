@@ -60,6 +60,9 @@
   "viewBook": "Two Pages",
   "viewFacing": "Two Pages Side by Side",
   "filledAreaSketch": {
+    "undoPoint": "Desfés punt",
+    "undoPointTitle": "Elimina l'últim punt (Retrocés)",
+    "holesPhaseHint": "Fes clic per a una obertura · Retorn o clic dret = fet",
     "line": "Línia",
     "lineTitle": "Segment recte",
     "arc": "Arc",
@@ -74,10 +77,7 @@
     "outerClosed": "Contorn exterior tancat ✓ · obertures: {{count}}",
     "drawingHole": "dibuixant obertura, punts: {{count}}",
     "outerOpenClosable": "Contorn exterior obert (tancable) · punts: {{count}}",
-    "outerOpen": "Contorn exterior obert · punts: {{count}}",
-    "undoPoint": "Desfés punt",
-    "undoPointTitle": "Elimina l'últim punt (Retrocés)",
-    "holesPhaseHint": "Fes clic per a una obertura · Retorn o clic dret = fet"
+    "outerOpen": "Contorn exterior obert · punts: {{count}}"
   },
   "boxWidthAbbr": "A",
   "boxHeightAbbr": "Al",

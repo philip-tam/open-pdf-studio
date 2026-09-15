@@ -105,7 +105,7 @@ test('parse: <u>/<s>-tags geven underline/strikethrough per run', () => {
 });
 
 test('parse: text-decoration:underline op een blok-<p> (externe /RC-kop) geldt voor die hele regel', () => {
-  // Acrobat's eigen RC zet onderstreping vaak op het <p>-blok zelf i.p.v.
+  // Externe RC zet onderstreping vaak op het <p>-blok zelf i.p.v.
   // een inline <u>, bv. een onderstreepte kop-regel gevolgd door gewone
   // tekst — precies het patroon dat eerder stilletjes verloren ging omdat
   // alleen <u>/<s>-tags telden.

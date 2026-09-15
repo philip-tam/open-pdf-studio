@@ -60,6 +60,9 @@
   "viewBook": "Two Pages",
   "viewFacing": "Two Pages Side by Side",
   "filledAreaSketch": {
+    "undoPoint": "Batalkan titik",
+    "undoPointTitle": "Hapus titik terakhir (Backspace)",
+    "holesPhaseHint": "Klik untuk bukaan · Enter atau klik kanan = selesai",
     "line": "Garis",
     "lineTitle": "Segmen lurus",
     "arc": "Busur",
@@ -74,10 +77,7 @@
     "outerClosed": "Kontur luar tertutup ✓ · bukaan: {{count}}",
     "drawingHole": " · menggambar bukaan ({{count}} titik)",
     "outerOpenClosable": "Kontur luar terbuka — {{count}} titik (bisa ditutup)",
-    "outerOpen": "Kontur luar terbuka — {{count}} titik",
-    "undoPoint": "Batalkan titik",
-    "undoPointTitle": "Hapus titik terakhir (Backspace)",
-    "holesPhaseHint": "Klik untuk bukaan · Enter atau klik kanan = selesai"
+    "outerOpen": "Kontur luar terbuka — {{count}} titik"
   },
   "boxWidthAbbr": "L",
   "boxHeightAbbr": "T",

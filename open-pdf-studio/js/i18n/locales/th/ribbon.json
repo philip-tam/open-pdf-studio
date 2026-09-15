@@ -174,8 +174,8 @@
     "headerFooter": "หัวกระดาษ/ท้ายกระดาษ",
     "manageWatermarks": "จัดการลายน้ำ",
     "manage": "จัดการ",
-    "ocr": "Recognize Text (OCR)",
     "straighten": "จัดหน้าให้ตรง",
+    "ocr": "Recognize Text (OCR)",
     "shiftPage": "เลื่อนหน้า"
   },
   "help": {

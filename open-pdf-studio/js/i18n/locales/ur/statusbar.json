@@ -60,6 +60,9 @@
   "viewBook": "Two Pages",
   "viewFacing": "Two Pages Side by Side",
   "filledAreaSketch": {
+    "undoPoint": "نقطہ واپس لیں",
+    "undoPointTitle": "آخری نقطہ ہٹائیں (Backspace)",
+    "holesPhaseHint": "سوراخ کے لیے کلک کریں · Enter یا دائیں کلک = مکمل",
     "line": "لائن",
     "lineTitle": "سیدھا حصہ",
     "arc": "آرک",
@@ -74,10 +77,7 @@
     "outerClosed": "بیرونی خاکہ بند ✓ · سوراخ: {{count}}",
     "drawingHole": " · سوراخ بن رہا ہے ({{count}} پوائنٹس)",
     "outerOpenClosable": "بیرونی خاکہ کھلا ہے — {{count}} پوائنٹس (بند کیا جا سکتا ہے)",
-    "outerOpen": "بیرونی خاکہ کھلا ہے — {{count}} پوائنٹس",
-    "undoPoint": "نقطہ واپس لیں",
-    "undoPointTitle": "آخری نقطہ ہٹائیں (Backspace)",
-    "holesPhaseHint": "سوراخ کے لیے کلک کریں · Enter یا دائیں کلک = مکمل"
+    "outerOpen": "بیرونی خاکہ کھلا ہے — {{count}} پوائنٹس"
   },
   "boxWidthAbbr": "چ",
   "boxHeightAbbr": "ا",

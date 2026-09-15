@@ -14,7 +14,8 @@
     "titleBlock": "Title block",
     "noTitleBlock": "No title block",
     "addTitleBlock": "Add your own title block (PDF)",
-    "openTitleBlocksFolder": "Open title blocks folder"
+    "openTitleBlocksFolder": "Open title blocks folder",
+    "style": "انداز"
   },
   "print": {
     "title": "پرنٹ",
@@ -323,6 +324,13 @@
     "title": "پیرامیٹرک علامت منتخب کریں",
     "cancel": "Cancel"
   },
+  "straighten": {
+    "title": "صفحہ سیدھا کریں",
+    "apply": "سیدھا کریں",
+    "angleInfo": "اصلاحی زاویہ: {{angle}}°",
+    "done": "{{count}} صفحات کو {{angle}}° سیدھا کیا گیا",
+    "alreadyStraight": "لائن پہلے سے سیدھی ہے — کسی اصلاح کی ضرورت نہیں۔"
+  },
   "ocrLanguage": {
     "title": "متن کی شناخت (OCR)",
     "run": "شناخت کریں",
@@ -334,13 +342,6 @@
       "chi_tra": "چینی (روایتی)",
       "chi_tra+eng": "چینی (روایتی) + انگریزی"
     }
-  },
-  "straighten": {
-    "title": "صفحہ سیدھا کریں",
-    "apply": "سیدھا کریں",
-    "angleInfo": "اصلاحی زاویہ: {{angle}}°",
-    "done": "{{count}} صفحات کو {{angle}}° سیدھا کیا گیا",
-    "alreadyStraight": "لائن پہلے سے سیدھی ہے — کسی اصلاح کی ضرورت نہیں۔"
   },
   "shiftPage": {
     "title": "Shift Page",

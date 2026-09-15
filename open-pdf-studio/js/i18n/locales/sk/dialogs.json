@@ -14,7 +14,8 @@
     "titleBlock": "Title block",
     "noTitleBlock": "No title block",
     "addTitleBlock": "Add your own title block (PDF)",
-    "openTitleBlocksFolder": "Open title blocks folder"
+    "openTitleBlocksFolder": "Open title blocks folder",
+    "style": "Štýl"
   },
   "print": {
     "title": "Tlač",
@@ -323,6 +324,13 @@
     "title": "Vybrať parametrický symbol",
     "cancel": "Cancel"
   },
+  "straighten": {
+    "title": "Narovnať Stránku",
+    "apply": "Narovnať",
+    "angleInfo": "Uhol korekcie: {{angle}}°",
+    "done": "Narovnaných {{count}} strán o {{angle}}°",
+    "alreadyStraight": "Čiara je už rovná — korekcia nie je potrebná."
+  },
   "ocrLanguage": {
     "title": "Rozpoznávanie textu (OCR)",
     "run": "Rozpoznať",
@@ -334,13 +342,6 @@
       "chi_tra": "Čínština (tradičná)",
       "chi_tra+eng": "Čínština (tradičná) + angličtina"
     }
-  },
-  "straighten": {
-    "title": "Narovnať Stránku",
-    "apply": "Narovnať",
-    "angleInfo": "Uhol korekcie: {{angle}}°",
-    "done": "Narovnaných {{count}} strán o {{angle}}°",
-    "alreadyStraight": "Čiara je už rovná — korekcia nie je potrebná."
   },
   "shiftPage": {
     "title": "Shift Page",

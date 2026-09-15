@@ -73,7 +73,7 @@ export function parseEditorDom(root) {
       else if (st.fontStyle === 'normal') i = false;
     }
     if (st && st.textDecoration) {
-      // Externe RC (Acrobat e.a.) zet de decoratie vaak op het regel-<p>
+      // Externe RC (andere editors) zet de decoratie vaak op het regel-<p>
       // zelf i.p.v. op een inline <u>/<s> — bv. een onderstreepte kop-regel
       // met verder gewone tekst. Zonder deze tak ging die decoratie
       // stilletjes verloren omdat alleen de <u>/<s>-tags hierboven telden.

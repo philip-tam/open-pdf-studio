@@ -174,8 +174,8 @@
     "headerFooter": "Ylätunniste/Alatunniste",
     "manageWatermarks": "Hallitse vesileimoja",
     "manage": "Hallitse",
-    "ocr": "Recognize Text (OCR)",
     "straighten": "Suorista Sivu",
+    "ocr": "Recognize Text (OCR)",
     "shiftPage": "Siirrä sivua"
   },
   "help": {

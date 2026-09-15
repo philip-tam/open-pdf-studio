@@ -486,7 +486,9 @@ export async function placeLastScreenshotAsOverlay() {
   }
 }
 
-// Re-exported for the freeform crop tool (tools/crop-select.js), which reuses
-// the same drag-select overlay and rect-to-page-space conversion instead of
-// duplicating it.
+// Re-exported for the freeform crop tool (tools/crop-select.js) and the
+// Straighten Page tool (tools/straighten-select.js), which reuse the same
+// drag-select overlay and rect-to-page-space conversion instead of
+// duplicating it. getCurrentCanvases is already exported at its definition
+// above.
 export { _selectionToAppRect as selectionToAppRect, _clampAppRect as clampAppRect };

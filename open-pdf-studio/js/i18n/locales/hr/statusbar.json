@@ -60,6 +60,9 @@
   "viewBook": "Two Pages",
   "viewFacing": "Two Pages Side by Side",
   "filledAreaSketch": {
+    "undoPoint": "Poništi točku",
+    "undoPointTitle": "Ukloni zadnju točku (Backspace)",
+    "holesPhaseHint": "Kliknite za otvor · Enter ili desni klik = gotovo",
     "line": "Linija",
     "lineTitle": "Ravni segment",
     "arc": "Luk",
@@ -74,10 +77,7 @@
     "outerClosed": "Vanjska kontura zatvorena ✓ · otvori: {{count}}",
     "drawingHole": "crtanje otvora, točaka: {{count}}",
     "outerOpenClosable": "Vanjska kontura otvorena (može se zatvoriti) · točaka: {{count}}",
-    "outerOpen": "Vanjska kontura otvorena · točaka: {{count}}",
-    "undoPoint": "Poništi točku",
-    "undoPointTitle": "Ukloni zadnju točku (Backspace)",
-    "holesPhaseHint": "Kliknite za otvor · Enter ili desni klik = gotovo"
+    "outerOpen": "Vanjska kontura otvorena · točaka: {{count}}"
   },
   "boxWidthAbbr": "Š",
   "boxHeightAbbr": "V",

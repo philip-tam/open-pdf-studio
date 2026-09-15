@@ -174,8 +174,8 @@
     "headerFooter": "Горен/Долен колонтитул",
     "manageWatermarks": "Управление на водни знаци",
     "manage": "Управление",
-    "ocr": "Recognize Text (OCR)",
     "straighten": "Изправяне на Страница",
+    "ocr": "Recognize Text (OCR)",
     "shiftPage": "Преместване на страница"
   },
   "help": {

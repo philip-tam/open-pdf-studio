@@ -174,8 +174,8 @@
     "headerFooter": "Kopf-/Fußzeile",
     "manageWatermarks": "Wasserzeichen verwalten",
     "manage": "Verwalten",
-    "ocr": "Recognize Text (OCR)",
     "straighten": "Seite Begradigen",
+    "ocr": "Recognize Text (OCR)",
     "shiftPage": "Seite verschieben"
   },
   "help": {

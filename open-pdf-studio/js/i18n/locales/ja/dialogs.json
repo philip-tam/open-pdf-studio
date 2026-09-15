@@ -14,7 +14,8 @@
     "titleBlock": "Title block",
     "noTitleBlock": "No title block",
     "addTitleBlock": "Add your own title block (PDF)",
-    "openTitleBlocksFolder": "Open title blocks folder"
+    "openTitleBlocksFolder": "Open title blocks folder",
+    "style": "スタイル"
   },
   "print": {
     "title": "印刷",
@@ -323,6 +324,13 @@
     "title": "パラメトリックシンボルを選択",
     "cancel": "Cancel"
   },
+  "straighten": {
+    "title": "ページを補正",
+    "apply": "補正",
+    "angleInfo": "補正角度：{{angle}}°",
+    "done": "{{count}} ページを {{angle}}° 補正しました",
+    "alreadyStraight": "線はすでにまっすぐです。補正の必要はありません。"
+  },
   "ocrLanguage": {
     "title": "文字認識（OCR）",
     "run": "認識",
@@ -334,13 +342,6 @@
       "chi_tra": "中国語（繁体字）",
       "chi_tra+eng": "中国語（繁体字）＋英語"
     }
-  },
-  "straighten": {
-    "title": "ページを補正",
-    "apply": "補正",
-    "angleInfo": "補正角度：{{angle}}°",
-    "done": "{{count}} ページを {{angle}}° 補正しました",
-    "alreadyStraight": "線はすでにまっすぐです。補正の必要はありません。"
   },
   "shiftPage": {
     "title": "Shift Page",

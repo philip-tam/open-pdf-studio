@@ -60,6 +60,9 @@
   "viewBook": "Two Pages",
   "viewFacing": "Two Pages Side by Side",
   "filledAreaSketch": {
+    "undoPoint": "Pont visszavonása",
+    "undoPointTitle": "Utolsó pont eltávolítása (Backspace)",
+    "holesPhaseHint": "Kattintson nyíláshoz · Enter vagy jobb katt = kész",
     "line": "Vonal",
     "lineTitle": "Egyenes szakasz",
     "arc": "Ív",
@@ -74,10 +77,7 @@
     "outerClosed": "Külső kontúr lezárva ✓ · nyílások: {{count}}",
     "drawingHole": " · nyílás rajzolása ({{count}} pont)",
     "outerOpenClosable": "Külső kontúr nyitva — {{count}} pont (lezárható)",
-    "outerOpen": "Külső kontúr nyitva — {{count}} pont",
-    "undoPoint": "Pont visszavonása",
-    "undoPointTitle": "Utolsó pont eltávolítása (Backspace)",
-    "holesPhaseHint": "Kattintson nyíláshoz · Enter vagy jobb katt = kész"
+    "outerOpen": "Külső kontúr nyitva — {{count}} pont"
   },
   "boxWidthAbbr": "Sz",
   "boxHeightAbbr": "M",

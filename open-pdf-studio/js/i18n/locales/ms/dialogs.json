@@ -14,7 +14,8 @@
     "titleBlock": "Title block",
     "noTitleBlock": "No title block",
     "addTitleBlock": "Add your own title block (PDF)",
-    "openTitleBlocksFolder": "Open title blocks folder"
+    "openTitleBlocksFolder": "Open title blocks folder",
+    "style": "Gaya"
   },
   "print": {
     "title": "Cetak",
@@ -323,6 +324,13 @@
     "title": "Pilih simbol parametrik",
     "cancel": "Cancel"
   },
+  "straighten": {
+    "title": "Luruskan Halaman",
+    "apply": "Luruskan",
+    "angleInfo": "Sudut pembetulan: {{angle}}°",
+    "done": "{{count}} halaman diluruskan sebanyak {{angle}}°",
+    "alreadyStraight": "Garisan sudah lurus — tiada pembetulan diperlukan."
+  },
   "ocrLanguage": {
     "title": "Pengecaman Teks (OCR)",
     "run": "Kenal pasti",
@@ -334,13 +342,6 @@
       "chi_tra": "Cina (Tradisional)",
       "chi_tra+eng": "Cina (Tradisional) + Bahasa Inggeris"
     }
-  },
-  "straighten": {
-    "title": "Luruskan Halaman",
-    "apply": "Luruskan",
-    "angleInfo": "Sudut pembetulan: {{angle}}°",
-    "done": "{{count}} halaman diluruskan sebanyak {{angle}}°",
-    "alreadyStraight": "Garisan sudah lurus — tiada pembetulan diperlukan."
   },
   "shiftPage": {
     "title": "Shift Page",

@@ -60,6 +60,9 @@
   "viewBook": "Two Pages",
   "viewFacing": "Two Pages Side by Side",
   "filledAreaSketch": {
+    "undoPoint": "Отмяна на точка",
+    "undoPointTitle": "Премахни последната точка (Backspace)",
+    "holesPhaseHint": "Кликнете за отвор · Enter или десен бутон = готово",
     "line": "Линия",
     "lineTitle": "Прав сегмент",
     "arc": "Дъга",
@@ -74,10 +77,7 @@
     "outerClosed": "Външен контур затворен ✓ · отвори: {{count}}",
     "drawingHole": "чертане на отвор, точки: {{count}}",
     "outerOpenClosable": "Външен контур отворен (може да се затвори) · точки: {{count}}",
-    "outerOpen": "Външен контур отворен · точки: {{count}}",
-    "undoPoint": "Отмяна на точка",
-    "undoPointTitle": "Премахни последната точка (Backspace)",
-    "holesPhaseHint": "Кликнете за отвор · Enter или десен бутон = готово"
+    "outerOpen": "Външен контур отворен · точки: {{count}}"
   },
   "boxWidthAbbr": "Ш",
   "boxHeightAbbr": "В",

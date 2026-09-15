@@ -68,6 +68,9 @@
   "viewFacing": "Twee pagina’s naast elkaar",
   "compareTabTitle": "Vergelijken",
   "filledAreaSketch": {
+    "undoPoint": "Punt ongedaan maken",
+    "undoPointTitle": "Verwijder laatste punt (Backspace)",
+    "holesPhaseHint": "Klik voor een opening · Enter of rechtermuisklik = gereed",
     "line": "Lijn",
     "lineTitle": "Recht segment",
     "arc": "Boog",
@@ -82,10 +85,7 @@
     "outerClosed": "Buitenrand gesloten ✓ · openingen: {{count}}",
     "drawingHole": "bezig met opening, punten: {{count}}",
     "outerOpenClosable": "Buitenrand open (sluitbaar) · punten: {{count}}",
-    "outerOpen": "Buitenrand open · punten: {{count}}",
-    "undoPoint": "Punt ongedaan maken",
-    "undoPointTitle": "Verwijder laatste punt (Backspace)",
-    "holesPhaseHint": "Klik voor een opening · Enter of rechtermuisklik = gereed"
+    "outerOpen": "Buitenrand open · punten: {{count}}"
   },
   "boxWidthAbbr": "B",
   "boxHeightAbbr": "H",

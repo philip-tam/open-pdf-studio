@@ -60,6 +60,9 @@
   "viewBook": "Two Pages",
   "viewFacing": "Two Pages Side by Side",
   "filledAreaSketch": {
+    "undoPoint": "Angre punkt",
+    "undoPointTitle": "Fjern siste punkt (Backspace)",
+    "holesPhaseHint": "Klikk for en åpning · Enter eller høyreklikk = ferdig",
     "line": "Linje",
     "lineTitle": "Rett segment",
     "arc": "Bue",
@@ -74,10 +77,7 @@
     "outerClosed": "Ytterkontur lukket ✓ · åpninger: {{count}}",
     "drawingHole": "tegner åpning, punkter: {{count}}",
     "outerOpenClosable": "Ytterkontur åpen (kan lukkes) · punkter: {{count}}",
-    "outerOpen": "Ytterkontur åpen · punkter: {{count}}",
-    "undoPoint": "Angre punkt",
-    "undoPointTitle": "Fjern siste punkt (Backspace)",
-    "holesPhaseHint": "Klikk for en åpning · Enter eller høyreklikk = ferdig"
+    "outerOpen": "Ytterkontur åpen · punkter: {{count}}"
   },
   "boxWidthAbbr": "B",
   "boxHeightAbbr": "H",

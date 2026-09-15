@@ -14,7 +14,8 @@
     "titleBlock": "Title block",
     "noTitleBlock": "No title block",
     "addTitleBlock": "Add your own title block (PDF)",
-    "openTitleBlocksFolder": "Open title blocks folder"
+    "openTitleBlocksFolder": "Open title blocks folder",
+    "style": "สไตล์"
   },
   "print": {
     "title": "พิมพ์",
@@ -323,6 +324,13 @@
     "title": "เลือกสัญลักษณ์พารามิเตอร์",
     "cancel": "Cancel"
   },
+  "straighten": {
+    "title": "จัดหน้าให้ตรง",
+    "apply": "จัดให้ตรง",
+    "angleInfo": "มุมแก้ไข: {{angle}}°",
+    "done": "จัดหน้าให้ตรง {{count}} หน้า ด้วยมุม {{angle}}°",
+    "alreadyStraight": "เส้นตรงอยู่แล้ว — ไม่จำเป็นต้องแก้ไข"
+  },
   "ocrLanguage": {
     "title": "การจดจำข้อความ (OCR)",
     "run": "จดจำ",
@@ -334,13 +342,6 @@
       "chi_tra": "จีน (ตัวเต็ม)",
       "chi_tra+eng": "จีน (ตัวเต็ม) + อังกฤษ"
     }
-  },
-  "straighten": {
-    "title": "จัดหน้าให้ตรง",
-    "apply": "จัดให้ตรง",
-    "angleInfo": "มุมแก้ไข: {{angle}}°",
-    "done": "จัดหน้าให้ตรง {{count}} หน้า ด้วยมุม {{angle}}°",
-    "alreadyStraight": "เส้นตรงอยู่แล้ว — ไม่จำเป็นต้องแก้ไข"
   },
   "shiftPage": {
     "title": "Shift Page",

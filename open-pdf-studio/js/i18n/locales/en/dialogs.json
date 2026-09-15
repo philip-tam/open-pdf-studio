@@ -17,7 +17,8 @@
     "titleBlock": "Title block",
     "noTitleBlock": "No title block",
     "addTitleBlock": "Add your own title block (PDF)",
-    "openTitleBlocksFolder": "Open title blocks folder"
+    "openTitleBlocksFolder": "Open title blocks folder",
+    "style": "Style"
   },
   "printQueue": {
     "save": "Save",
@@ -480,6 +481,13 @@
     "title": "Choose Parametric Symbol",
     "cancel": "Cancel"
   },
+  "straighten": {
+    "title": "Straighten Page",
+    "apply": "Straighten",
+    "angleInfo": "Correction angle: {{angle}}°",
+    "done": "Straightened {{count}} page(s) by {{angle}}°",
+    "alreadyStraight": "Line is already straight — no correction needed."
+  },
   "ocrLanguage": {
     "title": "Recognize Text (OCR)",
     "run": "Recognize",
@@ -491,13 +499,6 @@
       "chi_tra": "Chinese (Traditional)",
       "chi_tra+eng": "Chinese (Traditional) + English"
     }
-  },
-  "straighten": {
-    "title": "Straighten Page",
-    "apply": "Straighten",
-    "angleInfo": "Correction angle: {{angle}}°",
-    "done": "Straightened {{count}} page(s) by {{angle}}°",
-    "alreadyStraight": "Line is already straight — no correction needed."
   },
   "shiftPage": {
     "title": "Shift Page",

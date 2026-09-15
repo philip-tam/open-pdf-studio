@@ -51,7 +51,7 @@ export function hasMixedRuns(ann) {
 // character is its own valid break point, unlike space-delimited scripts.
 // Without this, a whole CJK sentence became a single unbreakable "word"
 // below (nothing to split on but a space that never comes), so it just
-// overflowed the box's width instead of wrapping like Acrobat does.
+// overflowed the box's width instead of wrapping like other editors do.
 function isCJK(ch) {
   const cp = ch.codePointAt(0);
   return (

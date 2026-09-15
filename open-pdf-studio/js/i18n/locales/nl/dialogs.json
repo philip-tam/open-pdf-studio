@@ -17,7 +17,8 @@
     "titleBlock": "Onderhoek",
     "noTitleBlock": "Geen onderhoek",
     "addTitleBlock": "Eigen onderhoek toevoegen (PDF)",
-    "openTitleBlocksFolder": "Onderhoeken-map openen"
+    "openTitleBlocksFolder": "Onderhoeken-map openen",
+    "style": "Stijl"
   },
   "printQueue": {
     "save": "Opslaan",
@@ -481,6 +482,13 @@
     "title": "Parametrisch symbool kiezen",
     "cancel": "Cancel"
   },
+  "straighten": {
+    "title": "Pagina Rechtzetten",
+    "apply": "Rechtzetten",
+    "angleInfo": "Correctiehoek: {{angle}}°",
+    "done": "{{count}} pagina('s) rechtgezet met {{angle}}°",
+    "alreadyStraight": "Lijn staat al recht — geen correctie nodig."
+  },
   "ocrLanguage": {
     "title": "Tekst herkennen (OCR)",
     "run": "Herken",
@@ -492,13 +500,6 @@
       "chi_tra": "Chinees (Traditioneel)",
       "chi_tra+eng": "Chinees (Traditioneel) + Engels"
     }
-  },
-  "straighten": {
-    "title": "Pagina Rechtzetten",
-    "apply": "Rechtzetten",
-    "angleInfo": "Correctiehoek: {{angle}}°",
-    "done": "{{count}} pagina('s) rechtgezet met {{angle}}°",
-    "alreadyStraight": "Lijn staat al recht — geen correctie nodig."
   },
   "shiftPage": {
     "title": "Pagina verschuiven",

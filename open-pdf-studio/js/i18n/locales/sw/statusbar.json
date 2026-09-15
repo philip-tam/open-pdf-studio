@@ -60,6 +60,9 @@
   "viewBook": "Two Pages",
   "viewFacing": "Two Pages Side by Side",
   "filledAreaSketch": {
+    "undoPoint": "Tengua pointi",
+    "undoPointTitle": "Ondoa pointi ya mwisho (Backspace)",
+    "holesPhaseHint": "Bofya kwa fursa · Enter au kubofya kulia = imekamilika",
     "line": "Mstari",
     "lineTitle": "Sehemu iliyonyooka",
     "arc": "Upinde",
@@ -74,10 +77,7 @@
     "outerClosed": "Ukingo wa nje umefungwa ✓ · fursa: {{count}}",
     "drawingHole": " · inachora fursa (pointi {{count}})",
     "outerOpenClosable": "Ukingo wa nje umefunguliwa — pointi {{count}} (unaweza kufungwa)",
-    "outerOpen": "Ukingo wa nje umefunguliwa — pointi {{count}}",
-    "undoPoint": "Tengua pointi",
-    "undoPointTitle": "Ondoa pointi ya mwisho (Backspace)",
-    "holesPhaseHint": "Bofya kwa fursa · Enter au kubofya kulia = imekamilika"
+    "outerOpen": "Ukingo wa nje umefunguliwa — pointi {{count}}"
   },
   "boxWidthAbbr": "U",
   "boxHeightAbbr": "K",

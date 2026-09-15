@@ -9,6 +9,7 @@ import { ifcCategoryForAnnotationType, ifcCategoryForParametric } from '../../so
 import { nenIfcForStamp } from '../../solid/data/nenIfcMap.js';
 import { STAVENREEKS_DEFAULTS } from '../../annotations/stavenreeks.js';
 import { knipselUitExtra } from './vector-snippet-load.js';
+import { hatchUitExtra } from '../saver/hatch-meta.js';
 import { heeft as heeftKnipselBron } from '../../annotations/vector-snippet-store.js';
 import { syncTwoPointGeometry } from '../../symbols/two-point.js';
 import { systeemFromOps, sparingenFromJson } from '../../annotations/systeemraster.js';
@@ -923,10 +924,7 @@ export async function convertPdfAnnotation(annot, pageNum, viewport, stampImageM
             borderStyle: mapBorderStyle(annot, extraColors),
             x: minX, y: minY,
             width: maxX - minX, height: maxY - minY,
-            hatchPattern: extraColors.opsHatchPattern || 'none',
-            hatchColor: extraColors.opsHatchColor || '#000000',
-            hatchScale: extraColors.opsHatchScale ?? 100,
-            hatchAngle: extraColors.opsHatchAngle ?? 0,
+            ...hatchUitExtra(extraColors),
           };
           if (extraColors.holes && extraColors.holes.length > 0) {
             const holeArcFlags = extraColors.opsHoleArcFlags || [];
@@ -969,6 +967,9 @@ export async function convertPdfAnnotation(annot, pageNum, viewport, stampImageM
             lineWidth: extraColors.borderWidth ?? annot.borderStyle?.width ?? 1,
             borderStyle: mapBorderStyle(annot, extraColors),
             measureText: maText,
+            // Arcering terug uit de eigen sleutels; zonder dit verliest een
+            // gearceerd meetvlak zijn arcering bij de volgende save.
+            ...hatchUitExtra(extraColors),
           };
           if (extraColors.measureScale) {
             maProps.measureScale = extraColors.measureScale;
@@ -992,7 +993,7 @@ export async function convertPdfAnnotation(annot, pageNum, viewport, stampImageM
 
         // Determine type from OPS_Subtype custom key (this app's own marker,
         // set when the annotation was created here) — or, for a /Polygon
-        // authored elsewhere (e.g. Acrobat) with a real /BE cloud border
+        // authored elsewhere (another editor) with a real /BE cloud border
         // effect and no OPS_Subtype, fall back to extraColors.borderCloudy
         // (read from /BE in color-extraction.js) so it still renders as a
         // cloud instead of a plain straight-edged polygon. Square already
@@ -1294,11 +1295,11 @@ export async function convertPdfAnnotation(annot, pageNum, viewport, stampImageM
           coH = rdVp.height;
         }
         // Some authoring tools bake a Rect/RD box a little too tight for the
-        // annotation's own Contents. Acrobat paints the file's own baked
+        // annotation's own Contents. Other editors paint the file's own baked
         // appearance stream regardless, so the shortfall never shows there;
         // we reconstruct the layout from Contents/DA and drawTextboxContent
         // silently drops lines past the box height — grow down to fit instead
-        // of truncating text Acrobat shows in full.
+        // of truncating text other editors show in full.
         const coNeededH = computeTextboxContentHeight({
           text, textRuns, width: coW, fontSize,
           lineSpacing: extraColors.lineSpacing, lineWidth: borderWidth,
@@ -1358,7 +1359,7 @@ export async function convertPdfAnnotation(annot, pageNum, viewport, stampImageM
       }
 
       // Same grow-to-fit as the callout branch above: don't silently drop
-      // lines Acrobat shows in full just because the authored Rect is tight.
+      // lines other editors show in full just because the authored Rect is tight.
       const ftNeededH = computeTextboxContentHeight({
         text, textRuns, width: ftWidth, fontSize,
         lineSpacing: extraColors.lineSpacing, lineWidth: borderWidth,

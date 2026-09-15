@@ -60,6 +60,9 @@
   "viewBook": "Two Pages",
   "viewFacing": "Two Pages Side by Side",
   "filledAreaSketch": {
+    "undoPoint": "Ångra punkt",
+    "undoPointTitle": "Ta bort senaste punkten (Backsteg)",
+    "holesPhaseHint": "Klicka för en öppning · Retur eller högerklick = klar",
     "line": "Linje",
     "lineTitle": "Rakt segment",
     "arc": "Båge",
@@ -74,10 +77,7 @@
     "outerClosed": "Ytterkontur stängd ✓ · öppningar: {{count}}",
     "drawingHole": "ritar öppning, punkter: {{count}}",
     "outerOpenClosable": "Ytterkontur öppen (kan stängas) · punkter: {{count}}",
-    "outerOpen": "Ytterkontur öppen · punkter: {{count}}",
-    "undoPoint": "Ångra punkt",
-    "undoPointTitle": "Ta bort senaste punkten (Backsteg)",
-    "holesPhaseHint": "Klicka för en öppning · Retur eller högerklick = klar"
+    "outerOpen": "Ytterkontur öppen · punkter: {{count}}"
   },
   "boxWidthAbbr": "B",
   "boxHeightAbbr": "H",

@@ -174,8 +174,8 @@
     "headerFooter": "Élőfej/élőláb",
     "manageWatermarks": "Vízjelek kezelése",
     "manage": "Kezelés",
-    "ocr": "Recognize Text (OCR)",
     "straighten": "Oldal Egyenesítése",
+    "ocr": "Recognize Text (OCR)",
     "shiftPage": "Oldal eltolása"
   },
   "help": {

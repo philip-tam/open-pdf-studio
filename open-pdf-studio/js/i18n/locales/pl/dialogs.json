@@ -14,7 +14,8 @@
     "titleBlock": "Title block",
     "noTitleBlock": "No title block",
     "addTitleBlock": "Add your own title block (PDF)",
-    "openTitleBlocksFolder": "Open title blocks folder"
+    "openTitleBlocksFolder": "Open title blocks folder",
+    "style": "Styl"
   },
   "print": {
     "title": "Drukowanie",
@@ -323,6 +324,13 @@
     "title": "Wybierz symbol parametryczny",
     "cancel": "Cancel"
   },
+  "straighten": {
+    "title": "Wyprostuj Stronę",
+    "apply": "Wyprostuj",
+    "angleInfo": "Kąt korekty: {{angle}}°",
+    "done": "Wyprostowano {{count}} stron(y) o {{angle}}°",
+    "alreadyStraight": "Linia jest już prosta — korekta niepotrzebna."
+  },
   "ocrLanguage": {
     "title": "Rozpoznawanie tekstu (OCR)",
     "run": "Rozpoznaj",
@@ -334,13 +342,6 @@
       "chi_tra": "Chiński (tradycyjny)",
       "chi_tra+eng": "Chiński (tradycyjny) + angielski"
     }
-  },
-  "straighten": {
-    "title": "Wyprostuj Stronę",
-    "apply": "Wyprostuj",
-    "angleInfo": "Kąt korekty: {{angle}}°",
-    "done": "Wyprostowano {{count}} stron(y) o {{angle}}°",
-    "alreadyStraight": "Linia jest już prosta — korekta niepotrzebna."
   },
   "shiftPage": {
     "title": "Shift Page",

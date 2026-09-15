@@ -14,7 +14,8 @@
     "titleBlock": "Title block",
     "noTitleBlock": "No title block",
     "addTitleBlock": "Add your own title block (PDF)",
-    "openTitleBlocksFolder": "Open title blocks folder"
+    "openTitleBlocksFolder": "Open title blocks folder",
+    "style": "Mtindo"
   },
   "print": {
     "title": "Chapisha",
@@ -323,6 +324,13 @@
     "title": "Chagua alama ya vigezo",
     "cancel": "Cancel"
   },
+  "straighten": {
+    "title": "Nyoosha Ukurasa",
+    "apply": "Nyoosha",
+    "angleInfo": "Pembe ya urekebishaji: {{angle}}°",
+    "done": "Kurasa {{count}} zimenyooshwa kwa {{angle}}°",
+    "alreadyStraight": "Mstari tayari umenyooka — hakuna marekebisho yanayohitajika."
+  },
   "ocrLanguage": {
     "title": "Utambuzi wa Maandishi (OCR)",
     "run": "Tambua",
@@ -334,13 +342,6 @@
       "chi_tra": "Kichina (cha Jadi)",
       "chi_tra+eng": "Kichina (cha Jadi) + Kiingereza"
     }
-  },
-  "straighten": {
-    "title": "Nyoosha Ukurasa",
-    "apply": "Nyoosha",
-    "angleInfo": "Pembe ya urekebishaji: {{angle}}°",
-    "done": "Kurasa {{count}} zimenyooshwa kwa {{angle}}°",
-    "alreadyStraight": "Mstari tayari umenyooka — hakuna marekebisho yanayohitajika."
   },
   "shiftPage": {
     "title": "Shift Page",

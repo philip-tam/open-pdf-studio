@@ -60,6 +60,9 @@
   "viewBook": "Two Pages",
   "viewFacing": "Two Pages Side by Side",
   "filledAreaSketch": {
+    "undoPoint": "בטל נקודה",
+    "undoPointTitle": "הסר את הנקודה האחרונה (Backspace)",
+    "holesPhaseHint": "לחץ לפתח · Enter או קליק ימני = סיום",
     "line": "קו",
     "lineTitle": "קטע ישר",
     "arc": "קשת",
@@ -74,10 +77,7 @@
     "outerClosed": "מתאר חיצוני סגור ✓ · פתחים: {{count}}",
     "drawingHole": " · מצייר פתח ({{count}} נקודות)",
     "outerOpenClosable": "מתאר חיצוני פתוח — {{count}} נקודות (ניתן לסגור)",
-    "outerOpen": "מתאר חיצוני פתוח — {{count}} נקודות",
-    "undoPoint": "בטל נקודה",
-    "undoPointTitle": "הסר את הנקודה האחרונה (Backspace)",
-    "holesPhaseHint": "לחץ לפתח · Enter או קליק ימני = סיום"
+    "outerOpen": "מתאר חיצוני פתוח — {{count}} נקודות"
   },
   "boxWidthAbbr": "ר",
   "boxHeightAbbr": "ג",

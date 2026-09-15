@@ -174,8 +174,8 @@
     "headerFooter": "ヘッダー/フッター",
     "manageWatermarks": "透かしを管理",
     "manage": "管理",
-    "ocr": "Recognize Text (OCR)",
     "straighten": "ページを補正",
+    "ocr": "Recognize Text (OCR)",
     "shiftPage": "ページをシフト"
   },
   "help": {

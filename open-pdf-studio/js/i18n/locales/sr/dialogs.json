@@ -14,7 +14,8 @@
     "titleBlock": "Title block",
     "noTitleBlock": "No title block",
     "addTitleBlock": "Add your own title block (PDF)",
-    "openTitleBlocksFolder": "Open title blocks folder"
+    "openTitleBlocksFolder": "Open title blocks folder",
+    "style": "Стил"
   },
   "print": {
     "title": "Штампање",
@@ -323,6 +324,13 @@
     "title": "Изабери параметарски симбол",
     "cancel": "Cancel"
   },
+  "straighten": {
+    "title": "Исправи Страницу",
+    "apply": "Исправи",
+    "angleInfo": "Угао корекције: {{angle}}°",
+    "done": "Исправљено {{count}} страница за {{angle}}°",
+    "alreadyStraight": "Линија је већ права — корекција није потребна."
+  },
   "ocrLanguage": {
     "title": "Препознавање текста (OCR)",
     "run": "Препознај",
@@ -334,13 +342,6 @@
       "chi_tra": "Кинески (традиционални)",
       "chi_tra+eng": "Кинески (традиционални) + енглески"
     }
-  },
-  "straighten": {
-    "title": "Исправи Страницу",
-    "apply": "Исправи",
-    "angleInfo": "Угао корекције: {{angle}}°",
-    "done": "Исправљено {{count}} страница за {{angle}}°",
-    "alreadyStraight": "Линија је већ права — корекција није потребна."
   },
   "shiftPage": {
     "title": "Shift Page",

@@ -60,6 +60,9 @@
   "viewBook": "Two Pages",
   "viewFacing": "Two Pages Side by Side",
   "filledAreaSketch": {
+    "undoPoint": "Hoàn tác điểm",
+    "undoPointTitle": "Xóa điểm cuối cùng (Backspace)",
+    "holesPhaseHint": "Nhấp để tạo lỗ mở · Enter hoặc chuột phải = xong",
     "line": "Đường thẳng",
     "lineTitle": "Đoạn thẳng",
     "arc": "Cung",
@@ -74,10 +77,7 @@
     "outerClosed": "Đường viền ngoài đã đóng ✓ · lỗ mở: {{count}}",
     "drawingHole": " · đang vẽ lỗ mở ({{count}} điểm)",
     "outerOpenClosable": "Đường viền ngoài đang mở — {{count}} điểm (có thể đóng)",
-    "outerOpen": "Đường viền ngoài đang mở — {{count}} điểm",
-    "undoPoint": "Hoàn tác điểm",
-    "undoPointTitle": "Xóa điểm cuối cùng (Backspace)",
-    "holesPhaseHint": "Nhấp để tạo lỗ mở · Enter hoặc chuột phải = xong"
+    "outerOpen": "Đường viền ngoài đang mở — {{count}} điểm"
   },
   "boxWidthAbbr": "R",
   "boxHeightAbbr": "C",

@@ -174,8 +174,8 @@
     "headerFooter": "Заглавље/подножје",
     "manageWatermarks": "Управљај воденим жиговима",
     "manage": "Управљај",
-    "ocr": "Recognize Text (OCR)",
     "straighten": "Исправи Страницу",
+    "ocr": "Recognize Text (OCR)",
     "shiftPage": "Помери страницу"
   },
   "help": {
