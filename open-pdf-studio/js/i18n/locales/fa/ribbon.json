@@ -175,7 +175,8 @@
     "manageWatermarks": "مدیریت واترمارک‌ها",
     "manage": "مدیریت",
     "ocr": "Recognize Text (OCR)",
-    "straighten": "صاف کردن صفحه"
+    "straighten": "صاف کردن صفحه",
+    "dewarp": "اصلاح خمیدگی صفحه"
   },
   "help": {
     "information": "اطلاعات",

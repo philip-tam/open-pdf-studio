@@ -341,5 +341,15 @@
     "angleInfo": "Pembe ya urekebishaji: {{angle}}°",
     "done": "Kurasa {{count}} zimenyooshwa kwa {{angle}}°",
     "alreadyStraight": "Mstari tayari umenyooka — hakuna marekebisho yanayohitajika."
+  },
+  "dewarp": {
+    "title": "Rekebisha Upinde wa Ukurasa",
+    "info": "Bofya vidokezo kando ya mstari ambao unapaswa kuwa wa moja kwa moja lakini umepinda (mf. karibu na mgongo wa kitabu), kisha bonyeza Enter. Ukurasa utachorwa upya kama picha — maandishi hayatachaguliwa tena isipokuwa uendeshe OCR baadaye.",
+    "apply": "Tumia",
+    "applying": "Inatumika…",
+    "previewLoading": "Inatengeneza hakikisho…",
+    "previewFailed": "Imeshindwa kutengeneza hakikisho.",
+    "done": "Ukurasa umerekebishwa",
+    "failed": "Imeshindwa — curve elekezi inahitaji angalau alama 3"
   }
 }

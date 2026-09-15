@@ -175,7 +175,8 @@
     "manageWatermarks": "Hantera vattenstamplar",
     "manage": "Hantera",
     "ocr": "Recognize Text (OCR)",
-    "straighten": "Räta Ut Sidan"
+    "straighten": "Räta Ut Sidan",
+    "dewarp": "Rätta Sidkrökning"
   },
   "help": {
     "information": "Information",

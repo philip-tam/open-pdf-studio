@@ -175,7 +175,8 @@
     "manageWatermarks": "Gestiona filigranes",
     "manage": "Gestiona",
     "ocr": "Recognize Text (OCR)",
-    "straighten": "Redreça la Pàgina"
+    "straighten": "Redreça la Pàgina",
+    "dewarp": "Corregeix la Corba"
   },
   "help": {
     "information": "Informació",

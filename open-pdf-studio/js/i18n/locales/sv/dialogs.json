@@ -341,5 +341,15 @@
     "angleInfo": "Korrigeringsvinkel: {{angle}}°",
     "done": "{{count}} sida/sidor rätade med {{angle}}°",
     "alreadyStraight": "Linjen är redan rak — ingen korrigering behövs."
+  },
+  "dewarp": {
+    "title": "Rätta Sidkrökning",
+    "info": "Klicka punkter längs en linje som borde vara rak men böjs (t.ex. nära bokens rygg), tryck sedan Enter. Sidan ritas om som en bild — text blir inte längre markerbar om du inte kör OCR efteråt.",
+    "apply": "Verkställ",
+    "applying": "Verkställer…",
+    "previewLoading": "Genererar förhandsvisning…",
+    "previewFailed": "Kunde inte generera förhandsvisning.",
+    "done": "Sidan rättad",
+    "failed": "Misslyckades — styrkurvan behöver minst 3 punkter"
   }
 }

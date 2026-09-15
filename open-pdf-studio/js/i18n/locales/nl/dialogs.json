@@ -499,5 +499,15 @@
     "angleInfo": "Correctiehoek: {{angle}}°",
     "done": "{{count}} pagina('s) rechtgezet met {{angle}}°",
     "alreadyStraight": "Lijn staat al recht — geen correctie nodig."
+  },
+  "dewarp": {
+    "title": "Pagina Ontkrommen",
+    "info": "Klik punten langs een lijn die recht zou moeten zijn maar krom loopt (bv. bij de boekrug), en druk op Enter. De pagina wordt als afbeelding opnieuw getekend — tekst wordt niet meer selecteerbaar tenzij u daarna OCR uitvoert.",
+    "apply": "Toepassen",
+    "applying": "Bezig…",
+    "previewLoading": "Voorbeeld wordt gegenereerd…",
+    "previewFailed": "Kon geen voorbeeld genereren.",
+    "done": "Pagina ontkromd",
+    "failed": "Ontkrommen mislukt — de hulplijn heeft minstens 3 punten nodig"
   }
 }

@@ -52,6 +52,8 @@ export const cropMarginsIcon = `<svg fill="none" stroke="currentColor" viewBox="
 
 export const straightenIcon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1" stroke-width="2" transform="rotate(-6 12 12)"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 17l18-4"/><circle cx="3" cy="17" r="1.4" fill="currentColor" stroke="none"/><circle cx="21" cy="13" r="1.4" fill="currentColor" stroke="none"/></svg>`;
 
+export const dewarpIcon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1" stroke-width="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 14c3-3 9-3 12 0"/><circle cx="6" cy="14" r="1.3" fill="currentColor" stroke="none"/><circle cx="18" cy="14" r="1.3" fill="currentColor" stroke="none"/></svg>`;
+
 export const resizePagesIcon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" stroke-width="2" fill="none"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h6m0 0v6m0-6l-7 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H4"/></svg>`;
 
 // --- Home tab: Navigate ---

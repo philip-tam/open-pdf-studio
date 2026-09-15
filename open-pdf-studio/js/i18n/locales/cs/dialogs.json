@@ -341,5 +341,15 @@
     "angleInfo": "Úhel korekce: {{angle}}°",
     "done": "Narovnáno {{count}} stránek o {{angle}}°",
     "alreadyStraight": "Čára je již rovná — korekce není potřeba."
+  },
+  "dewarp": {
+    "title": "Oprava Zakřivení Stránky",
+    "info": "Klikněte na body podél čáry, která by měla být rovná, ale je zakřivená (např. u hřbetu knihy), poté stiskněte Enter. Stránka bude překreslena jako obrázek — text pak nebude vybratelný, pokud následně nespustíte OCR.",
+    "apply": "Použít",
+    "applying": "Používá se…",
+    "previewLoading": "Vytváření náhledu…",
+    "previewFailed": "Náhled se nepodařilo vytvořit.",
+    "done": "Stránka opravena",
+    "failed": "Selhalo — vodicí křivka vyžaduje alespoň 3 body"
   }
 }

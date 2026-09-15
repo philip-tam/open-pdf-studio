@@ -175,7 +175,8 @@
     "manageWatermarks": "Upravljaj vodenim žigovima",
     "manage": "Upravljaj",
     "ocr": "Recognize Text (OCR)",
-    "straighten": "Ispravi Stranicu"
+    "straighten": "Ispravi Stranicu",
+    "dewarp": "Ispravak Zakrivljenosti"
   },
   "help": {
     "information": "Informacije",

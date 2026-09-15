@@ -341,5 +341,15 @@
     "angleInfo": "校正角度：{{angle}}°",
     "done": "已拉直 {{count}} 頁，角度 {{angle}}°",
     "alreadyStraight": "線條已經是直的，無需校正。"
+  },
+  "dewarp": {
+    "title": "頁面去彎曲",
+    "info": "沿著本應是直線卻彎曲的線（例如書脊附近）點擊多個點，然後按 Enter。頁面將重新繪製為圖片——之後文字將無法選取，除非您再執行 OCR。",
+    "apply": "套用",
+    "applying": "套用中…",
+    "previewLoading": "正在產生預覽…",
+    "previewFailed": "無法產生預覽。",
+    "done": "頁面已校正",
+    "failed": "校正失敗——引導曲線至少需要 3 個點"
   }
 }

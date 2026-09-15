@@ -341,5 +341,15 @@
     "angleInfo": "Kut korekcije: {{angle}}°",
     "done": "Ispravljeno {{count}} stranica za {{angle}}°",
     "alreadyStraight": "Linija je već ravna — korekcija nije potrebna."
+  },
+  "dewarp": {
+    "title": "Ispravak Zakrivljenosti",
+    "info": "Kliknite točke duž crte koja bi trebala biti ravna, ali je zakrivljena (npr. blizu hrpta knjige), zatim pritisnite Enter. Stranica će biti ponovno nacrtana kao slika — tekst više neće biti moguće označiti osim ako naknadno ne pokrenete OCR.",
+    "apply": "Primijeni",
+    "applying": "Primjenjuje se…",
+    "previewLoading": "Izrada pregleda…",
+    "previewFailed": "Pregled se nije mogao izraditi.",
+    "done": "Stranica ispravljena",
+    "failed": "Neuspjeh — vodeća krivulja zahtijeva najmanje 3 točke"
   }
 }

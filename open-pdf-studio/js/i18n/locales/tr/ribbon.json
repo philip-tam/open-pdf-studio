@@ -175,7 +175,8 @@
     "manageWatermarks": "Filigranları Yönet",
     "manage": "Yönet",
     "ocr": "Recognize Text (OCR)",
-    "straighten": "Sayfayı Düzelt"
+    "straighten": "Sayfayı Düzelt",
+    "dewarp": "Sayfa Eğrilik Düzeltme"
   },
   "help": {
     "information": "Bilgi",

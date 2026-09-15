@@ -175,7 +175,8 @@
     "manageWatermarks": "ניהול סימני מים",
     "manage": "ניהול",
     "ocr": "Recognize Text (OCR)",
-    "straighten": "יישור עמוד"
+    "straighten": "יישור עמוד",
+    "dewarp": "יישור עיקום עמוד"
   },
   "help": {
     "information": "מידע",

@@ -341,5 +341,15 @@
     "angleInfo": "Angle de correction : {{angle}}°",
     "done": "{{count}} page(s) redressée(s) de {{angle}}°",
     "alreadyStraight": "La ligne est déjà droite — aucune correction nécessaire."
+  },
+  "dewarp": {
+    "title": "Dévoiler la Page",
+    "info": "Cliquez des points le long d'une ligne qui devrait être droite mais qui courbe (par ex. près de la reliure), puis appuyez sur Entrée. La page est redessinée comme une image — le texte ne sera plus sélectionnable sauf si vous lancez l'OCR ensuite.",
+    "apply": "Appliquer",
+    "applying": "Application…",
+    "previewLoading": "Génération de l'aperçu…",
+    "previewFailed": "Impossible de générer un aperçu.",
+    "done": "Page corrigée",
+    "failed": "Échec — la courbe guide nécessite au moins 3 points"
   }
 }

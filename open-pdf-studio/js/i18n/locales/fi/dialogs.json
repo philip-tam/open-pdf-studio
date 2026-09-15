@@ -341,5 +341,15 @@
     "angleInfo": "Korjauskulma: {{angle}}°",
     "done": "{{count}} sivu(a) suoristettu {{angle}}°",
     "alreadyStraight": "Viiva on jo suora — korjausta ei tarvita."
+  },
+  "dewarp": {
+    "title": "Sivun Kaarevuuden Korjaus",
+    "info": "Napsauta pisteitä viivaa pitkin, jonka pitäisi olla suora mutta kaartuu (esim. kirjan selän lähellä), ja paina sitten Enter. Sivu piirretään uudelleen kuvana — teksti ei ole enää valittavissa, ellet suorita OCR:ää jälkeenpäin.",
+    "apply": "Käytä",
+    "applying": "Käytetään…",
+    "previewLoading": "Luodaan esikatselua…",
+    "previewFailed": "Esikatselua ei voitu luoda.",
+    "done": "Sivu korjattu",
+    "failed": "Epäonnistui — ohjauskäyrä tarvitsee vähintään 3 pistettä"
   }
 }

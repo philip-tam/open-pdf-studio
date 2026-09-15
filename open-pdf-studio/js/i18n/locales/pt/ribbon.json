@@ -175,7 +175,8 @@
     "manageWatermarks": "Gerenciar marcas d'água",
     "manage": "Gerenciar",
     "ocr": "Recognize Text (OCR)",
-    "straighten": "Endireitar Página"
+    "straighten": "Endireitar Página",
+    "dewarp": "Corrigir Curvatura"
   },
   "help": {
     "information": "Informações",

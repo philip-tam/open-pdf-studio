@@ -341,5 +341,15 @@
     "angleInfo": "Kąt korekty: {{angle}}°",
     "done": "Wyprostowano {{count}} stron(y) o {{angle}}°",
     "alreadyStraight": "Linia jest już prosta — korekta niepotrzebna."
+  },
+  "dewarp": {
+    "title": "Korekta Wypaczenia Strony",
+    "info": "Kliknij punkty wzdłuż linii, która powinna być prosta, ale jest wygięta (np. przy grzbiecie książki), a następnie naciśnij Enter. Strona zostanie ponownie narysowana jako obraz — tekst nie będzie już zaznaczalny, chyba że uruchomisz potem OCR.",
+    "apply": "Zastosuj",
+    "applying": "Stosowanie…",
+    "previewLoading": "Generowanie podglądu…",
+    "previewFailed": "Nie udało się wygenerować podglądu.",
+    "done": "Strona poprawiona",
+    "failed": "Niepowodzenie — krzywa prowadząca wymaga co najmniej 3 punktów"
   }
 }

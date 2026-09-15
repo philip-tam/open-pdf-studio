@@ -175,7 +175,8 @@
     "manageWatermarks": "Керування водяними знаками",
     "manage": "Керувати",
     "ocr": "Recognize Text (OCR)",
-    "straighten": "Вирівняти Сторінку"
+    "straighten": "Вирівняти Сторінку",
+    "dewarp": "Виправлення Викривлення"
   },
   "help": {
     "information": "Інформація",

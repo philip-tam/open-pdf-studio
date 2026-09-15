@@ -341,5 +341,15 @@
     "angleInfo": "Sudut koreksi: {{angle}}°",
     "done": "{{count}} halaman diluruskan sebesar {{angle}}°",
     "alreadyStraight": "Garis sudah lurus — tidak perlu koreksi."
+  },
+  "dewarp": {
+    "title": "Perbaiki Lengkungan Halaman",
+    "info": "Klik titik-titik di sepanjang garis yang seharusnya lurus tapi melengkung (mis. dekat jilid buku), lalu tekan Enter. Halaman akan digambar ulang sebagai gambar — teks tidak dapat dipilih lagi kecuali Anda menjalankan OCR setelahnya.",
+    "apply": "Terapkan",
+    "applying": "Menerapkan…",
+    "previewLoading": "Membuat pratinjau…",
+    "previewFailed": "Tidak dapat membuat pratinjau.",
+    "done": "Halaman diperbaiki",
+    "failed": "Gagal — kurva panduan memerlukan setidaknya 3 titik"
   }
 }

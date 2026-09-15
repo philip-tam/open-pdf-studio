@@ -270,7 +270,8 @@
     "reorderPages": "Reorder",
     "reorderPagesTitle": "Open thumbnails to drag pages into a new order",
     "ocr": "Recognize Text (OCR)",
-    "straighten": "Straighten Page"
+    "straighten": "Straighten Page",
+    "dewarp": "Page Dewarp"
   },
   "help": {
     "settings": "Settings",

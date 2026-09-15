@@ -341,5 +341,15 @@
     "angleInfo": "Sudut pembetulan: {{angle}}°",
     "done": "{{count}} halaman diluruskan sebanyak {{angle}}°",
     "alreadyStraight": "Garisan sudah lurus — tiada pembetulan diperlukan."
+  },
+  "dewarp": {
+    "title": "Betulkan Lengkung Halaman",
+    "info": "Klik titik di sepanjang garisan yang sepatutnya lurus tetapi melengkung (cth. berhampiran jilid buku), kemudian tekan Enter. Halaman akan dilukis semula sebagai imej — teks tidak lagi boleh dipilih melainkan anda menjalankan OCR selepas itu.",
+    "apply": "Guna Pakai",
+    "applying": "Sedang menggunakan…",
+    "previewLoading": "Menjana pratonton…",
+    "previewFailed": "Tidak dapat menjana pratonton.",
+    "done": "Halaman dibetulkan",
+    "failed": "Gagal — lengkung panduan memerlukan sekurang-kurangnya 3 titik"
   }
 }

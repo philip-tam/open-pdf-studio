@@ -175,7 +175,8 @@
     "manageWatermarks": "Управление водяными знаками",
     "manage": "Управление",
     "ocr": "Recognize Text (OCR)",
-    "straighten": "Выровнять Страницу"
+    "straighten": "Выровнять Страницу",
+    "dewarp": "Выпрямление Страницы"
   },
   "help": {
     "information": "Информация",

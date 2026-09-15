@@ -341,5 +341,15 @@
     "angleInfo": "Góc hiệu chỉnh: {{angle}}°",
     "done": "Đã làm thẳng {{count}} trang với góc {{angle}}°",
     "alreadyStraight": "Đường thẳng đã ngay ngắn — không cần hiệu chỉnh."
+  },
+  "dewarp": {
+    "title": "Chỉnh Cong Trang",
+    "info": "Nhấp các điểm dọc theo một đường lẽ ra phải thẳng nhưng bị cong (ví dụ gần gáy sách), sau đó nhấn Enter. Trang sẽ được vẽ lại dưới dạng hình ảnh — văn bản sẽ không thể chọn được trừ khi bạn chạy OCR sau đó.",
+    "apply": "Áp dụng",
+    "applying": "Đang áp dụng…",
+    "previewLoading": "Đang tạo bản xem trước…",
+    "previewFailed": "Không thể tạo bản xem trước.",
+    "done": "Đã chỉnh trang",
+    "failed": "Thất bại — đường cong hướng dẫn cần ít nhất 3 điểm"
   }
 }

@@ -498,5 +498,15 @@
     "angleInfo": "Correction angle: {{angle}}°",
     "done": "Straightened {{count}} page(s) by {{angle}}°",
     "alreadyStraight": "Line is already straight — no correction needed."
+  },
+  "dewarp": {
+    "title": "Page Dewarp",
+    "info": "Click points along a line that should be straight but curves (e.g. near a book's gutter), then press Enter. The page is redrawn as an image — text becomes non-selectable unless you run OCR afterward.",
+    "apply": "Apply",
+    "applying": "Applying…",
+    "previewLoading": "Generating preview…",
+    "previewFailed": "Couldn't generate a preview.",
+    "done": "Page dewarped",
+    "failed": "Dewarp failed — the guide curve needs at least 3 points"
   }
 }

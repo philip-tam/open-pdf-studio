@@ -175,7 +175,8 @@
     "manageWatermarks": "Quản lý Hình mờ",
     "manage": "Quản lý",
     "ocr": "Recognize Text (OCR)",
-    "straighten": "Làm Thẳng Trang"
+    "straighten": "Làm Thẳng Trang",
+    "dewarp": "Chỉnh Cong Trang"
   },
   "help": {
     "information": "Thông tin",

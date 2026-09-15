@@ -175,7 +175,8 @@
     "manageWatermarks": "Управљај воденим жиговима",
     "manage": "Управљај",
     "ocr": "Recognize Text (OCR)",
-    "straighten": "Исправи Страницу"
+    "straighten": "Исправи Страницу",
+    "dewarp": "Исправка Искривљења"
   },
   "help": {
     "information": "Информације",

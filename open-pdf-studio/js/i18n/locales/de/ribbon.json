@@ -175,7 +175,8 @@
     "manageWatermarks": "Wasserzeichen verwalten",
     "manage": "Verwalten",
     "ocr": "Recognize Text (OCR)",
-    "straighten": "Seite Begradigen"
+    "straighten": "Seite Begradigen",
+    "dewarp": "Seite Entzerren"
   },
   "help": {
     "information": "Informationen",

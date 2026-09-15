@@ -175,7 +175,8 @@
     "manageWatermarks": "Administrer vannmerker",
     "manage": "Administrer",
     "ocr": "Recognize Text (OCR)",
-    "straighten": "Rett Opp Siden"
+    "straighten": "Rett Opp Siden",
+    "dewarp": "Rett Sidekrumning"
   },
   "help": {
     "information": "Informasjon",

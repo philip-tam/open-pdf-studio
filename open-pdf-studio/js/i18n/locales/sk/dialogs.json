@@ -341,5 +341,15 @@
     "angleInfo": "Uhol korekcie: {{angle}}°",
     "done": "Narovnaných {{count}} strán o {{angle}}°",
     "alreadyStraight": "Čiara je už rovná — korekcia nie je potrebná."
+  },
+  "dewarp": {
+    "title": "Oprava Zakrivenia Stránky",
+    "info": "Kliknite na body pozdĺž čiary, ktorá by mala byť rovná, ale je zakrivená (napr. pri chrbte knihy), potom stlačte Enter. Stránka sa prekreslí ako obrázok — text potom nebude vybrateľný, pokiaľ následne nespustíte OCR.",
+    "apply": "Použiť",
+    "applying": "Používa sa…",
+    "previewLoading": "Vytvára sa náhľad…",
+    "previewFailed": "Náhľad sa nepodarilo vytvoriť.",
+    "done": "Stránka opravená",
+    "failed": "Zlyhalo — vodiaca krivka vyžaduje aspoň 3 body"
   }
 }

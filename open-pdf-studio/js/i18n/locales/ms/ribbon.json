@@ -175,7 +175,8 @@
     "manageWatermarks": "Urus Tera Air",
     "manage": "Urus",
     "ocr": "Recognize Text (OCR)",
-    "straighten": "Luruskan Halaman"
+    "straighten": "Luruskan Halaman",
+    "dewarp": "Betulkan Lengkung Halaman"
   },
   "help": {
     "information": "Maklumat",

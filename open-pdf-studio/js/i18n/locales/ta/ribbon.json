@@ -175,7 +175,8 @@
     "manageWatermarks": "நீர்முத்திரைகளை நிர்வகி",
     "manage": "நிர்வகி",
     "ocr": "Recognize Text (OCR)",
-    "straighten": "பக்கத்தை நேராக்கு"
+    "straighten": "பக்கத்தை நேராக்கு",
+    "dewarp": "பக்க வளைவு திருத்தம்"
   },
   "help": {
     "information": "தகவல்",

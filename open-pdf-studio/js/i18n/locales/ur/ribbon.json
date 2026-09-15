@@ -175,7 +175,8 @@
     "manageWatermarks": "واٹر مارکس کا انتظام",
     "manage": "انتظام",
     "ocr": "Recognize Text (OCR)",
-    "straighten": "صفحہ سیدھا کریں"
+    "straighten": "صفحہ سیدھا کریں",
+    "dewarp": "صفحہ کی خمیدگی درست کریں"
   },
   "help": {
     "information": "معلومات",

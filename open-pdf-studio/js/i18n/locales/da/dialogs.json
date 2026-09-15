@@ -341,5 +341,15 @@
     "angleInfo": "Korrektionsvinkel: {{angle}}°",
     "done": "{{count}} side(r) rettet med {{angle}}°",
     "alreadyStraight": "Linjen er allerede lige — ingen korrektion nødvendig."
+  },
+  "dewarp": {
+    "title": "Ret Sidekrumning",
+    "info": "Klik punkter langs en linje, der burde være lige, men bugter sig (f.eks. nær bogens ryg), og tryk derefter Enter. Siden tegnes om som et billede — tekst bliver ikke længere markerbar, medmindre du kører OCR bagefter.",
+    "apply": "Anvend",
+    "applying": "Anvender…",
+    "previewLoading": "Genererer forhåndsvisning…",
+    "previewFailed": "Kunne ikke generere forhåndsvisning.",
+    "done": "Side rettet",
+    "failed": "Mislykkedes — styrekurven kræver mindst 3 punkter"
   }
 }

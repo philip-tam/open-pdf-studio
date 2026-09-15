@@ -341,5 +341,15 @@
     "angleInfo": "Düzeltme açısı: {{angle}}°",
     "done": "{{count}} sayfa {{angle}}° düzeltildi",
     "alreadyStraight": "Çizgi zaten düz — düzeltmeye gerek yok."
+  },
+  "dewarp": {
+    "title": "Sayfa Eğrilik Düzeltme",
+    "info": "Düz olması gereken ama eğrilen bir çizgi boyunca (örn. kitap ciltlemesine yakın) noktalar tıklayın, sonra Enter'a basın. Sayfa bir görüntü olarak yeniden çizilir — daha sonra OCR çalıştırmadıkça metin seçilemez hale gelir.",
+    "apply": "Uygula",
+    "applying": "Uygulanıyor…",
+    "previewLoading": "Önizleme oluşturuluyor…",
+    "previewFailed": "Önizleme oluşturulamadı.",
+    "done": "Sayfa düzeltildi",
+    "failed": "Başarısız — kılavuz eğri en az 3 nokta gerektirir"
   }
 }

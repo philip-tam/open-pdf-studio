@@ -341,5 +341,15 @@
     "angleInfo": "Ángulo de corrección: {{angle}}°",
     "done": "{{count}} página(s) enderezada(s) {{angle}}°",
     "alreadyStraight": "La línea ya está recta — no se necesita corrección."
+  },
+  "dewarp": {
+    "title": "Corregir Curvatura",
+    "info": "Haga clic en puntos a lo largo de una línea que debería ser recta pero se curva (p. ej. cerca del lomo del libro) y pulse Enter. La página se vuelve a dibujar como una imagen — el texto dejará de ser seleccionable a menos que ejecute OCR después.",
+    "apply": "Aplicar",
+    "applying": "Aplicando…",
+    "previewLoading": "Generando vista previa…",
+    "previewFailed": "No se pudo generar la vista previa.",
+    "done": "Página corregida",
+    "failed": "Fallo — la curva guía necesita al menos 3 puntos"
   }
 }
