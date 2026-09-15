@@ -319,6 +319,8 @@
     "vectorSnippetPasteTitle": "काटे गए क्षेत्र को यहाँ चिपकाएँ, वेक्टर डेटा बनाए रखते हुए",
     "symbolScale": "स्केल",
     "symbolScaleTitle": "वह आकार जिस पर नया प्रतीक रखा जाता है",
-    "symbolScaleCustom": "कस्टम स्केल"
+    "symbolScaleCustom": "कस्टम स्केल",
+    "wipeoutRect": "वाइपआउट (आयत)",
+    "wipeoutFreeform": "वाइपआउट (मुक्त आकार)"
   }
 }

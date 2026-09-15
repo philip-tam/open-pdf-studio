@@ -319,6 +319,8 @@
     "vectorSnippetPasteTitle": "Tampal kawasan yang dipotong di sini, dengan mengekalkan data vektor",
     "symbolScale": "Skala",
     "symbolScaleTitle": "Saiz simbol baharu diletakkan",
-    "symbolScaleCustom": "Skala tersuai"
+    "symbolScaleCustom": "Skala tersuai",
+    "wipeoutRect": "Padam Putih (Segi Empat)",
+    "wipeoutFreeform": "Padam Putih (Bebas)"
   }
 }

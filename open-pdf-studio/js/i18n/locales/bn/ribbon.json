@@ -319,6 +319,8 @@
     "vectorSnippetPasteTitle": "কাটা অংশটি এখানে পেস্ট করুন, ভেক্টর ডেটা অক্ষুণ্ণ রেখে",
     "symbolScale": "স্কেল",
     "symbolScaleTitle": "নতুন প্রতীক যে আকারে বসানো হয়",
-    "symbolScaleCustom": "কাস্টম স্কেল"
+    "symbolScaleCustom": "কাস্টম স্কেল",
+    "wipeoutRect": "ওয়াইপআউট (আয়ত)",
+    "wipeoutFreeform": "ওয়াইপআউট (মুক্ত আকার)"
   }
 }

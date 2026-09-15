@@ -5,6 +5,7 @@ import RibbonButton from './RibbonButton.jsx';
 import RibbonButtonStack from './RibbonButtonStack.jsx';
 import { setTool } from '../../../tools/manager.js';
 import { startRemoveImageTool } from '../../../tools/tools/remove-image-tool.js';
+import { startWipeoutFreeform } from '../../../tools/wipeout-freeform.js';
 import { state, getActiveDocument, noPdf } from '../../../core/state.js';
 import { savePreferences } from '../../../core/preferences.js';
 import { isPdfAReadOnly } from '../../../pdf/loader.js';
@@ -24,7 +25,7 @@ import {
   measureDistanceIcon, measureAngleIcon, measurePerimeterIcon, measureAreaIcon,
   alignLeftIcon, alignTopIcon, alignBottomIcon,
   flipHIcon, flipVIcon, rotateCwIcon,
-  clearAllIcon
+  clearAllIcon, wipeoutRectIcon, wipeoutFreeformIcon
 } from '../../data/ribbonIcons.js';
 import { useTranslation } from '../../../i18n/useTranslation.js';
 import { createFullPageScaleRegion, invalidateScaleRegionCache } from '../../../annotations/scale-region.js';
@@ -212,6 +213,10 @@ export function DrawingGroups() {
             disabled={ro()} active={state.currentTool === 'image'} onClick={() => setTool('image')} />
           <RibbonButton size="small" id="dr-remove-image" title={t('drawing.removeImage')} icon={removeImageIcon}
             disabled={ro()} active={state.currentTool === 'removeImage'} onClick={() => startRemoveImageTool()} />
+          <RibbonButton size="small" id="dr-wipeout-rect" title={t('drawing.wipeoutRect')} icon={wipeoutRectIcon}
+            disabled={ro()} active={state.currentTool === 'mask'} onClick={() => setTool('mask')} />
+          <RibbonButton size="small" id="dr-wipeout-freeform" title={t('drawing.wipeoutFreeform')} icon={wipeoutFreeformIcon}
+            disabled={ro()} onClick={() => startWipeoutFreeform()} />
         </RibbonGroup>
 
         {/* LIJN-OPTIES — alleen zichtbaar bij het lijn-gereedschap. Bevat het

@@ -319,6 +319,8 @@
     "vectorSnippetPasteTitle": "Kesilen alanı vektör verilerini koruyarak buraya yapıştırın",
     "symbolScale": "Ölçek",
     "symbolScaleTitle": "Yeni bir sembolün yerleştirildiği boyut",
-    "symbolScaleCustom": "Özel ölçek"
+    "symbolScaleCustom": "Özel ölçek",
+    "wipeoutRect": "Beyazlatma (Dikdörtgen)",
+    "wipeoutFreeform": "Beyazlatma (Serbest Form)"
   }
 }

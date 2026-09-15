@@ -319,6 +319,8 @@
     "vectorSnippetPasteTitle": "Поставете изрязаната област тук, като запазите векторните данни",
     "symbolScale": "Мащаб",
     "symbolScaleTitle": "Размер, в който се поставя нов символ",
-    "symbolScaleCustom": "Потребителски мащаб"
+    "symbolScaleCustom": "Потребителски мащаб",
+    "wipeoutRect": "Избеляване (Правоъгълник)",
+    "wipeoutFreeform": "Избеляване (Свободна форма)"
   }
 }

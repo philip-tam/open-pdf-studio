@@ -319,6 +319,8 @@
     "vectorSnippetPasteTitle": "Zalijepite ovdje izrezano područje uz očuvanje vektorskih podataka",
     "symbolScale": "Mjerilo",
     "symbolScaleTitle": "Veličina u kojoj se postavlja novi simbol",
-    "symbolScaleCustom": "Prilagođeno mjerilo"
+    "symbolScaleCustom": "Prilagođeno mjerilo",
+    "wipeoutRect": "Izbjeljivanje (Pravokutnik)",
+    "wipeoutFreeform": "Izbjeljivanje (Slobodni oblik)"
   }
 }

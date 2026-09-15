@@ -319,6 +319,8 @@
     "vectorSnippetPasteTitle": "Dán vùng đã cắt vào đây, giữ nguyên dữ liệu vector",
     "symbolScale": "Tỷ lệ",
     "symbolScaleTitle": "Kích thước khi đặt một ký hiệu mới",
-    "symbolScaleCustom": "Tỷ lệ tùy chỉnh"
+    "symbolScaleCustom": "Tỷ lệ tùy chỉnh",
+    "wipeoutRect": "Xóa trắng (Hình chữ nhật)",
+    "wipeoutFreeform": "Xóa trắng (Tự do)"
   }
 }

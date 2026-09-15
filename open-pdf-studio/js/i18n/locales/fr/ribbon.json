@@ -319,6 +319,8 @@
     "vectorSnippetPasteTitle": "Coller ici la zone découpée en conservant ses données vectorielles",
     "symbolScale": "Échelle",
     "symbolScaleTitle": "Taille à laquelle un nouveau symbole est placé",
-    "symbolScaleCustom": "Échelle personnalisée"
+    "symbolScaleCustom": "Échelle personnalisée",
+    "wipeoutRect": "Correcteur (Rectangle)",
+    "wipeoutFreeform": "Correcteur (Forme libre)"
   }
 }
