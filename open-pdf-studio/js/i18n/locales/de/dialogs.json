@@ -350,6 +350,7 @@
     "previewLoading": "Vorschau wird erstellt…",
     "previewFailed": "Vorschau konnte nicht erstellt werden.",
     "done": "Seite entzerrt",
-    "failed": "Entzerren fehlgeschlagen — die Hilfslinie braucht mindestens 3 Punkte"
+    "failed": "Entzerren fehlgeschlagen — die Hilfslinie braucht mindestens 3 Punkte",
+    "curveCorrection": "Kurve {{index}}: korrigiert bis zu {{mm}} mm"
   }
 }

@@ -350,6 +350,7 @@
     "previewLoading": "미리보기 생성 중…",
     "previewFailed": "미리보기를 생성하지 못했습니다.",
     "done": "페이지 보정 완료",
-    "failed": "실패 — 안내 곡선에는 최소 3개의 점이 필요합니다"
+    "failed": "실패 — 안내 곡선에는 최소 3개의 점이 필요합니다",
+    "curveCorrection": "곡선 {{index}}: 최대 {{mm}}mm 보정"
   }
 }

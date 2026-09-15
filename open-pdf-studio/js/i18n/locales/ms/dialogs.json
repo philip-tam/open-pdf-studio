@@ -350,6 +350,7 @@
     "previewLoading": "Menjana pratonton…",
     "previewFailed": "Tidak dapat menjana pratonton.",
     "done": "Halaman dibetulkan",
-    "failed": "Gagal — lengkung panduan memerlukan sekurang-kurangnya 3 titik"
+    "failed": "Gagal — lengkung panduan memerlukan sekurang-kurangnya 3 titik",
+    "curveCorrection": "Lengkung {{index}}: membetulkan sehingga {{mm}} mm"
   }
 }

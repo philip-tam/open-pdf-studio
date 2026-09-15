@@ -350,6 +350,7 @@
     "previewLoading": "Membuat pratinjau…",
     "previewFailed": "Tidak dapat membuat pratinjau.",
     "done": "Halaman diperbaiki",
-    "failed": "Gagal — kurva panduan memerlukan setidaknya 3 titik"
+    "failed": "Gagal — kurva panduan memerlukan setidaknya 3 titik",
+    "curveCorrection": "Kurva {{index}}: memperbaiki hingga {{mm}} mm"
   }
 }

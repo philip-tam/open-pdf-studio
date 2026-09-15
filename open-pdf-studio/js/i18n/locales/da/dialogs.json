@@ -350,6 +350,7 @@
     "previewLoading": "Genererer forhåndsvisning…",
     "previewFailed": "Kunne ikke generere forhåndsvisning.",
     "done": "Side rettet",
-    "failed": "Mislykkedes — styrekurven kræver mindst 3 punkter"
+    "failed": "Mislykkedes — styrekurven kræver mindst 3 punkter",
+    "curveCorrection": "Kurve {{index}}: retter op til {{mm}} mm"
   }
 }

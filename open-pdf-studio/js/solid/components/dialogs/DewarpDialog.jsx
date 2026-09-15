@@ -1,28 +1,32 @@
-import { createSignal, onMount, Show } from 'solid-js';
+import { createSignal, onMount, Show, For } from 'solid-js';
 import Dialog from '../Dialog.jsx';
 import { closeDialog } from '../../stores/dialogStore.js';
 import { useTranslation } from '../../../i18n/useTranslation.js';
 import { updateStatusMessage } from '../../../ui/chrome/status-bar.js';
 
 const PREVIEW_MAX_WIDTH = 460;
+const MM_TO_POINTS = 72 / 25.4;
 
 export default function DewarpDialog(props) {
   const { t } = useTranslation('dialogs');
   const { t: tCommon } = useTranslation('common');
 
-  const { points } = props.data || {};
+  const { curves } = props.data || {};
 
   let previewCanvasRef;
   const [previewReady, setPreviewReady] = createSignal(false);
   const [previewFailed, setPreviewFailed] = createSignal(false);
   const [applying, setApplying] = createSignal(false);
+  const [sagsMm, setSagsMm] = createSignal([]);
 
   const close = () => closeDialog('dewarp-page');
 
   onMount(async () => {
     try {
-      const { renderDewarpPreview } = await import('../../../pdf/dewarp.js');
-      const warped = await renderDewarpPreview(points);
+      const { renderDewarpPreview, computeMaxSag } = await import('../../../pdf/dewarp.js');
+      setSagsMm((curves || []).map((pts) => computeMaxSag(pts) / MM_TO_POINTS));
+
+      const warped = await renderDewarpPreview(curves);
       if (!warped || !previewCanvasRef) {
         setPreviewFailed(true);
         return;
@@ -48,7 +52,7 @@ export default function DewarpDialog(props) {
     setApplying(true);
     try {
       const { dewarpPage } = await import('../../../pdf/dewarp.js');
-      const result = await dewarpPage(points);
+      const result = await dewarpPage(curves);
       updateStatusMessage(
         result.warped ? t('dewarp.done') : t('dewarp.failed')
       );
@@ -82,6 +86,13 @@ export default function DewarpDialog(props) {
     >
       <div class="crop-margins-form">
         <div class="crop-margins-info">{t('dewarp.info')}</div>
+        <div class="crop-margins-info">
+          <For each={sagsMm()}>
+            {(mm, i) => (
+              <div>{t('dewarp.curveCorrection', { index: i() + 1, mm: mm.toFixed(1) })}</div>
+            )}
+          </For>
+        </div>
         <div style={{
           display: 'flex',
           'justify-content': 'center',

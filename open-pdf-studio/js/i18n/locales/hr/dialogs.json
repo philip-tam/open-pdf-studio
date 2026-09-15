@@ -350,6 +350,7 @@
     "previewLoading": "Izrada pregleda…",
     "previewFailed": "Pregled se nije mogao izraditi.",
     "done": "Stranica ispravljena",
-    "failed": "Neuspjeh — vodeća krivulja zahtijeva najmanje 3 točke"
+    "failed": "Neuspjeh — vodeća krivulja zahtijeva najmanje 3 točke",
+    "curveCorrection": "Krivulja {{index}}: ispravak do {{mm}} mm"
   }
 }

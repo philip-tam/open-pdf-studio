@@ -350,6 +350,7 @@
     "previewLoading": "Vytváření náhledu…",
     "previewFailed": "Náhled se nepodařilo vytvořit.",
     "done": "Stránka opravena",
-    "failed": "Selhalo — vodicí křivka vyžaduje alespoň 3 body"
+    "failed": "Selhalo — vodicí křivka vyžaduje alespoň 3 body",
+    "curveCorrection": "Křivka {{index}}: oprava až {{mm}} mm"
   }
 }

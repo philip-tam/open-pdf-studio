@@ -350,6 +350,7 @@
     "previewLoading": "正在產生預覽…",
     "previewFailed": "無法產生預覽。",
     "done": "頁面已校正",
-    "failed": "校正失敗——引導曲線至少需要 3 個點"
+    "failed": "校正失敗——引導曲線至少需要 3 個點",
+    "curveCorrection": "曲線 {{index}}：最多校正 {{mm}} mm"
   }
 }

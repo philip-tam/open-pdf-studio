@@ -350,6 +350,7 @@
     "previewLoading": "Generant vista prèvia…",
     "previewFailed": "No s'ha pogut generar la vista prèvia.",
     "done": "Pàgina corregida",
-    "failed": "Ha fallat — la corba guia necessita almenys 3 punts"
+    "failed": "Ha fallat — la corba guia necessita almenys 3 punts",
+    "curveCorrection": "Corba {{index}}: corregeix fins a {{mm}} mm"
   }
 }

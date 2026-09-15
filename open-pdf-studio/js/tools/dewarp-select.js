@@ -1,10 +1,10 @@
-// Page Dewarp tool: let the user click a series of points along a text line
-// that should be straight but curves (book-gutter warp), then non-linearly
-// warp the page so that curve becomes level. Mirrors straighten-select.js's
-// mount/confirm/cancel flow, but captures a multi-point curve instead of a
-// single dragged line — confirming opens a preview dialog rather than
-// applying directly, since a bad guide curve is much harder to "eyeball"
-// correctly than a straight one.
+// Page Dewarp tool: let the user click a series of points along one or more
+// text lines that should be straight but curve (book-gutter warp), then
+// non-linearly warp the page so those curves become level. Mirrors
+// straighten-select.js's mount/confirm/cancel flow, but captures multi-
+// point curves instead of a single dragged line — confirming opens a
+// preview dialog rather than applying directly, since a bad guide curve is
+// much harder to "eyeball" correctly than a straight one.
 import { getActiveDocument } from '../core/state.js';
 import { updateStatusMessage } from '../ui/chrome/status-bar.js';
 import { render } from 'solid-js/web';
@@ -49,8 +49,8 @@ function pointToAppSpace(x, y, container) {
 
 /**
  * Start the Page Dewarp flow on the current page: click points along a
- * curved guide line, Enter to confirm and open the preview dialog, Escape
- * to cancel.
+ * curved guide line (optionally more than one — see DewarpOverlay), Enter
+ * to confirm and open the preview dialog, Escape to cancel.
  */
 export function startDewarpPage() {
   const doc = getActiveDocument();
@@ -77,16 +77,16 @@ export function startDewarpPage() {
   disposeOverlay = render(
     () =>
       DewarpOverlay({
-        onConfirm: (points) => {
-          const appPoints = points
-            .map((p) => pointToAppSpace(p.x, p.y, container))
-            .filter(Boolean);
+        onConfirm: (curves) => {
+          const appCurves = curves
+            .map((pts) => pts.map((p) => pointToAppSpace(p.x, p.y, container)).filter(Boolean))
+            .filter((pts) => pts.length >= 3);
           unmountOverlay();
-          if (appPoints.length < 3) {
+          if (appCurves.length === 0) {
             updateStatusMessage('Dewarp cancelled');
             return;
           }
-          openDialog('dewarp-page', { points: appPoints });
+          openDialog('dewarp-page', { curves: appCurves });
         },
         onCancel: () => {
           updateStatusMessage('Dewarp cancelled');

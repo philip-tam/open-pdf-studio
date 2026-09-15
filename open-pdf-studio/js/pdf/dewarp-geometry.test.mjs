@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { buildDewarpField } from './dewarp-geometry.js';
+import { buildDewarpField, computeMaxSag, buildMultiCurveDewarpField } from './dewarp-geometry.js';
 
 test('a straight curve produces near-zero displacement everywhere', () => {
   const points = [{ x: 0, y: 100 }, { x: 100, y: 100 }, { x: 200, y: 100 }];
@@ -87,4 +87,41 @@ test('a curve with zero influenceHeight applies full, unfaded correction (still 
   const field = buildDewarpField(points, 0);
   // Directly above/below the curve itself (within its x-range), no y-falloff.
   assert.equal(field.displacementAt(100, 9999), field.displacementAt(100, 150));
+});
+
+test('computeMaxSag reports ~0 for a straight curve and the real peak sag for a bowed one', () => {
+  const straight = [{ x: 0, y: 100 }, { x: 100, y: 100 }, { x: 200, y: 100 }];
+  assert.ok(computeMaxSag(straight) < 1e-6);
+
+  // Endpoints at y=100, middle at y=150: peak sag from the target (100) is 50.
+  const bowed = [{ x: 0, y: 100 }, { x: 100, y: 150 }, { x: 200, y: 100 }];
+  const sag = computeMaxSag(bowed);
+  assert.ok(Math.abs(sag - 50) < 1, `expected ~50, got ${sag}`);
+});
+
+test('computeMaxSag on fewer than 2 points is 0, not a crash', () => {
+  assert.equal(computeMaxSag([]), 0);
+  assert.equal(computeMaxSag([{ x: 0, y: 0 }]), 0);
+});
+
+test('buildMultiCurveDewarpField: each curve corrects its own region independently', () => {
+  const topCurve = [{ x: 0, y: 50 }, { x: 100, y: 80 }, { x: 200, y: 50 }];
+  const bottomCurve = [{ x: 0, y: 700 }, { x: 100, y: 670 }, { x: 200, y: 700 }];
+  // A finite influence distance so each curve's correction localizes near
+  // its own region instead of reaching the whole page (which is the whole
+  // point of drawing two curves instead of one).
+  const field = buildMultiCurveDewarpField([topCurve, bottomCurve], 100);
+  const atTop = field.displacementAt(100, 80);
+  const atBottom = field.displacementAt(100, 670);
+  assert.ok(atTop < -1e-6, `expected a real correction near the top curve, got ${atTop}`);
+  assert.ok(atBottom > 1e-6, `expected a real correction near the bottom curve, got ${atBottom}`);
+  // Midway between them (400), both curves' influence has faded out.
+  assert.ok(Math.abs(field.displacementAt(100, 400)) < 1e-6);
+  // Far off to the side must not throw and must return a finite number.
+  assert.ok(Number.isFinite(field.displacementAt(1000, 400)));
+});
+
+test('buildMultiCurveDewarpField with no curves returns null', () => {
+  assert.equal(buildMultiCurveDewarpField([], 0), null);
+  assert.equal(buildMultiCurveDewarpField([[]], 0), null);
 });

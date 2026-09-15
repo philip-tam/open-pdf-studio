@@ -350,6 +350,7 @@
     "previewLoading": "Se generează previzualizarea…",
     "previewFailed": "Previzualizarea nu a putut fi generată.",
     "done": "Pagină corectată",
-    "failed": "Eșuat — curba ghid necesită cel puțin 3 puncte"
+    "failed": "Eșuat — curba ghid necesită cel puțin 3 puncte",
+    "curveCorrection": "Curba {{index}}: corectează până la {{mm}} mm"
   }
 }

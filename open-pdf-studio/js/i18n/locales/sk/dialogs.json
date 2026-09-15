@@ -350,6 +350,7 @@
     "previewLoading": "Vytvára sa náhľad…",
     "previewFailed": "Náhľad sa nepodarilo vytvoriť.",
     "done": "Stránka opravená",
-    "failed": "Zlyhalo — vodiaca krivka vyžaduje aspoň 3 body"
+    "failed": "Zlyhalo — vodiaca krivka vyžaduje aspoň 3 body",
+    "curveCorrection": "Krivka {{index}}: oprava až {{mm}} mm"
   }
 }

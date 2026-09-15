@@ -350,6 +350,7 @@
     "previewLoading": "Đang tạo bản xem trước…",
     "previewFailed": "Không thể tạo bản xem trước.",
     "done": "Đã chỉnh trang",
-    "failed": "Thất bại — đường cong hướng dẫn cần ít nhất 3 điểm"
+    "failed": "Thất bại — đường cong hướng dẫn cần ít nhất 3 điểm",
+    "curveCorrection": "Đường cong {{index}}: chỉnh tới {{mm}} mm"
   }
 }

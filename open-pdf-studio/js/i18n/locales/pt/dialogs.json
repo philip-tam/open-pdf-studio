@@ -350,6 +350,7 @@
     "previewLoading": "Gerando pré-visualização…",
     "previewFailed": "Não foi possível gerar a pré-visualização.",
     "done": "Página corrigida",
-    "failed": "Falha — a curva-guia precisa de pelo menos 3 pontos"
+    "failed": "Falha — a curva-guia precisa de pelo menos 3 pontos",
+    "curveCorrection": "Curva {{index}}: corrige até {{mm}} mm"
   }
 }

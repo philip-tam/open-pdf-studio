@@ -507,6 +507,7 @@
     "previewLoading": "Generating preview…",
     "previewFailed": "Couldn't generate a preview.",
     "done": "Page dewarped",
-    "failed": "Dewarp failed — the guide curve needs at least 3 points"
+    "failed": "Dewarp failed — the guide curve needs at least 3 points",
+    "curveCorrection": "Curve {{index}}: correcting up to {{mm}} mm"
   }
 }

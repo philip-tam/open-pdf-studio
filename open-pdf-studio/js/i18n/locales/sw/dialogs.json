@@ -350,6 +350,7 @@
     "previewLoading": "Inatengeneza hakikisho…",
     "previewFailed": "Imeshindwa kutengeneza hakikisho.",
     "done": "Ukurasa umerekebishwa",
-    "failed": "Imeshindwa — curve elekezi inahitaji angalau alama 3"
+    "failed": "Imeshindwa — curve elekezi inahitaji angalau alama 3",
+    "curveCorrection": "Curve {{index}}: inarekebisha hadi {{mm}} mm"
   }
 }

@@ -350,6 +350,7 @@
     "previewLoading": "Generazione anteprima…",
     "previewFailed": "Impossibile generare l'anteprima.",
     "done": "Pagina corretta",
-    "failed": "Operazione fallita — la curva guida richiede almeno 3 punti"
+    "failed": "Operazione fallita — la curva guida richiede almeno 3 punti",
+    "curveCorrection": "Curva {{index}}: corregge fino a {{mm}} mm"
   }
 }

@@ -121,3 +121,54 @@ export function buildDewarpField(points, influenceHeight) {
 
   return { targetY, curveYAt, displacementAt };
 }
+
+/**
+ * How much a single guide curve is actually bowing — the simplest possible
+ * readout of "how curved is this," shown to the user (converted to mm by
+ * the caller) so drawing a curve gives immediate quantitative feedback, the
+ * same way Straighten Page shows its computed angle. The peak distance
+ * between the curve and its own target (straightened) height, in the same
+ * units as the curve's points.
+ * @param {{x:number,y:number}[]} points
+ * @returns {number}
+ */
+export function computeMaxSag(points) {
+  if (!points || points.length < 2) return 0;
+  const samples = sampleSplineArrow(points, 24);
+  const targetY = (points[0].y + points[points.length - 1].y) / 2;
+  let max = 0;
+  for (const s of samples) {
+    const d = Math.abs(s.y - targetY);
+    if (d > max) max = d;
+  }
+  return max;
+}
+
+/**
+ * Combine multiple independent guide curves (e.g. one near the top of the
+ * page, one near the bottom — real book-gutter warp often isn't symmetric
+ * top-to-bottom, so two separately-drawn curves are more direct than one
+ * curve plus an abstract influence-distance knob) into a single field by
+ * summing each curve's own contribution. Curves are expected to be
+ * spatially separated (different y ranges) with reasonable influence
+ * distances, so overlap — and therefore double-correction — stays small in
+ * practice.
+ * @param {{x:number,y:number}[][]} curves - one point-array per guide curve.
+ * @param {number} influenceHeight - passed through to buildDewarpField for
+ *   each curve (symmetric above/below; see buildDewarpField's own docs for
+ *   the asymmetric-object form, still supported per curve if needed later).
+ * @returns {null | { displacementAt: (x: number, y: number) => number }}
+ */
+export function buildMultiCurveDewarpField(curves, influenceHeight) {
+  const fields = (curves || [])
+    .map((pts) => buildDewarpField(pts, influenceHeight))
+    .filter(Boolean);
+  if (fields.length === 0) return null;
+  return {
+    displacementAt(x, y) {
+      let sum = 0;
+      for (const f of fields) sum += f.displacementAt(x, y);
+      return sum;
+    },
+  };
+}

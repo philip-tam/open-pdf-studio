@@ -350,6 +350,7 @@
     "previewLoading": "Generowanie podglądu…",
     "previewFailed": "Nie udało się wygenerować podglądu.",
     "done": "Strona poprawiona",
-    "failed": "Niepowodzenie — krzywa prowadząca wymaga co najmniej 3 punktów"
+    "failed": "Niepowodzenie — krzywa prowadząca wymaga co najmniej 3 punktów",
+    "curveCorrection": "Krzywa {{index}}: korekta do {{mm}} mm"
   }
 }

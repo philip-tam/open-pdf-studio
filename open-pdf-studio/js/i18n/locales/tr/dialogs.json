@@ -350,6 +350,7 @@
     "previewLoading": "Önizleme oluşturuluyor…",
     "previewFailed": "Önizleme oluşturulamadı.",
     "done": "Sayfa düzeltildi",
-    "failed": "Başarısız — kılavuz eğri en az 3 nokta gerektirir"
+    "failed": "Başarısız — kılavuz eğri en az 3 nokta gerektirir",
+    "curveCorrection": "Eğri {{index}}: en fazla {{mm}} mm düzeltme"
   }
 }

@@ -350,6 +350,7 @@
     "previewLoading": "Génération de l'aperçu…",
     "previewFailed": "Impossible de générer un aperçu.",
     "done": "Page corrigée",
-    "failed": "Échec — la courbe guide nécessite au moins 3 points"
+    "failed": "Échec — la courbe guide nécessite au moins 3 points",
+    "curveCorrection": "Courbe {{index}} : correction jusqu'à {{mm}} mm"
   }
 }

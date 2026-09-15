@@ -350,6 +350,7 @@
     "previewLoading": "Előnézet készítése…",
     "previewFailed": "Nem sikerült előnézetet készíteni.",
     "done": "Oldal javítva",
-    "failed": "Sikertelen — a vezetőgörbéhez legalább 3 pont szükséges"
+    "failed": "Sikertelen — a vezetőgörbéhez legalább 3 pont szükséges",
+    "curveCorrection": "Görbe {{index}}: legfeljebb {{mm}} mm javítás"
   }
 }

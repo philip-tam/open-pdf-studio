@@ -508,6 +508,7 @@
     "previewLoading": "Voorbeeld wordt gegenereerd…",
     "previewFailed": "Kon geen voorbeeld genereren.",
     "done": "Pagina ontkromd",
-    "failed": "Ontkrommen mislukt — de hulplijn heeft minstens 3 punten nodig"
+    "failed": "Ontkrommen mislukt — de hulplijn heeft minstens 3 punten nodig",
+    "curveCorrection": "Curve {{index}}: corrigeert tot {{mm}} mm"
   }
 }

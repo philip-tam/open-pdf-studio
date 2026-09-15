@@ -350,6 +350,7 @@
     "previewLoading": "Luodaan esikatselua…",
     "previewFailed": "Esikatselua ei voitu luoda.",
     "done": "Sivu korjattu",
-    "failed": "Epäonnistui — ohjauskäyrä tarvitsee vähintään 3 pistettä"
+    "failed": "Epäonnistui — ohjauskäyrä tarvitsee vähintään 3 pistettä",
+    "curveCorrection": "Käyrä {{index}}: korjaa enintään {{mm}} mm"
   }
 }

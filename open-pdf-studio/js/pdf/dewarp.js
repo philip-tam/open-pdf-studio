@@ -1,7 +1,7 @@
 // Page Dewarp: correct curved/warped scanned book pages (the sag near a
 // book's gutter/spine that makes horizontal text lines bow instead of stay
-// straight) by drawing a curved guide line and warping the page so that
-// line becomes level.
+// straight) by drawing one or more curved guide lines and warping the page
+// so those lines become level.
 //
 // Unlike Straighten Page (deskew.js), this is NOT an affine transform — the
 // PDF spec has no non-linear content-stream operator, so there is no way to
@@ -11,14 +11,17 @@
 // a rasterized image in place of a re-embedded vector page). See the Page
 // Dewarp design report for the full rationale.
 //
-// Transform model: a single user-drawn curve measures vertical sag only
-// (dx is always 0 — book-gutter warp bows a line up/down, it doesn't shear
-// it sideways). For any point (x, y), the correction is the amount needed
-// to bring the curve's height AT x up to the curve's own target height,
-// scaled down the further y is from the curve (a triangular falloff over
-// `influenceHeight`) — so the correction is strongest right at the guide
-// line and fades out toward the page edges, rather than shearing the whole
-// page uniformly.
+// Transform model: each user-drawn curve measures vertical sag only (dx is
+// always 0 — book-gutter warp bows a line up/down, it doesn't shear it
+// sideways). For any point (x, y), a curve's correction is the amount
+// needed to bring that curve's height AT x up to its own target height,
+// tapered by distance from the curve — so the correction is strongest
+// right at the guide line and fades out with distance, rather than
+// shearing the whole page uniformly. Real book-gutter curvature often
+// isn't symmetric top-to-bottom, so drawing a SEPARATE curve near the top
+// and another near the bottom (rather than one curve plus an abstract
+// influence-distance knob) is the direct way to correct each independently
+// — their contributions are summed (see buildMultiCurveDewarpField).
 import { getActiveDocument, getPageRotation } from "../core/state.js";
 import { getCachedPdfBytes } from "./loader.js";
 import { getCacheKey, reloadFromBytes } from "./page-manager.js";
@@ -26,10 +29,10 @@ import { canvasToBytes } from "./exporter.js";
 import { recordPageStructure } from "../core/undo-manager.js";
 import { showLoading, hideLoading } from "../ui/chrome/dialogs.js";
 import { cloneAnnotation } from "../annotations/factory.js";
-import { buildDewarpField } from "./dewarp-geometry.js";
+import { buildDewarpField, buildMultiCurveDewarpField, computeMaxSag } from "./dewarp-geometry.js";
 import { PDFDocument } from "pdf-lib";
 
-export { buildDewarpField };
+export { buildDewarpField, computeMaxSag };
 
 const DEFAULT_DPI = 300;
 const DEFAULT_TILE_PX = 6;
@@ -133,12 +136,16 @@ function warpAnnotation(ann, field) {
 
 // Shared rasterize+warp step used by both the dialog's preview and the real
 // apply — guarantees the preview shows exactly what Apply will produce.
-async function computeWarpedCanvas(pageNum, points, options) {
+async function computeWarpedCanvas(pageNum, curves, options) {
   const dpi = options.dpi || DEFAULT_DPI;
   const scale = dpi / 72;
   const sourceCanvas = await renderPageContentOnly(pageNum, scale);
-  const influenceHeight = options.influenceHeight ?? sourceCanvas.height / scale;
-  const field = buildDewarpField(points, influenceHeight);
+  // Default influence shrinks as more curves are drawn, so a top curve and
+  // a bottom curve localize to roughly their own thirds of the page rather
+  // than both reaching (and partially cancelling in) the middle.
+  const pageHeightPt = sourceCanvas.height / scale;
+  const influenceHeight = options.influenceHeight ?? pageHeightPt / (curves.length + 1);
+  const field = buildMultiCurveDewarpField(curves, influenceHeight);
   if (!field) return null;
   const warpedCanvas = warpCanvasVertical(sourceCanvas, field, scale);
   return { warpedCanvas, field, scale };
@@ -148,42 +155,47 @@ async function computeWarpedCanvas(pageNum, points, options) {
  * Rasterize and warp the current page WITHOUT committing anything — for the
  * confirm dialog's preview. Returns the warped canvas directly so it can be
  * drawn into a preview `<canvas>`.
- * @param {{x:number,y:number}[]} points
+ * @param {{x:number,y:number}[][]} curves - one point-array per guide curve.
  * @param {Object} [options] - see dewarpPage's options.
  * @returns {Promise<HTMLCanvasElement | null>}
  */
-export async function renderDewarpPreview(points, options = {}) {
+export async function renderDewarpPreview(curves, options = {}) {
   const doc = getActiveDocument();
   if (!doc?.pdfDoc) return null;
-  if (!points || points.length < 3) return null;
-  const result = await computeWarpedCanvas(doc.currentPage, points, options);
+  const valid = (curves || []).filter((c) => c && c.length >= 3);
+  if (valid.length === 0) return null;
+  const result = await computeWarpedCanvas(doc.currentPage, valid, options);
   return result ? result.warpedCanvas : null;
 }
 
 /**
- * Dewarp the current page: rasterize it, warp the raster by the field
- * derived from the user's guide curve, and swap it in as a full-page image
+ * Dewarp the current page: rasterize it, warp the raster by the combined
+ * field from the user's guide curve(s), and swap it in as a full-page image
  * at the same page-tree position. Current page only — there's deliberately
  * no "apply to all pages" here (unlike Straighten's constant rotation, a
  * book's gutter-warp shape differs page to page).
  *
- * @param {{x:number,y:number}[]} points - guide-curve points, APP space, on
- *   the current page.
+ * @param {{x:number,y:number}[][]} curves - one point-array per guide
+ *   curve, APP space, on the current page. Draw one curve for a simple
+ *   single-region correction, or two (e.g. one near the top, one near the
+ *   bottom) when the page warps differently in each area.
  * @param {Object} [options]
  * @param {number} [options.dpi=300] - rasterize resolution.
  * @param {'png'|'jpeg'} [options.format='png'] - lossless by default, since
  *   this operation's whole point is fidelity, not size (contrast
  *   compress.js's deliberately-lossy JPEG default).
  * @param {number} [options.quality=0.92] - only used when format is 'jpeg'.
- * @param {number} [options.influenceHeight] - defaults to the full page
- *   height (in points), so the correction reaches from the guide line all
- *   the way to the top/bottom edges.
+ * @param {number} [options.influenceHeight] - distance each curve's
+ *   correction reaches before fading out; defaults to the page height
+ *   divided by (number of curves + 1), so multiple curves localize to
+ *   their own regions instead of overlapping in the middle.
  * @returns {Promise<{warped: boolean}>}
  */
-export async function dewarpPage(points, options = {}) {
+export async function dewarpPage(curves, options = {}) {
   const doc = getActiveDocument();
   if (!doc?.pdfDoc) return { warped: false };
-  if (!points || points.length < 3) return { warped: false };
+  const valid = (curves || []).filter((c) => c && c.length >= 3);
+  if (valid.length === 0) return { warped: false };
 
   const cacheKey = getCacheKey();
   const currentBytes = getCachedPdfBytes(cacheKey);
@@ -199,7 +211,7 @@ export async function dewarpPage(points, options = {}) {
 
   showLoading("Dewarping page...");
   try {
-    const result = await computeWarpedCanvas(pageNum, points, options);
+    const result = await computeWarpedCanvas(pageNum, valid, options);
     if (!result) return { warped: false };
     const { warpedCanvas, field } = result;
     const bytes = await canvasToBytes(warpedCanvas, format, quality);
