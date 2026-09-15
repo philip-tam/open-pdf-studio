@@ -152,7 +152,11 @@
     "annotationsList": "Lista adnotacji (F11)",
     "annotationsLabel": "Adnotacje",
     "appearance": "Wygląd",
-    "keystrokes": "Keystrokes"
+    "keystrokes": "Keystrokes",
+    "readerMode": "Tryb czytnika",
+    "readerModeTip": "Zapamiętuje stronę, pozycję przewijania i powiększenie każdego PDF-a przy zamykaniu i ponownym otwieraniu",
+    "readerModeOffTitle": "Wyłącz tryb czytnika",
+    "readerModeOffMessage": "Wyczyścić także zapisaną pozycję czytania każdego PDF-a? Wybierz Nie, aby zachować je na wypadek ponownego włączenia trybu czytnika."
   },
   "organize": {
     "pages": "Strony",

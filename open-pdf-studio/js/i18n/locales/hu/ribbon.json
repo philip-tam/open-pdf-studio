@@ -152,7 +152,11 @@
     "annotationsList": "Annotációk listája (F11)",
     "annotationsLabel": "Annotációk",
     "appearance": "Megjelenés",
-    "keystrokes": "Keystrokes"
+    "keystrokes": "Keystrokes",
+    "readerMode": "Olvasó mód",
+    "readerModeTip": "Megjegyzi minden PDF oldalát, görgetési pozícióját és nagyítását bezárás és újranyitás között",
+    "readerModeOffTitle": "Olvasó mód kikapcsolása",
+    "readerModeOffMessage": "Törli minden PDF mentett olvasási pozícióját is? Válassza a Nem lehetőséget, ha meg szeretné tartani őket az újbóli bekapcsoláshoz."
   },
   "organize": {
     "pages": "Oldalak",

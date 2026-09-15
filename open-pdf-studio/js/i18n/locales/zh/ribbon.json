@@ -152,7 +152,11 @@
     "annotationsList": "批注列表 (F11)",
     "annotationsLabel": "批注",
     "appearance": "外观",
-    "keystrokes": "Keystrokes"
+    "keystrokes": "Keystrokes",
+    "readerMode": "閱讀模式",
+    "readerModeTip": "在關閉又重新打開時，記住每份 PDF 的頁碼、捲軸位置及縮放比例",
+    "readerModeOffTitle": "關閉閱讀模式",
+    "readerModeOffMessage": "是否也要清除每份 PDF 已儲存的閱讀位置？選擇「否」以保留它們，以備日後重新開啟閱讀模式時使用。"
   },
   "organize": {
     "pages": "页面",

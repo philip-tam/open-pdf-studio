@@ -152,7 +152,11 @@
     "annotationsList": "Elenco annotazioni (F11)",
     "annotationsLabel": "Annotazioni",
     "appearance": "Aspetto",
-    "keystrokes": "Keystrokes"
+    "keystrokes": "Keystrokes",
+    "readerMode": "Modalità lettura",
+    "readerModeTip": "Ricorda pagina, posizione di scorrimento e zoom di ogni PDF alla chiusura e riapertura",
+    "readerModeOffTitle": "Disattiva modalità lettura",
+    "readerModeOffMessage": "Cancellare anche la posizione di lettura salvata di ogni PDF? Scegli No per conservarle in caso di riattivazione."
   },
   "organize": {
     "pages": "Pagine",

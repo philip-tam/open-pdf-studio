@@ -152,7 +152,11 @@
     "annotationsList": "एनोटेशन सूची (F11)",
     "annotationsLabel": "एनोटेशन",
     "appearance": "दिखावट",
-    "keystrokes": "Keystrokes"
+    "keystrokes": "Keystrokes",
+    "readerMode": "रीडर मोड",
+    "readerModeTip": "हर PDF को बंद और फिर से खोलते समय पृष्ठ, स्क्रोल स्थिति और ज़ूम याद रखता है",
+    "readerModeOffTitle": "रीडर मोड बंद करें",
+    "readerModeOffMessage": "क्या हर PDF की सहेजी गई पठन स्थिति भी साफ़ करें? बाद में रीडर मोड फिर से चालू करने पर रखने के लिए नहीं चुनें।"
   },
   "organize": {
     "pages": "पृष्ठ",

@@ -152,7 +152,11 @@
     "annotationsList": "Merkintäluettelo (F11)",
     "annotationsLabel": "Merkinnät",
     "appearance": "Ulkoasu",
-    "keystrokes": "Keystrokes"
+    "keystrokes": "Keystrokes",
+    "readerMode": "Lukutila",
+    "readerModeTip": "Muistaa jokaisen PDF:n sivun, vierityskohdan ja zoomauksen sulkemisen ja uudelleenavaamisen välillä",
+    "readerModeOffTitle": "Poista lukutila käytöstä",
+    "readerModeOffMessage": "Tyhjennäänkö myös jokaisen PDF:n tallennettu lukukohta? Valitse Ei, jos haluat säilyttää ne lukutilan uudelleenkäyttöä varten."
   },
   "organize": {
     "pages": "Sivut",

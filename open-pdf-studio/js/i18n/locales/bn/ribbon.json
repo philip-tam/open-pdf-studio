@@ -152,7 +152,11 @@
     "annotationsList": "টীকার তালিকা (F11)",
     "annotationsLabel": "টীকা",
     "appearance": "চেহারা",
-    "keystrokes": "Keystrokes"
+    "keystrokes": "Keystrokes",
+    "readerMode": "রিডার মোড",
+    "readerModeTip": "পিডিএফ বন্ধ এবং পুনরায় খোলার সময় পাতা, স্ক্রল অবস্থান এবং জুম মনে রাখে",
+    "readerModeOffTitle": "রিডার মোড বন্ধ করুন",
+    "readerModeOffMessage": "প্রতিটি PDF-এর সংরক্ষিত পঠন অবস্থানও কি মুছে ফেলবেন? ভবিষ্যতে রিডার মোড আবার চালু করলে রাখতে না বেছে নিন।"
   },
   "organize": {
     "pages": "পৃষ্ঠাসমূহ",

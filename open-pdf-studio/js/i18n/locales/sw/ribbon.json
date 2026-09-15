@@ -152,7 +152,11 @@
     "annotationsList": "Orodha ya Maoni (F11)",
     "annotationsLabel": "Maoni",
     "appearance": "Muonekano",
-    "keystrokes": "Keystrokes"
+    "keystrokes": "Keystrokes",
+    "readerMode": "Hali ya Kusoma",
+    "readerModeTip": "Inakumbuka ukurasa, nafasi ya kusogeza na kuza kwa kila PDF unapofunga na kufungua tena",
+    "readerModeOffTitle": "Zima Hali ya Kusoma",
+    "readerModeOffMessage": "Je, ufute pia nafasi ya kusoma iliyohifadhiwa kwa kila PDF? Chagua Hapana ili kuzihifadhi endapo utawasha tena Hali ya Kusoma."
   },
   "organize": {
     "pages": "Kurasa",

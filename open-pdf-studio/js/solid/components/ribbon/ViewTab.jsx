@@ -89,6 +89,28 @@ export default function ViewTab() {
               });
               redrawAnnotations();
             }} />
+          <RibbonButton id="reader-mode-toggle"
+            title={t('view.readerModeTip') || 'Remember each PDF\'s page, scroll position and zoom across closing and reopening it'}
+            icon={`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 5.5C4 4.67 4.67 4 5.5 4H12v16H5.5A1.5 1.5 0 014 18.5v-13z"/><path d="M20 5.5c0-.83-.67-1.5-1.5-1.5H12v16h6.5a1.5 1.5 0 001.5-1.5v-13z"/><path d="M12 4v16" stroke-width="1"/></svg>`}
+            label={t('view.readerMode') || 'Reader Mode'}
+            active={state.preferences?.readerMode}
+            onClick={async () => {
+              const turningOff = state.preferences.readerMode;
+              if (turningOff) {
+                const { showConfirm } = await import('../../../ui/chrome/confirm-dialog.js');
+                const clearAll = await showConfirm({
+                  title: t('view.readerModeOffTitle') || 'Turn off Reader Mode',
+                  message: t('view.readerModeOffMessage') || 'Also clear the saved reading position for every PDF? Choose No to keep them for if you turn Reader Mode back on.',
+                });
+                if (clearAll) {
+                  const { clearAllReaderPositions } = await import('../../../core/reader-mode.js');
+                  clearAllReaderPositions();
+                }
+              }
+              state.preferences.readerMode = !state.preferences.readerMode;
+              const { savePreferences } = await import('../../../core/preferences.js');
+              savePreferences();
+            }} />
         </RibbonGroup>
 
         <RibbonGroup label={t('view.panels')}>

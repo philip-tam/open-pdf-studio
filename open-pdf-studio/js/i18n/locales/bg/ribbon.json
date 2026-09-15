@@ -152,7 +152,11 @@
     "annotationsList": "Списък с анотации (F11)",
     "annotationsLabel": "Анотации",
     "appearance": "Външен вид",
-    "keystrokes": "Keystrokes"
+    "keystrokes": "Keystrokes",
+    "readerMode": "Режим четене",
+    "readerModeTip": "Запомня страницата, позицията на превъртане и мащаба на всеки PDF при затваряне и повторно отваряне",
+    "readerModeOffTitle": "Изключване на режима четене",
+    "readerModeOffMessage": "Да се изчисти ли и запазената позиция на четене за всеки PDF? Изберете „Не“, за да ги запазите за случай, че повторно включите режима."
   },
   "organize": {
     "pages": "Страници",

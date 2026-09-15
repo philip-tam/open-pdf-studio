@@ -152,7 +152,11 @@
     "annotationsList": "주석 목록 (F11)",
     "annotationsLabel": "주석",
     "appearance": "모양",
-    "keystrokes": "Keystrokes"
+    "keystrokes": "Keystrokes",
+    "readerMode": "리더 모드",
+    "readerModeTip": "PDF를 닫았다가 다시 열 때 페이지, 스크롤 위치, 확대/축소를 기억합니다",
+    "readerModeOffTitle": "리더 모드 끄기",
+    "readerModeOffMessage": "모든 PDF의 저장된 읽기 위치도 지울까요? 나중에 리더 모드를 다시 켜는 경우를 위해 보관하려면 '아니오'를 선택하세요."
   },
   "organize": {
     "pages": "페이지",

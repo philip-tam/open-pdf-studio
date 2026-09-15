@@ -10,6 +10,7 @@ import { savePDF } from '../../pdf/saver.js';
 import { unlockFile, lockFile, renameFile, fileExists } from '../../core/platform.js';
 import { cancelPendingZoom } from '../setup/navigation-events.js';
 import { closeAllPopups } from '../../bridge.js';
+import { saveReaderPosition } from '../../core/reader-mode.js';
 
 /**
  * Create a new tab for a document
@@ -208,6 +209,20 @@ export async function closeTab(index, force = false, dialogAction = null) {
       if (!saved) return false; // Save failed or was cancelled
     }
     // action === 'dontsave' → proceed to close without saving
+  }
+
+  // Reader Mode: remember where we were in this file, before anything below
+  // tears down its rendered state. Skipped for untitled/blank docs — there's
+  // no file path to key the memory on, and nothing meaningful to resume.
+  if (state.preferences.readerMode && doc.filePath && !doc.isUntitled) {
+    const container = document.getElementById('pdf-container');
+    saveReaderPosition(doc.filePath, {
+      page: doc.currentPage,
+      scale: doc.scale,
+      scrollTop: container ? container.scrollTop : 0,
+      scrollHeight: container ? container.scrollHeight : 0,
+      viewMode: doc.viewMode,
+    });
   }
 
   // Cancel any in-progress background annotation loading for this document.

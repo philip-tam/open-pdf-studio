@@ -152,7 +152,11 @@
     "annotationsList": "Seznam anotací (F11)",
     "annotationsLabel": "Anotace",
     "appearance": "Vzhled",
-    "keystrokes": "Keystrokes"
+    "keystrokes": "Keystrokes",
+    "readerMode": "Režim Čtení",
+    "readerModeTip": "Zapamatuje si stránku, pozici posouvání a přiblížení každého PDF při zavření a opětovném otevření",
+    "readerModeOffTitle": "Vypnout režim Čtení",
+    "readerModeOffMessage": "Vymazat též uloženou pozici čtení pro každé PDF? Zvolte Ne, chcete-li si je ponechat pro případ opětovného zapnutí režimu Čtení."
   },
   "organize": {
     "pages": "Stránky",

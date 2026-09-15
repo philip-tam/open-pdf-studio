@@ -152,7 +152,11 @@
     "annotationsList": "Daftar Anotasi (F11)",
     "annotationsLabel": "Anotasi",
     "appearance": "Tampilan",
-    "keystrokes": "Keystrokes"
+    "keystrokes": "Keystrokes",
+    "readerMode": "Mode Pembaca",
+    "readerModeTip": "Mengingat halaman, posisi gulir, dan zoom setiap PDF saat ditutup dan dibuka kembali",
+    "readerModeOffTitle": "Matikan Mode Pembaca",
+    "readerModeOffMessage": "Hapus juga posisi baca tersimpan untuk setiap PDF? Pilih Tidak untuk menyimpannya jika Anda mengaktifkan Mode Pembaca lagi."
   },
   "organize": {
     "pages": "Halaman",

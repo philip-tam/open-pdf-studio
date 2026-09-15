@@ -152,7 +152,11 @@
     "annotationsList": "רשימת הערות (F11)",
     "annotationsLabel": "הערות",
     "appearance": "מראה",
-    "keystrokes": "Keystrokes"
+    "keystrokes": "Keystrokes",
+    "readerMode": "מצב קריאה",
+    "readerModeTip": "זוכר את העמוד, מיקום הגלילה והזינוק של כל קובץ PDF בין סגירה לפתיחה מחדש",
+    "readerModeOffTitle": "כיבוי מצב קריאה",
+    "readerModeOffMessage": "לנקות גם את מיקום הקריאה השמור של כל קובץ PDF? בחר לא כדי לשמור אותם למקרה שתפעיל שוב את מצב קריאה."
   },
   "organize": {
     "pages": "עמודים",
