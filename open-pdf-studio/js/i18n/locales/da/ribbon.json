@@ -320,7 +320,7 @@
     "symbolScale": "Skala",
     "symbolScaleTitle": "Størrelse, som et nyt symbol placeres i",
     "symbolScaleCustom": "Brugerdefineret skala",
-    "wipeoutRect": "Overmaling (Rektangel)",
-    "wipeoutFreeform": "Overmaling (Fri form)"
+    "wipeoutBrush": "Overmalingspensel",
+    "wipeoutBrushRadius": "Radius:"
   }
 }

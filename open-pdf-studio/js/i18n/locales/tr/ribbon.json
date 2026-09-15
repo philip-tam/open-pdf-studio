@@ -320,7 +320,7 @@
     "symbolScale": "Ölçek",
     "symbolScaleTitle": "Yeni bir sembolün yerleştirildiği boyut",
     "symbolScaleCustom": "Özel ölçek",
-    "wipeoutRect": "Beyazlatma (Dikdörtgen)",
-    "wipeoutFreeform": "Beyazlatma (Serbest Form)"
+    "wipeoutBrush": "Beyazlatma Fırçası",
+    "wipeoutBrushRadius": "Yarıçap:"
   }
 }

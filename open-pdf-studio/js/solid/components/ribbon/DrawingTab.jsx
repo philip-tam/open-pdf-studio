@@ -5,7 +5,6 @@ import RibbonButton from './RibbonButton.jsx';
 import RibbonButtonStack from './RibbonButtonStack.jsx';
 import { setTool } from '../../../tools/manager.js';
 import { startRemoveImageTool } from '../../../tools/tools/remove-image-tool.js';
-import { startWipeoutFreeform } from '../../../tools/wipeout-freeform.js';
 import { state, getActiveDocument, noPdf } from '../../../core/state.js';
 import { savePreferences } from '../../../core/preferences.js';
 import { isPdfAReadOnly } from '../../../pdf/loader.js';
@@ -25,7 +24,7 @@ import {
   measureDistanceIcon, measureAngleIcon, measurePerimeterIcon, measureAreaIcon,
   alignLeftIcon, alignTopIcon, alignBottomIcon,
   flipHIcon, flipVIcon, rotateCwIcon,
-  clearAllIcon, wipeoutRectIcon, wipeoutFreeformIcon
+  clearAllIcon, wipeoutBrushIcon
 } from '../../data/ribbonIcons.js';
 import { useTranslation } from '../../../i18n/useTranslation.js';
 import { createFullPageScaleRegion, invalidateScaleRegionCache } from '../../../annotations/scale-region.js';
@@ -213,10 +212,8 @@ export function DrawingGroups() {
             disabled={ro()} active={state.currentTool === 'image'} onClick={() => setTool('image')} />
           <RibbonButton size="small" id="dr-remove-image" title={t('drawing.removeImage')} icon={removeImageIcon}
             disabled={ro()} active={state.currentTool === 'removeImage'} onClick={() => startRemoveImageTool()} />
-          <RibbonButton size="small" id="dr-wipeout-rect" title={t('drawing.wipeoutRect')} icon={wipeoutRectIcon}
-            disabled={ro()} active={state.currentTool === 'mask'} onClick={() => setTool('mask')} />
-          <RibbonButton size="small" id="dr-wipeout-freeform" title={t('drawing.wipeoutFreeform')} icon={wipeoutFreeformIcon}
-            disabled={ro()} onClick={() => startWipeoutFreeform()} />
+          <RibbonButton size="small" id="dr-wipeout-brush" title={t('drawing.wipeoutBrush')} icon={wipeoutBrushIcon}
+            disabled={ro()} active={state.currentTool === 'wipeoutBrush'} onClick={() => setTool('wipeoutBrush')} />
         </RibbonGroup>
 
         {/* LIJN-OPTIES — alleen zichtbaar bij het lijn-gereedschap. Bevat het
@@ -232,6 +229,28 @@ export function DrawingGroups() {
                 onChange={(e) => { state.preferences.lineContinue = e.currentTarget.checked; savePreferences(); }}
               />
               <span>{t('drawing.lineContinue') || 'Doorlopend'}</span>
+            </label>
+          </RibbonGroup>
+        </Show>
+
+        {/* WIPEOUT BRUSH OPTIES — alleen zichtbaar bij het Wipeout Brush-gereedschap.
+            Een schuifregelaar voor de penseelstraal (mm), gedeeld met de tool via
+            dezelfde preference (state.preferences.wipeoutBrushRadiusMm). */}
+        <Show when={state.currentTool === 'wipeoutBrush'}>
+          <RibbonGroup label={t('drawing.wipeoutBrush')}>
+            <label class="ribbon-slider-option" style={{ display: 'flex', 'align-items': 'center', gap: '6px' }}>
+              <span>{t('drawing.wipeoutBrushRadius')}</span>
+              <input
+                type="range"
+                min="1"
+                max="30"
+                step="0.5"
+                value={state.preferences.wipeoutBrushRadiusMm ?? 6}
+                onInput={(e) => { state.preferences.wipeoutBrushRadiusMm = parseFloat(e.target.value); savePreferences(); }}
+              />
+              <span style={{ 'min-width': '3.5em', 'text-align': 'right' }}>
+                {(state.preferences.wipeoutBrushRadiusMm ?? 6).toFixed(1)} mm
+              </span>
             </label>
           </RibbonGroup>
         </Show>

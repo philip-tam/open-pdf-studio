@@ -320,7 +320,7 @@
     "symbolScale": "Mjerilo",
     "symbolScaleTitle": "Veličina u kojoj se postavlja novi simbol",
     "symbolScaleCustom": "Prilagođeno mjerilo",
-    "wipeoutRect": "Izbjeljivanje (Pravokutnik)",
-    "wipeoutFreeform": "Izbjeljivanje (Slobodni oblik)"
+    "wipeoutBrush": "Kist za izbjeljivanje",
+    "wipeoutBrushRadius": "Polumjer:"
   }
 }

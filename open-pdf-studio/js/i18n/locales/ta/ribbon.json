@@ -320,7 +320,7 @@
     "symbolScale": "அளவுகோல்",
     "symbolScaleTitle": "புதிய குறியீடு வைக்கப்படும் அளவு",
     "symbolScaleCustom": "தனிப்பயன் அளவுகோல்",
-    "wipeoutRect": "வைபௌட் (சதுரம்)",
-    "wipeoutFreeform": "வைபௌட் (இல்லு வடிவம்)"
+    "wipeoutBrush": "வைபௌட் பிரஷ்",
+    "wipeoutBrushRadius": "ஆரம்:"
   }
 }

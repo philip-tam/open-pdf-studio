@@ -320,7 +320,7 @@
     "symbolScale": "Escala",
     "symbolScaleTitle": "Tamaño con el que se coloca un símbolo nuevo",
     "symbolScaleCustom": "Escala personalizada",
-    "wipeoutRect": "Corrector (Rectángulo)",
-    "wipeoutFreeform": "Corrector (Forma libre)"
+    "wipeoutBrush": "Pincel corrector",
+    "wipeoutBrushRadius": "Radio:"
   }
 }

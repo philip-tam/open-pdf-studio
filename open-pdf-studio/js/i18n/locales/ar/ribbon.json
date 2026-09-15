@@ -320,7 +320,7 @@
     "symbolScale": "المقياس",
     "symbolScaleTitle": "الحجم الذي يُوضع به رمز جديد",
     "symbolScaleCustom": "مقياس مخصص",
-    "wipeoutRect": "تصحيح (مستطيل)",
-    "wipeoutFreeform": "تصحيح (شكل حر)"
+    "wipeoutBrush": "فرشاة التصحيح",
+    "wipeoutBrushRadius": "نصف القطر:"
   }
 }

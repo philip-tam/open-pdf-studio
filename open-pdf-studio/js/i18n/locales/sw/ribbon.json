@@ -320,7 +320,7 @@
     "symbolScale": "Kipimo",
     "symbolScaleTitle": "Ukubwa wa kuweka alama mpya",
     "symbolScaleCustom": "Kipimo maalum",
-    "wipeoutRect": "Futa (Mstatili)",
-    "wipeoutFreeform": "Futa (Umbo huru)"
+    "wipeoutBrush": "Burashi ya kufuta",
+    "wipeoutBrushRadius": "Radius:"
   }
 }

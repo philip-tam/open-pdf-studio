@@ -320,7 +320,7 @@
     "symbolScale": "Масштаб",
     "symbolScaleTitle": "Размер, в котором размещается новый символ",
     "symbolScaleCustom": "Свой масштаб",
-    "wipeoutRect": "Замазывание (Прямоугольник)",
-    "wipeoutFreeform": "Замазывание (Произвольная форма)"
+    "wipeoutBrush": "Кисть замазывания",
+    "wipeoutBrushRadius": "Радиус:"
   }
 }

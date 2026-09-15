@@ -320,7 +320,7 @@
     "symbolScale": "Κλίμακα",
     "symbolScaleTitle": "Μέγεθος με το οποίο τοποθετείται ένα νέο σύμβολο",
     "symbolScaleCustom": "Προσαρμοσμένη κλίμακα",
-    "wipeoutRect": "Λώκανση (Ορθογώνιο)",
-    "wipeoutFreeform": "Λώκανση (Ελεύθερο σχήμα)"
+    "wipeoutBrush": "Πινέλο λώκανσης",
+    "wipeoutBrushRadius": "Ακτίνα:"
   }
 }

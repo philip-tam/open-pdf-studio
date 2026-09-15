@@ -320,7 +320,7 @@
     "symbolScale": "קנה מידה",
     "symbolScaleTitle": "הגודל שבו ממוקם סמל חדש",
     "symbolScaleCustom": "קנה מידה מותאם",
-    "wipeoutRect": "מחיקה (מלבן)",
-    "wipeoutFreeform": "מחיקה (צורה חופשית)"
+    "wipeoutBrush": "מברשת מחיקה",
+    "wipeoutBrushRadius": "רדיוס:"
   }
 }

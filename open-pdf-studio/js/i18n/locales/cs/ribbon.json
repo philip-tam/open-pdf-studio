@@ -320,7 +320,7 @@
     "symbolScale": "Měřítko",
     "symbolScaleTitle": "Velikost, ve které se umístí nový symbol",
     "symbolScaleCustom": "Vlastní měřítko",
-    "wipeoutRect": "Vybělení (Obdélník)",
-    "wipeoutFreeform": "Vybělení (Volný tvar)"
+    "wipeoutBrush": "Kartáč vybělení",
+    "wipeoutBrushRadius": "Poloměr:"
   }
 }

@@ -320,7 +320,7 @@
     "symbolScale": "Maßstab",
     "symbolScaleTitle": "Größe, in der ein neues Symbol platziert wird",
     "symbolScaleCustom": "Eigener Maßstab",
-    "wipeoutRect": "Whiteout (Rechteck)",
-    "wipeoutFreeform": "Whiteout (Freiform)"
+    "wipeoutBrush": "Whiteout-Pinsel",
+    "wipeoutBrushRadius": "Radius:"
   }
 }

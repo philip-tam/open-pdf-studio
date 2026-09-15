@@ -320,7 +320,7 @@
     "symbolScale": "স্কেল",
     "symbolScaleTitle": "নতুন প্রতীক যে আকারে বসানো হয়",
     "symbolScaleCustom": "কাস্টম স্কেল",
-    "wipeoutRect": "ওয়াইপআউট (আয়ত)",
-    "wipeoutFreeform": "ওয়াইপআউট (মুক্ত আকার)"
+    "wipeoutBrush": "ওয়াইপআউট ব্রাশ",
+    "wipeoutBrushRadius": "ব্যাসার্ধ:"
   }
 }

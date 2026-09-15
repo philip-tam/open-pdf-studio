@@ -54,9 +54,7 @@ export const straightenIcon = `<svg fill="none" stroke="currentColor" viewBox="0
 
 export const resizePagesIcon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" stroke-width="2" fill="none"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h6m0 0v6m0-6l-7 7"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H4"/></svg>`;
 
-export const wipeoutRectIcon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1" stroke-width="2"/><rect x="7" y="9" width="10" height="6" rx="0.5" fill="currentColor" stroke="none"/></svg>`;
-
-export const wipeoutFreeformIcon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1" stroke-width="2"/><path d="M8 14c-1-2 0-4 2-4.5c0-2 3-3 4-1c2-0.5 3.5 1 2.5 2.5c1.5 1 1 3.5-1 3.5c-0.5 1.5-3 1.5-3.5 0c-2 0.5-3.5-1-4-0.5z" fill="currentColor" stroke="none"/></svg>`;
+export const wipeoutBrushIcon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1" stroke-width="2"/><circle cx="9" cy="13" r="3.5" fill="currentColor" stroke="none"/><circle cx="14.5" cy="10.5" r="2" fill="currentColor" stroke="none" opacity="0.6"/></svg>`;
 
 export const shiftPageIcon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1" stroke-width="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m0-8l-2.5 2.5M12 8l2.5 2.5m-2.5 5.5l-2.5-2.5m2.5 2.5l2.5-2.5"/></svg>`;
 

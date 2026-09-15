@@ -320,7 +320,7 @@
     "symbolScale": "Tỷ lệ",
     "symbolScaleTitle": "Kích thước khi đặt một ký hiệu mới",
     "symbolScaleCustom": "Tỷ lệ tùy chỉnh",
-    "wipeoutRect": "Xóa trắng (Hình chữ nhật)",
-    "wipeoutFreeform": "Xóa trắng (Tự do)"
+    "wipeoutBrush": "Cọ Xóa Trắng",
+    "wipeoutBrushRadius": "Bán kính:"
   }
 }

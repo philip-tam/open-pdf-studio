@@ -475,8 +475,8 @@
     "symbolScale": "Scale",
     "symbolScaleTitle": "Size at which a new symbol is placed",
     "symbolScaleCustom": "Custom scale",
-    "wipeoutRect": "Wipeout (Rectangle)",
-    "wipeoutFreeform": "Wipeout (Freeform)"
+    "wipeoutBrush": "Wipeout Brush",
+    "wipeoutBrushRadius": "Radius:"
   },
   "theme": {
     "system": "System (Auto Detect)",

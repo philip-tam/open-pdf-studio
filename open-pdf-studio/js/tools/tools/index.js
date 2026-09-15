@@ -6,6 +6,7 @@ import { handTool } from './hand-tool.js';
 import { selectTool } from './select-tool.js';
 import { drawTool } from './draw-tool.js';
 import { eraserTool } from './eraser-tool.js';
+import { wipeoutBrushTool } from './wipeout-brush-tool.js';
 import { shapeTool } from './shape-tool.js';
 import { lineTool } from './line-tool.js';
 import { polylineTool, cloudPolylineTool } from './polyline-tool.js';
@@ -42,6 +43,8 @@ export function registerAllTools() {
   registerTool('draw', drawTool);
   // Ink eraser: drag to remove whole freehand strokes (issue #329)
   registerTool('eraser', eraserTool);
+  // Wipeout Brush: drag to paint a white patch over scan dirt
+  registerTool('wipeoutBrush', wipeoutBrushTool);
 
   // Shapes (all use the same drag-to-create pattern)
   registerTool('box', shapeTool);

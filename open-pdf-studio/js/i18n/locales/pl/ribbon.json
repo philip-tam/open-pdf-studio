@@ -320,7 +320,7 @@
     "symbolScale": "Skala",
     "symbolScaleTitle": "Rozmiar, w jakim umieszczany jest nowy symbol",
     "symbolScaleCustom": "Skala niestandardowa",
-    "wipeoutRect": "Wybielenie (Prostokąt)",
-    "wipeoutFreeform": "Wybielenie (Dowolny kształt)"
+    "wipeoutBrush": "Pędzel wybielający",
+    "wipeoutBrushRadius": "Promień:"
   }
 }

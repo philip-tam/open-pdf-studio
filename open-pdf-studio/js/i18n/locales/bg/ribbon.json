@@ -320,7 +320,7 @@
     "symbolScale": "Мащаб",
     "symbolScaleTitle": "Размер, в който се поставя нов символ",
     "symbolScaleCustom": "Потребителски мащаб",
-    "wipeoutRect": "Избеляване (Правоъгълник)",
-    "wipeoutFreeform": "Избеляване (Свободна форма)"
+    "wipeoutBrush": "Четка за избеляване",
+    "wipeoutBrushRadius": "Радиус:"
   }
 }

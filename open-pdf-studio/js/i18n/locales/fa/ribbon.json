@@ -320,7 +320,7 @@
     "symbolScale": "مقیاس",
     "symbolScaleTitle": "اندازه‌ای که نماد جدید با آن قرار می‌گیرد",
     "symbolScaleCustom": "مقیاس سفارشی",
-    "wipeoutRect": "سفیدکننده (مستطیل)",
-    "wipeoutFreeform": "سفیدکننده (آزاد)"
+    "wipeoutBrush": "قلموی سفیدکننده",
+    "wipeoutBrushRadius": "شعاع:"
   }
 }

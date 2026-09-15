@@ -320,7 +320,7 @@
     "symbolScale": "Skala",
     "symbolScaleTitle": "Storlek som en ny symbol placeras i",
     "symbolScaleCustom": "Anpassad skala",
-    "wipeoutRect": "Vitmaskning (Rektangel)",
-    "wipeoutFreeform": "Vitmaskning (Fri form)"
+    "wipeoutBrush": "Vitmaskningspensel",
+    "wipeoutBrushRadius": "Radie:"
   }
 }
