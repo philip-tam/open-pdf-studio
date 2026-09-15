@@ -154,9 +154,7 @@
     "appearance": "Izgled",
     "keystrokes": "Keystrokes",
     "readerMode": "Način čitanja",
-    "readerModeTip": "Pamti stranicu, položaj pomicanja i zumiranje svakog PDF-a pri zatvaranju i ponovnom otvaranju",
-    "readerModeOffTitle": "Isključi način čitanja",
-    "readerModeOffMessage": "Želite li obrisati i spremljeni položaj čitanja za svaki PDF? Odaberite Ne kako biste ih zadržali za slučaj da ponovno uključite način čitanja."
+    "readerModeTip": "Pamti stranicu, položaj pomicanja i zumiranje svakog PDF-a pri zatvaranju i ponovnom otvaranju"
   },
   "organize": {
     "pages": "Stranice",

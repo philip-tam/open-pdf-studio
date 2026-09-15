@@ -154,9 +154,7 @@
     "appearance": "Ulkoasu",
     "keystrokes": "Keystrokes",
     "readerMode": "Lukutila",
-    "readerModeTip": "Muistaa jokaisen PDF:n sivun, vierityskohdan ja zoomauksen sulkemisen ja uudelleenavaamisen välillä",
-    "readerModeOffTitle": "Poista lukutila käytöstä",
-    "readerModeOffMessage": "Tyhjennäänkö myös jokaisen PDF:n tallennettu lukukohta? Valitse Ei, jos haluat säilyttää ne lukutilan uudelleenkäyttöä varten."
+    "readerModeTip": "Muistaa jokaisen PDF:n sivun, vierityskohdan ja zoomauksen sulkemisen ja uudelleenavaamisen välillä"
   },
   "organize": {
     "pages": "Sivut",

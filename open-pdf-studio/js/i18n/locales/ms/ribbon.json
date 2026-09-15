@@ -154,9 +154,7 @@
     "appearance": "Penampilan",
     "keystrokes": "Keystrokes",
     "readerMode": "Mod Pembaca",
-    "readerModeTip": "Mengingati halaman, kedudukan tatal dan zum setiap PDF apabila ditutup dan dibuka semula",
-    "readerModeOffTitle": "Matikan Mod Pembaca",
-    "readerModeOffMessage": "Kosongkan juga kedudukan bacaan tersimpan untuk setiap PDF? Pilih Tidak untuk menyimpannya jika anda menghidupkan semula Mod Pembaca."
+    "readerModeTip": "Mengingati halaman, kedudukan tatal dan zum setiap PDF apabila ditutup dan dibuka semula"
   },
   "organize": {
     "pages": "Halaman",

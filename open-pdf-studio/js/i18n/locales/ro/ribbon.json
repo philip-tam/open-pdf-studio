@@ -154,9 +154,7 @@
     "appearance": "Aspect",
     "keystrokes": "Keystrokes",
     "readerMode": "Mod citire",
-    "readerModeTip": "Ține minte pagina, poziția de derulare și zoom-ul fiecărui PDF la închidere și redeschidere",
-    "readerModeOffTitle": "Dezactivează modul citire",
-    "readerModeOffMessage": "Ștergi și poziția de citire salvată pentru fiecare PDF? Alege Nu pentru a le păstra dacă reactivezi modul citire."
+    "readerModeTip": "Ține minte pagina, poziția de derulare și zoom-ul fiecărui PDF la închidere și redeschidere"
   },
   "organize": {
     "pages": "Pagini",

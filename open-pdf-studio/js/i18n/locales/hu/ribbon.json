@@ -154,9 +154,7 @@
     "appearance": "Megjelenés",
     "keystrokes": "Keystrokes",
     "readerMode": "Olvasó mód",
-    "readerModeTip": "Megjegyzi minden PDF oldalát, görgetési pozícióját és nagyítását bezárás és újranyitás között",
-    "readerModeOffTitle": "Olvasó mód kikapcsolása",
-    "readerModeOffMessage": "Törli minden PDF mentett olvasási pozícióját is? Válassza a Nem lehetőséget, ha meg szeretné tartani őket az újbóli bekapcsoláshoz."
+    "readerModeTip": "Megjegyzi minden PDF oldalát, görgetési pozícióját és nagyítását bezárás és újranyitás között"
   },
   "organize": {
     "pages": "Oldalak",

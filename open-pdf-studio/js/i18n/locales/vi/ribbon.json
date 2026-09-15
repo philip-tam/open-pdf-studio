@@ -154,9 +154,7 @@
     "appearance": "Giao diện",
     "keystrokes": "Keystrokes",
     "readerMode": "Chế độ đọc",
-    "readerModeTip": "Ghi nhớ trang, vị trí cuộn và mức thu phóng của mỗi PDF khi đóng và mở lại",
-    "readerModeOffTitle": "Tắt chế độ đọc",
-    "readerModeOffMessage": "Có xóa cả vị trí đọc đã lưu của mọi PDF không? Chọn Không để giữ chúng cho lần bật lại chế độ đọc."
+    "readerModeTip": "Ghi nhớ trang, vị trí cuộn và mức thu phóng của mỗi PDF khi đóng và mở lại"
   },
   "organize": {
     "pages": "Trang",

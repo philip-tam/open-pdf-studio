@@ -3,123 +3,137 @@
 // gated entirely by state.preferences.readerMode. This is NOT a session
 // restore (which files were open, see main.js's restoreLastSession) and
 // NOT a different rendering path — bookmarks/highlights/annotations are
-// completely untouched; it only remembers a reading position per file path
-// (the FULL path, so two same-named files in different folders never
-// collide).
+// completely untouched; it only remembers a reading position per file.
 //
-// Persisted to a Rust-backed file (reader_positions.json in the app data
-// dir, same mechanism as preferences.json/session.json — survives WebView2
-// data clears, unlike localStorage), with localStorage as the load/save
-// fallback outside Tauri. Loaded once into an in-memory cache at startup
-// (initReaderMode(), called from main.js); the save/get/clear functions
-// below are synchronous reads/writes against that cache so call sites in
-// tabs.js/loader.js don't need to await file I/O on every open/close.
-import { isTauri, saveReaderPositionsFile, loadReaderPositionsFile } from './platform.js';
+// Stored as a small SIDECAR file next to the PDF itself — e.g.
+// "MyBook.pdf" gets "MyBook.pdf.readerpos.json" in the same folder —
+// rather than one central list under the app's own data directory.
+// Deliberately: a central list would accumulate an ever-growing, never-
+// pruned record of every PDF the user has ever opened in one place (a
+// privacy concern the user raised directly), whereas a sidecar carries no
+// information beyond what's already implied by that one PDF sitting in
+// that folder, and naturally travels or disappears with the file it
+// belongs to. No cap/eviction logic is needed for the same reason — each
+// file's sidecar is independent, nothing here accumulates.
+//
+// The PDF's own directory is already fs-scope-permitted by the time this
+// runs: loader.js calls allow_fs_scope(filePath) on every open, which (per
+// saver/ocr-text-layer.js's own comment on the same mechanism) registers
+// the FILE's PARENT DIRECTORY, not just that one path — so writing/reading
+// a sibling sidecar file needs no extra scope call.
+//
+// Outside Tauri (no real filesystem to place a sidecar next to), falls
+// back to a single localStorage entry per file path — same trade-off
+// browsers already have for any other per-site storage.
+import { isTauri, readBinaryFile, writeBinaryFile } from './platform.js';
 
-const LOCAL_STORAGE_KEY = 'readerModePositions';
-const MAX_ENTRIES = 200;
+const SIDECAR_SUFFIX = '.readerpos.json';
+const LOCAL_STORAGE_PREFIX = 'readerModePosition:';
 
-let cache = null;
-let loadPromise = null;
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
 
-async function ensureLoaded() {
-  if (cache) return cache;
-  if (!loadPromise) {
-    loadPromise = (async () => {
-      let loaded = null;
-      if (isTauri()) {
-        try {
-          loaded = await loadReaderPositionsFile();
-        } catch (e) {
-          console.warn('Failed to load reader-mode positions file:', e);
-        }
-      }
-      if (!loaded) {
-        try {
-          const s = localStorage.getItem(LOCAL_STORAGE_KEY);
-          loaded = s ? JSON.parse(s) : null;
-        } catch (e) {
-          console.warn('Failed to read reader-mode positions:', e);
-        }
-      }
-      cache = loaded || {};
-      return cache;
-    })();
-  }
-  return loadPromise;
+function sidecarPath(filePath) {
+  return filePath + SIDECAR_SUFFIX;
 }
 
-function persist() {
-  if (!cache) return;
+/**
+ * @param {string} filePath
+ * @returns {Promise<{page: number, scale: number, scrollTop: number, scrollHeight: number, viewMode: string} | null>}
+ */
+export async function getReaderPosition(filePath) {
+  if (!filePath) return null;
   if (isTauri()) {
-    saveReaderPositionsFile(cache).catch((e) =>
-      console.warn('Failed to save reader-mode positions file:', e)
-    );
+    try {
+      const bytes = await readBinaryFile(sidecarPath(filePath));
+      if (!bytes || bytes.length === 0) return null;
+      return JSON.parse(decoder.decode(bytes));
+    } catch (e) {
+      return null; // no sidecar yet, or unreadable — both just mean "nothing saved"
+    }
   }
   try {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(cache));
+    const s = localStorage.getItem(LOCAL_STORAGE_PREFIX + filePath);
+    return s ? JSON.parse(s) : null;
   } catch (e) {
-    console.warn('Failed to save reader-mode positions:', e);
+    return null;
   }
 }
 
 /**
- * Load the on-disk positions into the in-memory cache. Call once at app
- * startup (fire-and-forget is fine — nothing reads the cache until a PDF is
- * opened or closed, which is always later than this resolves in practice).
- */
-export async function initReaderMode() {
-  await ensureLoaded();
-}
-
-/**
- * Save the reading position for a file. No-op if `filePath` is falsy or the
- * cache hasn't loaded yet (startup-race edge case — extremely unlikely to
- * matter in practice, since closing a file always happens well after init).
+ * Save the reading position for a file. No-op if `filePath` is falsy.
  * @param {string} filePath
  * @param {{page: number, scale: number, scrollTop: number, scrollHeight: number, viewMode: string}} position
  */
-export function saveReaderPosition(filePath, position) {
-  if (!filePath || !cache) return;
-  cache[filePath] = { ...position, savedAt: Date.now() };
-
-  const paths = Object.keys(cache);
-  if (paths.length > MAX_ENTRIES) {
-    // Evict the least-recently-saved entries first.
-    paths
-      .sort((a, b) => (cache[a].savedAt || 0) - (cache[b].savedAt || 0))
-      .slice(0, paths.length - MAX_ENTRIES)
-      .forEach((p) => delete cache[p]);
+export async function saveReaderPosition(filePath, position) {
+  if (!filePath) return;
+  const data = { ...position, savedAt: Date.now() };
+  if (isTauri()) {
+    try {
+      await writeBinaryFile(sidecarPath(filePath), encoder.encode(JSON.stringify(data)));
+    } catch (e) {
+      // Read-only folder, moved/removed file, etc. — losing the reading
+      // position is a minor inconvenience, not worth surfacing to the user.
+      console.warn('Failed to save reader-mode position sidecar:', e);
+    }
+    return;
   }
-
-  persist();
-}
-
-/**
- * @param {string} filePath
- * @returns {{page: number, scale: number, scrollTop: number, scrollHeight: number, viewMode: string} | null}
- */
-export function getReaderPosition(filePath) {
-  if (!filePath || !cache) return null;
-  return cache[filePath] || null;
+  try {
+    localStorage.setItem(LOCAL_STORAGE_PREFIX + filePath, JSON.stringify(data));
+  } catch (e) {
+    console.warn('Failed to save reader-mode position:', e);
+  }
 }
 
 /**
  * Forget the saved position for one file (e.g. if the user wants a fresh
- * start on their next open of it).
+ * start on their next open of it). Currently unused by the UI — exposed
+ * for completeness/future use (e.g. a "forget reading position" item on
+ * the file's context menu).
  * @param {string} filePath
  */
-export function clearReaderPosition(filePath) {
-  if (!filePath || !cache || !cache[filePath]) return;
-  delete cache[filePath];
-  persist();
+export async function clearReaderPosition(filePath) {
+  if (!filePath) return;
+  if (isTauri()) {
+    try {
+      if (window.__TAURI__?.fs?.remove) await window.__TAURI__.fs.remove(sidecarPath(filePath));
+    } catch (e) {
+      // Already gone, or never existed — fine either way.
+    }
+    return;
+  }
+  try {
+    localStorage.removeItem(LOCAL_STORAGE_PREFIX + filePath);
+  } catch (e) {
+    // ignore
+  }
 }
 
 /**
- * Forget every saved reading position — offered when the user turns Reader
- * Mode off, in case they don't want the accumulated positions left behind.
+ * One-time migration from the earlier design (a single central
+ * reader_positions.json under the app data directory) to per-file
+ * sidecars: relocates each entry next to its own PDF, then blanks the
+ * central file so it stops being a standing list of every PDF ever
+ * opened. Best-effort per entry — a file that's been moved, renamed, or
+ * is on a read-only volume just keeps its old central-store entry
+ * un-migrated (silently dropped, same as any other inaccessible sidecar
+ * write). Call once at startup; safe to call repeatedly (no-ops once the
+ * central file is empty).
  */
-export function clearAllReaderPositions() {
-  cache = {};
-  persist();
+export async function migrateLegacyReaderPositions() {
+  if (!isTauri()) return;
+  try {
+    const { loadReaderPositionsFile, saveReaderPositionsFile } = await import('./platform.js');
+    const legacy = await loadReaderPositionsFile();
+    if (!legacy || typeof legacy !== 'object') return;
+    const paths = Object.keys(legacy);
+    if (paths.length === 0) return;
+    for (const filePath of paths) {
+      const { savedAt, ...position } = legacy[filePath] || {};
+      await saveReaderPosition(filePath, position);
+    }
+    await saveReaderPositionsFile({});
+  } catch (e) {
+    console.warn('Reader Mode: legacy position migration failed:', e);
+  }
 }

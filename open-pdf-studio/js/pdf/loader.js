@@ -453,7 +453,7 @@ export async function loadPDF(filePath, docIndex, preloadedData = null) {
       // loading, so it's swallowed rather than surfaced.
       if (state.preferences.readerMode && filePath) {
         try {
-          const saved = getReaderPosition(filePath);
+          const saved = await getReaderPosition(filePath);
           if (saved) {
             if (saved.page && saved.page !== doc.currentPage) {
               await goToPage(saved.page);

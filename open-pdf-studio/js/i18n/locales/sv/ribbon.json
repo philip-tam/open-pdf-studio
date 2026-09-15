@@ -154,9 +154,7 @@
     "appearance": "Utseende",
     "keystrokes": "Keystrokes",
     "readerMode": "Läsläge",
-    "readerModeTip": "Kom ihåg sida, rullningsposition och zoom för varje PDF när den stängs och öppnas igen",
-    "readerModeOffTitle": "Stäng av läsläge",
-    "readerModeOffMessage": "Ska även den sparade läspositionen för varje PDF rensas? Välj Nej för att behålla dem om du slår på läsläge igen."
+    "readerModeTip": "Kom ihåg sida, rullningsposition och zoom för varje PDF när den stängs och öppnas igen"
   },
   "organize": {
     "pages": "Sidor",

@@ -154,9 +154,7 @@
     "appearance": "Vzhľad",
     "keystrokes": "Keystrokes",
     "readerMode": "Režim Čítania",
-    "readerModeTip": "Zapamätá si stránku, polóhu posuvníka a priblíženie každého PDF pri zatvorení a opätovnom otvorení",
-    "readerModeOffTitle": "Vypnúť režim Čítania",
-    "readerModeOffMessage": "Vymazať aj uloženú pozíciu čítania pre každé PDF? Zvoľte Nie, ak si ich chcete ponechať pre prípad opätovného zapnutia."
+    "readerModeTip": "Zapamätá si stránku, polóhu posuvníka a priblíženie každého PDF pri zatvorení a opätovnom otvorení"
   },
   "organize": {
     "pages": "Strany",

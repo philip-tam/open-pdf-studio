@@ -154,9 +154,7 @@
     "appearance": "Aparência",
     "keystrokes": "Keystrokes",
     "readerMode": "Modo leitura",
-    "readerModeTip": "Lembra a página, posição de rolagem e zoom de cada PDF ao fechar e reabrir",
-    "readerModeOffTitle": "Desativar modo leitura",
-    "readerModeOffMessage": "Também limpar a posição de leitura salva de cada PDF? Escolha Não para mantê-las caso reative o modo leitura."
+    "readerModeTip": "Lembra a página, posição de rolagem e zoom de cada PDF ao fechar e reabrir"
   },
   "organize": {
     "pages": "Páginas",

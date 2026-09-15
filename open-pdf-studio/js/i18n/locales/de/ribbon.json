@@ -154,9 +154,7 @@
     "appearance": "Darstellung",
     "keystrokes": "Keystrokes",
     "readerMode": "Lesemodus",
-    "readerModeTip": "Merkt sich Seite, Scrollposition und Zoom jeder PDF beim Schließen und erneuten Öffnen",
-    "readerModeOffTitle": "Lesemodus deaktivieren",
-    "readerModeOffMessage": "Auch die gespeicherte Leseposition jeder PDF löschen? Wählen Sie Nein, um sie für eine erneute Aktivierung zu behalten."
+    "readerModeTip": "Merkt sich Seite, Scrollposition und Zoom jeder PDF beim Schließen und erneuten Öffnen"
   },
   "organize": {
     "pages": "Seiten",

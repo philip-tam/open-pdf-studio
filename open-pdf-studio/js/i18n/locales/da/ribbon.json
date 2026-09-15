@@ -154,9 +154,7 @@
     "appearance": "Udseende",
     "keystrokes": "Keystrokes",
     "readerMode": "Læsetilstand",
-    "readerModeTip": "Husker side, rulleposition og zoom for hver PDF, når den lukkes og åbnes igen",
-    "readerModeOffTitle": "Sluk læsetilstand",
-    "readerModeOffMessage": "Skal den gemte læseposition for hver PDF også ryddes? Vælg Nej for at beholde dem, hvis du slår læsetilstand til igen."
+    "readerModeTip": "Husker side, rulleposition og zoom for hver PDF, når den lukkes og åbnes igen"
   },
   "organize": {
     "pages": "Sider",

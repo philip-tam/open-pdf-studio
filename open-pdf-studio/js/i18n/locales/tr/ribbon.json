@@ -154,9 +154,7 @@
     "appearance": "Görünüm",
     "keystrokes": "Keystrokes",
     "readerMode": "Okuyucu Modu",
-    "readerModeTip": "Her PDF'nin sayfasını, kaydırma konumunu ve yakınlaştırmasını kapatıp yeniden açtığınızda hatırlar",
-    "readerModeOffTitle": "Okuyucu Modunu Kapat",
-    "readerModeOffMessage": "Her PDF için kaydedilen okuma konumu da silinsin mi? Okuyucu Modunu tekrar açarsanız korumak için Hayır'ı seçin."
+    "readerModeTip": "Her PDF'nin sayfasını, kaydırma konumunu ve yakınlaştırmasını kapatıp yeniden açtığınızda hatırlar"
   },
   "organize": {
     "pages": "Sayfalar",

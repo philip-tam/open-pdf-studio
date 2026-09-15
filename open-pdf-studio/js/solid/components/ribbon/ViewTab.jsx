@@ -95,18 +95,12 @@ export default function ViewTab() {
             label={t('view.readerMode') || 'Reader Mode'}
             active={state.preferences?.readerMode}
             onClick={async () => {
-              const turningOff = state.preferences.readerMode;
-              if (turningOff) {
-                const { showConfirm } = await import('../../../ui/chrome/confirm-dialog.js');
-                const clearAll = await showConfirm({
-                  title: t('view.readerModeOffTitle') || 'Turn off Reader Mode',
-                  message: t('view.readerModeOffMessage') || 'Also clear the saved reading position for every PDF? Choose No to keep them for if you turn Reader Mode back on.',
-                });
-                if (clearAll) {
-                  const { clearAllReaderPositions } = await import('../../../core/reader-mode.js');
-                  clearAllReaderPositions();
-                }
-              }
+              // Nothing to confirm on turning off: positions live as sidecar
+              // files next to each PDF, not a central list that needs a
+              // "clear all" step — turning this off just stops writing new
+              // ones. Existing sidecars are as private as the PDF next to
+              // them; deleting one is a normal file-delete if the user wants
+              // that at all.
               state.preferences.readerMode = !state.preferences.readerMode;
               const { savePreferences } = await import('../../../core/preferences.js');
               savePreferences();
