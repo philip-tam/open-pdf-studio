@@ -24,7 +24,8 @@ function _tauri() {
 
 async function _allowDir(dir) {
   try {
-    await _tauri().core?.invoke('allow_fs_scope', { path: dir + '\\_scope.pdf' });
+    const scopePath = await _tauri().path.join(dir, '_scope.pdf');
+    await _tauri().core?.invoke('allow_fs_scope', { path: scopePath });
   } catch { /* scope grant is best-effort */ }
 }
 
@@ -38,8 +39,7 @@ export async function getFrameDirs() {
   const dirs = [];
   try {
     const appData = await t.path.appDataDir();
-    const sep = appData.endsWith('\\') || appData.endsWith('/') ? '' : '\\';
-    const userDir = `${appData}${sep}kaders`;
+    const userDir = await t.path.join(appData, 'kaders');
     await _allowDir(userDir);
     if (await _exists(userDir)) dirs.push(userDir);
   } catch { /* no appData (browser) */ }
@@ -47,8 +47,7 @@ export async function getFrameDirs() {
   if (await _exists(DEV_FRAMES_DIR)) dirs.push(DEV_FRAMES_DIR);
   try {
     const res = await t.path.resourceDir();
-    const sep = res.endsWith('\\') || res.endsWith('/') ? '' : '\\';
-    const bundled = `${res}${sep}kaders`;
+    const bundled = await t.path.join(res, 'kaders');
     await _allowDir(bundled);
     if (await _exists(bundled)) dirs.push(bundled);
   } catch { /* no resource dir */ }
@@ -61,8 +60,7 @@ export async function getUserFramesDir() {
   if (await _exists(DEV_FRAMES_DIR)) return DEV_FRAMES_DIR;
   const t = _tauri();
   const appData = await t.path.appDataDir();
-  const sep = appData.endsWith('\\') || appData.endsWith('/') ? '' : '\\';
-  const userDir = `${appData}${sep}kaders`;
+  const userDir = await t.path.join(appData, 'kaders');
   await _allowDir(userDir);
   if (!(await _exists(userDir))) {
     try { await t.fs.mkdir(userDir, { recursive: true }); } catch { /* leave */ }
@@ -98,7 +96,7 @@ async function _scanDir(dir, out, seen) {
   let entries = [];
   try { entries = await _tauri().fs.readDir(dir); } catch { return; }
   for (const en of entries || []) {
-    const full = `${dir}\\${en.name}`;
+    const full = await _tauri().path.join(dir, en.name);
     if (en.isDirectory) {
       await _allowDir(full);
       await _scanDir(full, out, seen);
