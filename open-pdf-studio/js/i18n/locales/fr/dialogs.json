@@ -294,6 +294,20 @@
     "dontAskAgain": "Ne plus demander",
     "notNow": "Pas maintenant"
   },
+  "cropMargins": {
+    "title": "Rogner les marges",
+    "applyTo": "Appliquer à :",
+    "currentPage": "Page actuelle",
+    "allPages": "Toutes les pages",
+    "pageRange": "Plage de pages",
+    "pages": "Pages :",
+    "pagesPlaceholder": "ex. 1-3, 5, 8-10",
+    "padding": "Marge intérieure (mm) :",
+    "threshold": "Seuil :",
+    "info": "{{count}} page(s) dans le document. CropBox préserve le contenu d'origine — entièrement réversible avec Annuler.",
+    "noContent": "Aucun contenu détecté — toutes les pages sélectionnées semblent vides.",
+    "resultWithSkipped": "{{cropped}} page(s) rognée(s). {{skipped}} page(s) vierge(s) ignorée(s)."
+  },
   "resizePages": {
     "title": "Resize Pages",
     "applyTo": "Apply to:",

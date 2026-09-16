@@ -294,6 +294,20 @@
     "dontAskAgain": "Не питай отново",
     "notNow": "Не сега"
   },
+  "cropMargins": {
+    "title": "Изрязване на полета",
+    "applyTo": "Прилагане към:",
+    "currentPage": "Текуща страница",
+    "allPages": "Всички страници",
+    "pageRange": "Диапазон от страници",
+    "pages": "Страници:",
+    "pagesPlaceholder": "напр. 1-3, 5, 8-10",
+    "padding": "Отстъп (mm):",
+    "threshold": "Праг:",
+    "info": "{{count}} страница(и) в документа. CropBox запазва оригиналното съдържание — напълно обратимо с Отмяна.",
+    "noContent": "Не е открито съдържание — всички избрани страници изглеждат празни.",
+    "resultWithSkipped": "Изрязани {{cropped}} страница(и). Пропуснати {{skipped}} празна(и) страница(и)."
+  },
   "resizePages": {
     "title": "Resize Pages",
     "applyTo": "Apply to:",

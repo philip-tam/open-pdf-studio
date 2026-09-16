@@ -294,6 +294,20 @@
     "dontAskAgain": "دوبارہ مت پوچھیں",
     "notNow": "ابھی نہیں"
   },
+  "cropMargins": {
+    "title": "مارجن کراپ کریں",
+    "applyTo": "اطلاق کریں:",
+    "currentPage": "موجودہ صفحہ",
+    "allPages": "تمام صفحات",
+    "pageRange": "صفحہ کی حد",
+    "pages": "صفحات:",
+    "pagesPlaceholder": "مثلاً 1-3, 5, 8-10",
+    "padding": "پیڈنگ (mm):",
+    "threshold": "حد:",
+    "info": "دستاویز میں {{count}} صفحات ہیں۔ CropBox اصل مواد کو محفوظ رکھتا ہے — کالعدم کے ساتھ مکمل طور پر واپس کیا جا سکتا ہے۔",
+    "noContent": "کوئی مواد نہیں ملا — تمام منتخب صفحات خالی معلوم ہوتے ہیں۔",
+    "resultWithSkipped": "{{cropped}} صفحات کراپ کیے گئے۔ {{skipped}} خالی صفحات نظر انداز کیے گئے۔"
+  },
   "resizePages": {
     "title": "Resize Pages",
     "applyTo": "Apply to:",

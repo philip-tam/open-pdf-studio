@@ -294,6 +294,20 @@
     "dontAskAgain": "Ne kérdezze többé",
     "notNow": "Most nem"
   },
+  "cropMargins": {
+    "title": "Margók vágása",
+    "applyTo": "Alkalmazás erre:",
+    "currentPage": "Aktuális oldal",
+    "allPages": "Összes oldal",
+    "pageRange": "Oldaltartomány",
+    "pages": "Oldalak:",
+    "pagesPlaceholder": "pl. 1-3, 5, 8-10",
+    "padding": "Kitöltés (mm):",
+    "threshold": "Küszöbérték:",
+    "info": "{{count}} oldal a dokumentumban. A CropBox megőrzi az eredeti tartalmat — a Visszavonással teljesen visszaállítható.",
+    "noContent": "Nem található tartalom — az összes kijelölt oldal üresnek tűnik.",
+    "resultWithSkipped": "{{cropped}} oldal levágva. {{skipped}} üres oldal kihagyva."
+  },
   "resizePages": {
     "title": "Resize Pages",
     "applyTo": "Apply to:",

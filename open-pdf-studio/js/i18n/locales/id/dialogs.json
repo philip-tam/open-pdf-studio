@@ -294,6 +294,20 @@
     "dontAskAgain": "Jangan Tanya Lagi",
     "notNow": "Tidak Sekarang"
   },
+  "cropMargins": {
+    "title": "Pangkas Margin",
+    "applyTo": "Terapkan ke:",
+    "currentPage": "Halaman saat ini",
+    "allPages": "Semua halaman",
+    "pageRange": "Rentang Halaman",
+    "pages": "Halaman:",
+    "pagesPlaceholder": "mis. 1-3, 5, 8-10",
+    "padding": "Padding (mm):",
+    "threshold": "Ambang Batas:",
+    "info": "{{count}} halaman dalam dokumen. CropBox mempertahankan konten asli — sepenuhnya dapat dibatalkan dengan Urungkan.",
+    "noContent": "Tidak ada konten terdeteksi — semua halaman yang dipilih tampak kosong.",
+    "resultWithSkipped": "{{cropped}} halaman dipangkas. {{skipped}} halaman kosong dilewati."
+  },
   "resizePages": {
     "title": "Resize Pages",
     "applyTo": "Apply to:",

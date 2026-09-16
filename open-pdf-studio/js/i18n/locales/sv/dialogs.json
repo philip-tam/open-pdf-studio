@@ -294,6 +294,20 @@
     "dontAskAgain": "Fråga inte igen",
     "notNow": "Inte nu"
   },
+  "cropMargins": {
+    "title": "Beskär marginaler",
+    "applyTo": "Tillämpa på:",
+    "currentPage": "Aktuell sida",
+    "allPages": "Alla sidor",
+    "pageRange": "Sidintervall",
+    "pages": "Sidor:",
+    "pagesPlaceholder": "t.ex. 1-3, 5, 8-10",
+    "padding": "Utfyllnad (mm):",
+    "threshold": "Tröskelvärde:",
+    "info": "{{count}} sida(or) i dokumentet. CropBox bevarar det ursprungliga innehållet — helt återställbart med Ångra.",
+    "noContent": "Inget innehåll upptäcktes — alla valda sidor verkar vara tomma.",
+    "resultWithSkipped": "Beskar {{cropped}} sida(or). Hoppade över {{skipped}} tomma sidor."
+  },
   "resizePages": {
     "title": "Resize Pages",
     "applyTo": "Apply to:",

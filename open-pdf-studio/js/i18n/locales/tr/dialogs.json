@@ -294,6 +294,20 @@
     "dontAskAgain": "Bir Daha Sorma",
     "notNow": "Şimdi Değil"
   },
+  "cropMargins": {
+    "title": "Kenar Boşluklarını Kırp",
+    "applyTo": "Şuna uygula:",
+    "currentPage": "Geçerli sayfa",
+    "allPages": "Tüm sayfalar",
+    "pageRange": "Sayfa Aralığı",
+    "pages": "Sayfalar:",
+    "pagesPlaceholder": "örn. 1-3, 5, 8-10",
+    "padding": "İç Boşluk (mm):",
+    "threshold": "Eşik:",
+    "info": "Belgede {{count}} sayfa var. CropBox orijinal içeriği korur — Geri Al ile tamamen geri alınabilir.",
+    "noContent": "İçerik algılanmadı — seçilen tüm sayfalar boş görünüyor.",
+    "resultWithSkipped": "{{cropped}} sayfa kırpıldı. {{skipped}} boş sayfa atlandı."
+  },
   "resizePages": {
     "title": "Resize Pages",
     "applyTo": "Apply to:",

@@ -294,6 +294,20 @@
     "dontAskAgain": "Не питај поново",
     "notNow": "Не сада"
   },
+  "cropMargins": {
+    "title": "Опсецање маргина",
+    "applyTo": "Примени на:",
+    "currentPage": "Тренутна страница",
+    "allPages": "Све странице",
+    "pageRange": "Опсег страница",
+    "pages": "Странице:",
+    "pagesPlaceholder": "нпр. 1-3, 5, 8-10",
+    "padding": "Попуна (mm):",
+    "threshold": "Праг:",
+    "info": "{{count}} страница у документу. CropBox чува оригинални садржај — потпуно повратно опцијом Опозови.",
+    "noContent": "Није откривен садржај — све изабране странице изгледају празно.",
+    "resultWithSkipped": "Опсечено {{cropped}} страница. Прескочено {{skipped}} празних страница."
+  },
   "resizePages": {
     "title": "Resize Pages",
     "applyTo": "Apply to:",

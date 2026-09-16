@@ -294,6 +294,20 @@
     "dontAskAgain": "Більше не питати",
     "notNow": "Не зараз"
   },
+  "cropMargins": {
+    "title": "Обрізати поля",
+    "applyTo": "Застосувати до:",
+    "currentPage": "Поточна сторінка",
+    "allPages": "Усі сторінки",
+    "pageRange": "Діапазон сторінок",
+    "pages": "Сторінки:",
+    "pagesPlaceholder": "напр. 1-3, 5, 8-10",
+    "padding": "Відступ (мм):",
+    "threshold": "Поріг:",
+    "info": "{{count}} сторінок у документі. CropBox зберігає початковий вміст — повністю оборотно за допомогою Скасувати.",
+    "noContent": "Вміст не виявлено — усі вибрані сторінки виглядають порожніми.",
+    "resultWithSkipped": "Обрізано {{cropped}} сторінок. Пропущено {{skipped}} порожніх сторінок."
+  },
   "resizePages": {
     "title": "Resize Pages",
     "applyTo": "Apply to:",

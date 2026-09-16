@@ -294,6 +294,20 @@
     "dontAskAgain": "Už sa nepýtať",
     "notNow": "Teraz nie"
   },
+  "cropMargins": {
+    "title": "Orezať okraje",
+    "applyTo": "Použiť na:",
+    "currentPage": "Aktuálna strana",
+    "allPages": "Všetky strany",
+    "pageRange": "Rozsah strán",
+    "pages": "Strany:",
+    "pagesPlaceholder": "napr. 1-3, 5, 8-10",
+    "padding": "Odsadenie (mm):",
+    "threshold": "Prah:",
+    "info": "{{count}} strán v dokumente. CropBox zachováva pôvodný obsah — plne vratné pomocou Späť.",
+    "noContent": "Nebol zistený žiadny obsah — všetky vybrané strany sa zdajú byť prázdne.",
+    "resultWithSkipped": "Orezaných {{cropped}} strán. Preskočených {{skipped}} prázdnych strán."
+  },
   "resizePages": {
     "title": "Resize Pages",
     "applyTo": "Apply to:",

@@ -294,6 +294,20 @@
     "dontAskAgain": "ไม่ต้องถามอีก",
     "notNow": "ไม่ใช่ตอนนี้"
   },
+  "cropMargins": {
+    "title": "ครอบตัดขอบ",
+    "applyTo": "นำไปใช้กับ:",
+    "currentPage": "หน้าปัจจุบัน",
+    "allPages": "ทุกหน้า",
+    "pageRange": "ช่วงหน้า",
+    "pages": "หน้า:",
+    "pagesPlaceholder": "เช่น 1-3, 5, 8-10",
+    "padding": "ระยะขอบ (mm):",
+    "threshold": "ค่าขีดแบ่ง:",
+    "info": "มี {{count}} หน้าในเอกสาร CropBox จะรักษาเนื้อหาต้นฉบับไว้ — ย้อนกลับได้อย่างสมบูรณ์ด้วยเลิกทำ",
+    "noContent": "ไม่พบเนื้อหา — หน้าที่เลือกทั้งหมดดูเหมือนจะว่างเปล่า",
+    "resultWithSkipped": "ครอบตัดแล้ว {{cropped}} หน้า ข้ามหน้าว่าง {{skipped}} หน้า"
+  },
   "resizePages": {
     "title": "Resize Pages",
     "applyTo": "Apply to:",

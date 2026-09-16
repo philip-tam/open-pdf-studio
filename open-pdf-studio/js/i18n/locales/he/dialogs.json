@@ -294,6 +294,20 @@
     "dontAskAgain": "אל תשאל שוב",
     "notNow": "לא כעת"
   },
+  "cropMargins": {
+    "title": "חיתוך שוליים",
+    "applyTo": "החל על:",
+    "currentPage": "העמוד הנוכחי",
+    "allPages": "כל העמודים",
+    "pageRange": "טווח עמודים",
+    "pages": "עמודים:",
+    "pagesPlaceholder": "לדוגמה: 1-3, 5, 8-10",
+    "padding": "ריפוד (mm):",
+    "threshold": "סף:",
+    "info": "{{count}} עמודים במסמך. CropBox שומר על התוכן המקורי — הפיך לחלוטין באמצעות ביטול.",
+    "noContent": "לא זוהה תוכן — כל העמודים שנבחרו נראים ריקים.",
+    "resultWithSkipped": "נחתכו {{cropped}} עמודים. {{skipped}} עמודים ריקים דולגו."
+  },
   "resizePages": {
     "title": "Resize Pages",
     "applyTo": "Apply to:",

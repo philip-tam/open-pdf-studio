@@ -294,6 +294,20 @@
     "dontAskAgain": "Älä kysy uudelleen",
     "notNow": "Ei nyt"
   },
+  "cropMargins": {
+    "title": "Rajaa marginaalit",
+    "applyTo": "Käytä kohteessa:",
+    "currentPage": "Nykyinen sivu",
+    "allPages": "Kaikki sivut",
+    "pageRange": "Sivualue",
+    "pages": "Sivut:",
+    "pagesPlaceholder": "esim. 1-3, 5, 8-10",
+    "padding": "Täyte (mm):",
+    "threshold": "Kynnysarvo:",
+    "info": "{{count}} sivua asiakirjassa. CropBox säilyttää alkuperäisen sisällön — täysin peruutettavissa Kumoa-toiminnolla.",
+    "noContent": "Sisältöä ei havaittu — kaikki valitut sivut näyttävät olevan tyhjiä.",
+    "resultWithSkipped": "Rajattiin {{cropped}} sivua. Ohitettiin {{skipped}} tyhjää sivua."
+  },
   "resizePages": {
     "title": "Resize Pages",
     "applyTo": "Apply to:",

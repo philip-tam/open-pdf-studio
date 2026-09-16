@@ -294,6 +294,20 @@
     "dontAskAgain": "Ikke spør igjen",
     "notNow": "Ikke nå"
   },
+  "cropMargins": {
+    "title": "Beskjær marger",
+    "applyTo": "Bruk på:",
+    "currentPage": "Gjeldende side",
+    "allPages": "Alle sider",
+    "pageRange": "Sideområde",
+    "pages": "Sider:",
+    "pagesPlaceholder": "f.eks. 1-3, 5, 8-10",
+    "padding": "Fyll (mm):",
+    "threshold": "Terskel:",
+    "info": "{{count}} side(r) i dokumentet. CropBox bevarer det opprinnelige innholdet — fullt reverserbart med Angre.",
+    "noContent": "Ingen innhold oppdaget — alle valgte sider ser ut til å være tomme.",
+    "resultWithSkipped": "Beskar {{cropped}} side(r). Hoppet over {{skipped}} tomme side(r)."
+  },
   "resizePages": {
     "title": "Resize Pages",
     "applyTo": "Apply to:",

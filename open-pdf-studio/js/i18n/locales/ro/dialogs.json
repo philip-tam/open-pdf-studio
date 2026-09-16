@@ -294,6 +294,20 @@
     "dontAskAgain": "Nu mai intreba",
     "notNow": "Nu acum"
   },
+  "cropMargins": {
+    "title": "Decupare margini",
+    "applyTo": "Se aplica la:",
+    "currentPage": "Pagina curenta",
+    "allPages": "Toate paginile",
+    "pageRange": "Interval pagini",
+    "pages": "Pagini:",
+    "pagesPlaceholder": "ex. 1-3, 5, 8-10",
+    "padding": "Umplutura (mm):",
+    "threshold": "Prag:",
+    "info": "{{count}} pagini in document. CropBox pastreaza continutul original — complet reversibil cu Anulare.",
+    "noContent": "Nu a fost detectat continut — toate paginile selectate par a fi goale.",
+    "resultWithSkipped": "{{cropped}} pagini decupate. {{skipped}} pagini goale omise."
+  },
   "resizePages": {
     "title": "Resize Pages",
     "applyTo": "Apply to:",

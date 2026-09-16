@@ -294,6 +294,20 @@
     "dontAskAgain": "不再询问",
     "notNow": "暂时不"
   },
+  "cropMargins": {
+    "title": "裁剪边距",
+    "applyTo": "应用于：",
+    "currentPage": "当前页面",
+    "allPages": "所有页面",
+    "pageRange": "页码范围",
+    "pages": "页面：",
+    "pagesPlaceholder": "例如 1-3, 5, 8-10",
+    "padding": "内边距 (mm)：",
+    "threshold": "阈值：",
+    "info": "文档中共有 {{count}} 页。CropBox 会保留原始内容 — 可通过撤销完全恢复。",
+    "noContent": "未检测到内容 — 所有选定页面似乎都是空白的。",
+    "resultWithSkipped": "已裁剪 {{cropped}} 页。已跳过 {{skipped}} 个空白页。"
+  },
   "resizePages": {
     "title": "Resize Pages",
     "applyTo": "Apply to:",

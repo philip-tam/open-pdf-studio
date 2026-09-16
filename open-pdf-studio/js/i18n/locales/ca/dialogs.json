@@ -294,6 +294,20 @@
     "dontAskAgain": "No ho tornis a preguntar",
     "notNow": "Ara no"
   },
+  "cropMargins": {
+    "title": "Retalla marges",
+    "applyTo": "Aplica a:",
+    "currentPage": "Pàgina actual",
+    "allPages": "Totes les pàgines",
+    "pageRange": "Interval de pàgines",
+    "pages": "Pàgines:",
+    "pagesPlaceholder": "p. ex. 1-3, 5, 8-10",
+    "padding": "Farciment (mm):",
+    "threshold": "Llindar:",
+    "info": "{{count}} pàgina(es) al document. CropBox conserva el contingut original — totalment reversible amb Desfés.",
+    "noContent": "No s'ha detectat contingut — totes les pàgines seleccionades semblen buides.",
+    "resultWithSkipped": "S'han retallat {{cropped}} pàgina(es). S'han omès {{skipped}} pàgina(es) en blanc."
+  },
   "resizePages": {
     "title": "Resize Pages",
     "applyTo": "Apply to:",

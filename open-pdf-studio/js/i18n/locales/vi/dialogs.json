@@ -294,6 +294,20 @@
     "dontAskAgain": "Không Hỏi lại",
     "notNow": "Không phải Bây giờ"
   },
+  "cropMargins": {
+    "title": "Cắt Lề",
+    "applyTo": "Áp dụng cho:",
+    "currentPage": "Trang hiện tại",
+    "allPages": "Tất cả trang",
+    "pageRange": "Phạm vi Trang",
+    "pages": "Trang:",
+    "pagesPlaceholder": "vd. 1-3, 5, 8-10",
+    "padding": "Đệm (mm):",
+    "threshold": "Ngưỡng:",
+    "info": "Có {{count}} trang trong tài liệu. CropBox giữ nguyên nội dung gốc — có thể hoàn tác hoàn toàn bằng Hoàn tác.",
+    "noContent": "Không phát hiện nội dung — tất cả các trang đã chọn có vẻ trống.",
+    "resultWithSkipped": "Đã cắt {{cropped}} trang. Đã bỏ qua {{skipped}} trang trống."
+  },
   "resizePages": {
     "title": "Resize Pages",
     "applyTo": "Apply to:",

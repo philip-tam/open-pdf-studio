@@ -294,6 +294,20 @@
     "dontAskAgain": "আর জিজ্ঞাসা করবেন না",
     "notNow": "এখন নয়"
   },
+  "cropMargins": {
+    "title": "মার্জিন ক্রপ করুন",
+    "applyTo": "প্রয়োগ করুন:",
+    "currentPage": "বর্তমান পৃষ্ঠা",
+    "allPages": "সমস্ত পৃষ্ঠা",
+    "pageRange": "পৃষ্ঠার পরিসর",
+    "pages": "পৃষ্ঠা:",
+    "pagesPlaceholder": "যেমন 1-3, 5, 8-10",
+    "padding": "প্যাডিং (mm):",
+    "threshold": "থ্রেশহোল্ড:",
+    "info": "নথিতে {{count}} পৃষ্ঠা আছে। CropBox মূল কন্টেন্ট সংরক্ষণ করে — আনডু দিয়ে সম্পূর্ণরূপে বিপরীতযোগ্য।",
+    "noContent": "কোনো কন্টেন্ট সনাক্ত করা যায়নি — নির্বাচিত সব পৃষ্ঠা খালি বলে মনে হচ্ছে।",
+    "resultWithSkipped": "{{cropped}}টি পৃষ্ঠা ক্রপ করা হয়েছে। {{skipped}}টি খালি পৃষ্ঠা এড়িয়ে যাওয়া হয়েছে।"
+  },
   "resizePages": {
     "title": "Resize Pages",
     "applyTo": "Apply to:",

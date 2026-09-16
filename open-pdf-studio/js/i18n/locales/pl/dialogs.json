@@ -294,6 +294,20 @@
     "dontAskAgain": "Nie pytaj ponownie",
     "notNow": "Nie teraz"
   },
+  "cropMargins": {
+    "title": "Przytnij marginesy",
+    "applyTo": "Zastosuj do:",
+    "currentPage": "Bieżąca strona",
+    "allPages": "Wszystkie strony",
+    "pageRange": "Zakres stron",
+    "pages": "Strony:",
+    "pagesPlaceholder": "np. 1-3, 5, 8-10",
+    "padding": "Wypełnienie (mm):",
+    "threshold": "Próg:",
+    "info": "{{count}} stron w dokumencie. CropBox zachowuje oryginalną zawartość — w pełni odwracalne za pomocą Cofnij.",
+    "noContent": "Nie wykryto zawartości — wszystkie wybrane strony wydają się puste.",
+    "resultWithSkipped": "Przycięto {{cropped}} stron. Pominięto {{skipped}} pustych stron."
+  },
   "resizePages": {
     "title": "Resize Pages",
     "applyTo": "Apply to:",
