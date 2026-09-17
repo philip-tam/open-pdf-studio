@@ -305,7 +305,67 @@ async fn is_default_pdf_app() -> bool {
             default_desktop == "Open PDF Studio.desktop" || default_desktop == "open-pdf-studio.desktop"
         }
 
-        #[cfg(not(any(target_os = "windows", target_os = "linux")))]
+        #[cfg(target_os = "macos")]
+        {
+            use std::ffi::CString;
+            use std::os::raw::{c_char, c_void};
+
+            #[link(name = "CoreFoundation", kind = "framework")]
+            extern "C" {
+                static kCFAllocatorDefault: *const c_void;
+                fn CFStringCreateWithCString(alloc: *const c_void, c_str: *const c_char, encoding: u32) -> *const c_void;
+                fn CFStringGetCString(the_string: *const c_void, buffer: *mut c_char, buffer_size: isize, encoding: u32) -> u8;
+                fn CFRelease(cf: *const c_void);
+            }
+
+            #[link(name = "CoreServices", kind = "framework")]
+            extern "C" {
+                fn LSCopyDefaultRoleHandlerForContentType(in_content_type: *const c_void, in_role: u32) -> *const c_void;
+            }
+
+            const K_CF_STRING_ENCODING_UTF8: u32 = 0x0800_0100;
+            const K_LS_ROLES_ALL: u32 = 0xFFFF_FFFF;
+            const OUR_BUNDLE_ID: &str = "org.openaec.openpdfstudio";
+
+            // Same two UTIs open_default_apps_settings sets — check whichever
+            // one Launch Services actually resolved the "pdf" extension to.
+            let content_types = ["com.adobe.pdf", "public.pdf"];
+            let mut is_default = false;
+
+            for uti in content_types {
+                let c_uti = match CString::new(uti) {
+                    Ok(s) => s,
+                    Err(_) => continue,
+                };
+                unsafe {
+                    let cf_uti = CFStringCreateWithCString(kCFAllocatorDefault, c_uti.as_ptr(), K_CF_STRING_ENCODING_UTF8);
+                    if cf_uti.is_null() {
+                        continue;
+                    }
+                    let handler = LSCopyDefaultRoleHandlerForContentType(cf_uti, K_LS_ROLES_ALL);
+                    CFRelease(cf_uti);
+                    if handler.is_null() {
+                        continue;
+                    }
+                    let mut buf = [0u8; 256];
+                    let ok = CFStringGetCString(handler, buf.as_mut_ptr() as *mut c_char, buf.len() as isize, K_CF_STRING_ENCODING_UTF8);
+                    CFRelease(handler);
+                    if ok != 0 {
+                        let end = buf.iter().position(|&b| b == 0).unwrap_or(buf.len());
+                        if let Ok(s) = std::str::from_utf8(&buf[..end]) {
+                            if s.eq_ignore_ascii_case(OUR_BUNDLE_ID) {
+                                is_default = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            is_default
+        }
+
+        #[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "macos")))]
         {
             false
         }
@@ -315,6 +375,9 @@ async fn is_default_pdf_app() -> bool {
 /// Make this app the default handler for .pdf files.
 /// On Windows, opens the system default-apps settings page. On Linux, sets the
 /// xdg-mime default directly (no system UI for this exists on most desktops).
+/// On macOS, sets it directly via Launch Services (no per-type settings page
+/// exists there either, and unlike Linux there's no CLI tool preinstalled to
+/// shell out to).
 #[tauri::command]
 fn open_default_apps_settings() -> Result<bool, String> {
     #[cfg(target_os = "windows")]
@@ -351,7 +414,52 @@ fn open_default_apps_settings() -> Result<bool, String> {
         Ok(true)
     }
 
-    #[cfg(not(any(target_os = "windows", target_os = "linux")))]
+    #[cfg(target_os = "macos")]
+    {
+        // NOT implemented via the legacy LSSetDefaultRoleHandlerForContentType
+        // C SPI — that call crashes here. Its internal
+        // _LSPresentDefaultHandlerChangeUI step (which tries to present a
+        // system confirmation UI) segfaults on objc_msgSend when invoked from
+        // this app's WKWebView IPC-handler context on macOS 26.6.2 (confirmed
+        // via a real crash log: EXC_BAD_ACCESS in objc_msgSend <-
+        // _LSPresentDefaultHandlerChangeUI <- _LSSetContentTypeHandler <-
+        // LSSetDefaultRoleHandlerForContentType). NSWorkspace's modern,
+        // supported replacement (macOS 12+) doesn't go through that path.
+        use objc2_app_kit::NSWorkspace;
+        use objc2_foundation::{NSBundle, NSString};
+        use objc2_uniform_type_identifiers::UTType;
+
+        let bundle_url = NSBundle::mainBundle().bundleURL();
+        let workspace = NSWorkspace::sharedWorkspace();
+
+        // Info.plist declares the PDF document type by extension only (no
+        // explicit LSItemContentTypes), so Launch Services resolves it
+        // against the extension's own UTI — historically com.adobe.pdf, with
+        // public.pdf as its System-declared conforming alias. Set both.
+        let content_types = ["com.adobe.pdf", "public.pdf"];
+        let mut set_any = false;
+
+        for uti in content_types {
+            let ns_uti = NSString::from_str(uti);
+            let Some(ut_type) = UTType::typeWithIdentifier(&ns_uti) else {
+                continue;
+            };
+            workspace.setDefaultApplicationAtURL_toOpenContentType_completionHandler(
+                &bundle_url,
+                &ut_type,
+                None,
+            );
+            set_any = true;
+        }
+
+        if set_any {
+            Ok(true)
+        } else {
+            Err("Neither com.adobe.pdf nor public.pdf resolved to a UTType".to_string())
+        }
+    }
+
+    #[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "macos")))]
     {
         Ok(false)
     }
