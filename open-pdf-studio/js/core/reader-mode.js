@@ -21,9 +21,9 @@
 //
 // The PDF's own directory is already fs-scope-permitted by the time this
 // runs: loader.js calls allow_fs_scope(filePath) on every open, which (per
-// saver/ocr-text-layer.js's own comment on the same mechanism) registers
-// the FILE's PARENT DIRECTORY, not just that one path — so writing/reading
-// a sibling sidecar file needs no extra scope call.
+// lib.rs's allow_fs_scope command) registers the FILE's PARENT DIRECTORY,
+// not just that one path — so writing/reading a sibling sidecar file needs
+// no extra scope call.
 //
 // Outside Tauri (no real filesystem to place a sidecar next to), falls
 // back to a single localStorage entry per file path — same trade-off
@@ -85,58 +85,5 @@ export async function saveReaderPosition(filePath, position) {
     localStorage.setItem(LOCAL_STORAGE_PREFIX + filePath, JSON.stringify(data));
   } catch (e) {
     console.warn('Failed to save reader-mode position:', e);
-  }
-}
-
-/**
- * Forget the saved position for one file (e.g. if the user wants a fresh
- * start on their next open of it). Currently unused by the UI — exposed
- * for completeness/future use (e.g. a "forget reading position" item on
- * the file's context menu).
- * @param {string} filePath
- */
-export async function clearReaderPosition(filePath) {
-  if (!filePath) return;
-  if (isTauri()) {
-    try {
-      if (window.__TAURI__?.fs?.remove) await window.__TAURI__.fs.remove(sidecarPath(filePath));
-    } catch (e) {
-      // Already gone, or never existed — fine either way.
-    }
-    return;
-  }
-  try {
-    localStorage.removeItem(LOCAL_STORAGE_PREFIX + filePath);
-  } catch (e) {
-    // ignore
-  }
-}
-
-/**
- * One-time migration from the earlier design (a single central
- * reader_positions.json under the app data directory) to per-file
- * sidecars: relocates each entry next to its own PDF, then blanks the
- * central file so it stops being a standing list of every PDF ever
- * opened. Best-effort per entry — a file that's been moved, renamed, or
- * is on a read-only volume just keeps its old central-store entry
- * un-migrated (silently dropped, same as any other inaccessible sidecar
- * write). Call once at startup; safe to call repeatedly (no-ops once the
- * central file is empty).
- */
-export async function migrateLegacyReaderPositions() {
-  if (!isTauri()) return;
-  try {
-    const { loadReaderPositionsFile, saveReaderPositionsFile } = await import('./platform.js');
-    const legacy = await loadReaderPositionsFile();
-    if (!legacy || typeof legacy !== 'object') return;
-    const paths = Object.keys(legacy);
-    if (paths.length === 0) return;
-    for (const filePath of paths) {
-      const { savedAt, ...position } = legacy[filePath] || {};
-      await saveReaderPosition(filePath, position);
-    }
-    await saveReaderPositionsFile({});
-  } catch (e) {
-    console.warn('Reader Mode: legacy position migration failed:', e);
   }
 }

@@ -12,6 +12,8 @@ pub mod mcp_server;
 pub mod mcp_tool_meta;
 pub mod ocr;
 pub mod pdfium_renderer;
+pub mod handtekening;
+pub mod print_instelling;
 pub mod render_to_png;
 pub mod window_mgmt;
 pub mod startup_diagnostics;
@@ -126,31 +128,6 @@ fn save_preferences(data: String) -> Result<bool, String> {
 #[tauri::command]
 fn load_preferences() -> Option<String> {
     let path = get_preferences_file_path();
-    fs::read_to_string(&path).ok()
-}
-
-fn get_reader_positions_file_path() -> String {
-    if let Some(data_dir) = dirs::data_local_dir() {
-        let app_dir = data_dir.join("OpenPDFStudio");
-        if !app_dir.exists() {
-            let _ = fs::create_dir_all(&app_dir);
-        }
-        app_dir.join("reader_positions.json").to_string_lossy().to_string()
-    } else {
-        "reader_positions.json".to_string()
-    }
-}
-
-#[tauri::command]
-fn save_reader_positions(data: String) -> Result<bool, String> {
-    let path = get_reader_positions_file_path();
-    fs::write(&path, data).map_err(|e| e.to_string())?;
-    Ok(true)
-}
-
-#[tauri::command]
-fn load_reader_positions() -> Option<String> {
-    let path = get_reader_positions_file_path();
     fs::read_to_string(&path).ok()
 }
 
@@ -633,14 +610,23 @@ async fn get_printers() -> Result<String, String> {
 /// async for the same reason as get_printers: GDI spooling is slow blocking
 /// work and must not run on the main event-loop thread.
 #[tauri::command]
-async fn print_pdf(path: String, printer: String) -> Result<bool, String> {
+async fn print_pdf(
+    path: String,
+    printer: String,
+    orientatie: Option<String>,
+    papier: Option<String>,
+) -> Result<bool, String> {
+    // Keuzes uit de Pagina-instelling. Zonder argumenten: Auto + printerstandaard,
+    // precies het gedrag van vóór deze parameters.
+    let orientatie = print_instelling::Orientatie::uit_keuze(orientatie.as_deref());
+    let papier = print_instelling::Papier::uit_keuze(papier.as_deref());
     #[cfg(target_os = "windows")]
     {
         use windows_sys::Win32::Graphics::Gdi::{
             CreateDCW, DeleteDC, StretchDIBits, GetDeviceCaps, SetStretchBltMode,
             ResetDCW, DEVMODEW, BITMAPINFO, BITMAPINFOHEADER,
             BI_RGB, DIB_RGB_COLORS, SRCCOPY, HORZRES, VERTRES, LOGPIXELSX, HALFTONE,
-            DM_ORIENTATION, DMORIENT_PORTRAIT, DMORIENT_LANDSCAPE,
+            DM_ORIENTATION, DM_PAPERSIZE, DMORIENT_PORTRAIT, DMORIENT_LANDSCAPE,
         };
         // The StartDoc/EndDoc print-job family lives under Storage::Xps in
         // windows-sys (print spooler document API), not under Graphics::Gdi.
@@ -684,6 +670,12 @@ async fn print_pdf(path: String, printer: String) -> Result<bool, String> {
             let mut devmode: DEVMODEW = std::mem::zeroed();
             devmode.dmSize = std::mem::size_of::<DEVMODEW>() as u16;
             devmode.dmFields = DM_ORIENTATION;
+            // Papierformaat alleen als de gebruiker er een koos; anders blijft
+            // het formaat van de printer staan.
+            if let Some(code) = print_instelling::dmpaper(papier) {
+                devmode.dmFields |= DM_PAPERSIZE;
+                devmode.Anonymous1.Anonymous1.dmPaperSize = code;
+            }
             {
                 let n = printer_w.len().min(31);
                 devmode.dmDeviceName[..n].copy_from_slice(&printer_w[..n]);
@@ -727,8 +719,16 @@ async fn print_pdf(path: String, printer: String) -> Result<bool, String> {
                 // drawing goes on landscape paper, no 90° auto-rotation.
                 // dmOrientation is i16; the DMORIENT_* consts are u32 in windows-sys.
                 devmode.Anonymous1.Anonymous1.dmOrientation =
-                    (if w > h { DMORIENT_LANDSCAPE } else { DMORIENT_PORTRAIT }) as i16;
-                ResetDCW(hdc, &devmode);
+                    (if print_instelling::liggend_voor_pagina(orientatie, w, h) {
+                        DMORIENT_LANDSCAPE
+                    } else {
+                        DMORIENT_PORTRAIT
+                    }) as i16;
+                if ResetDCW(hdc, &devmode).is_null() {
+                    // De driver weigerde de wijziging; de pagina gaat met de
+                    // vorige instelling mee in plaats van de opdracht af te breken.
+                    eprintln!("[print] ResetDC geweigerd voor pagina {} ({:?}, {:?})", i + 1, orientatie, papier);
+                }
                 let dev_w = GetDeviceCaps(hdc, HORZRES as i32);
                 let dev_h = GetDeviceCaps(hdc, VERTRES as i32);
 
@@ -792,6 +792,9 @@ async fn print_pdf(path: String, printer: String) -> Result<bool, String> {
         // The caller always passes an absolute temp path, so the filename can
         // never be mistaken for an option; `--` is not portable across lp
         // implementations and is deliberately left out.
+        for optie in print_instelling::lp_opties(orientatie, papier) {
+            cmd.arg(optie);
+        }
         let output = cmd
             .arg(&path)
             .output()
@@ -811,7 +814,7 @@ async fn print_pdf(path: String, printer: String) -> Result<bool, String> {
 
     #[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "macos")))]
     {
-        let _ = (&path, &printer);
+        let _ = (&path, &printer, &orientatie, &papier);
         Err("Printing is not supported on this platform".to_string())
     }
 }
@@ -2463,6 +2466,43 @@ fn invalidate_pdf_cache(
     Ok(true)
 }
 
+/// Alles loslaten wat het proces voor een gesloten document vasthoudt: ruwe
+/// bytes, geparsede handles (lopdf én PDFium), thumbnails, paginatypen en
+/// pixmaps. Alleen aanroepen als geen ander open tabblad hetzelfde pad
+/// gebruikt — de JS-kant beslist dat (document-release.js). Lopende renders
+/// houden hun eigen Arc vast en merken hier niets van.
+#[tauri::command]
+fn release_pdf_document(
+    path: String,
+    bytes_cache: tauri::State<PdfBytesCache>,
+    handle_cache: tauri::State<DocHandleCache>,
+    thumb_cache: tauri::State<ThumbnailCache>,
+    page_type_cache: tauri::State<PageTypeCache>,
+    pdfium_cache: tauri::State<pdfium_renderer::PdfiumDocCache>,
+    pixmap_cache: tauri::State<pdfium_renderer::PixmapCacheState>,
+) -> Result<bool, String> {
+    bytes_cache.0.lock().map_err(|e| format!("Bytes cache lock: {}", e))?.remove(&path);
+    handle_cache.0.lock().map_err(|e| format!("Handle cache lock: {}", e))?.remove(&path);
+    if let Ok(mut tc) = thumb_cache.0.lock() {
+        tc.retain(|(p, _, _, _), _| p != &path);
+    }
+    if let Ok(mut pc) = page_type_cache.0.lock() {
+        pc.retain(|(p, _), _| p != &path);
+    }
+    let had_doc = pdfium_cache
+        .0
+        .lock()
+        .map_err(|e| format!("Pdfium doc cache lock: {}", e))?
+        .remove(&path)
+        .is_some();
+    if let Ok(mut guard) = pixmap_cache.0.lock() {
+        if let Some(cache) = guard.as_mut() {
+            cache.remove_path(&path);
+        }
+    }
+    Ok(had_doc)
+}
+
 /// Clear the entire PDF bytes cache AND parsed handle cache (call on app
 /// cleanup or memory pressure).
 #[tauri::command]
@@ -2755,6 +2795,19 @@ pub fn run(opts: StartupOpts) {
             diagnostics.record("native-created", None);
             app.manage(diagnostics);
 
+            // Ondertekende versies (pdf_signed_revision) ouder dan zeven dagen
+            // opruimen; vangnet naast het opruimen door de UI. Ruim genoeg, zodat
+            // een tabblad dat in een andere, nog draaiende instantie open staat
+            // zijn bestand niet kwijtraakt. Fouten negeren.
+            if let Ok(cachemap) = app.path().app_cache_dir() {
+                std::thread::spawn(move || {
+                    handtekening::verifieer::ruim_ondertekende_versies_op(
+                        &handtekening::verifieer::map_ondertekende_versies(&cachemap),
+                        handtekening::verifieer::OPRUIMEN_NA,
+                    );
+                });
+            }
+
             // Grant FS plugin scope for command-line files (file association)
             for path in app.state::<OpenedFiles>().0.lock().unwrap().iter() {
                 let _ = app.fs_scope().allow_file(path);
@@ -2909,8 +2962,6 @@ pub fn run(opts: StartupOpts) {
             list_pdf_files,
             save_preferences,
             load_preferences,
-            save_reader_positions,
-            load_reader_positions,
             save_catalog,
             load_catalog,
             delete_catalog,
@@ -2927,6 +2978,10 @@ pub fn run(opts: StartupOpts) {
             page_content_size,
             get_page_dimensions,
             invalidate_pdf_cache,
+            handtekening::certificaat::pdf_certificate_info,
+            handtekening::verifieer::pdf_signature_list,
+            handtekening::verifieer::pdf_signed_revision,
+            release_pdf_document,
             clear_pdf_cache,
             analyze_page_type,
             analyze_page_type_batch,
