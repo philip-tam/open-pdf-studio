@@ -78,7 +78,9 @@
     "find": "Najít",
     "findCtrlF": "Najít (Ctrl+F)",
     "resizePages": "Resize Pages",
-    "resize": "Resize"
+    "resize": "Resize",
+    "cadExport": "Do CAD",
+    "cadExportTitle": "Exportovat vektorový výkres do DXF nebo DWG"
   },
   "comment": {
     "drawing": "Kreslení",
@@ -154,7 +156,8 @@
     "appearance": "Vzhled",
     "keystrokes": "Keystrokes",
     "readerMode": "Režim Čtení",
-    "readerModeTip": "Zapamatuje si stránku, pozici posouvání a přiblížení každého PDF při zavření a opětovném otevření"
+    "readerModeTip": "Zapamatuje si stránku, pozici posouvání a přiblížení tohoto PDF při zavření a opětovném otevření. Dokud je funkce zapnutá, je vedle tohoto PDF uložen malý soubor, který se proto objeví i ve složkách synchronizovaných s cloudem (OneDrive, Dropbox atd.); vypnutím funkce se soubor odstraní.",
+    "readerModeSaveFailed": "Režim čtení nemohl uložit nastavení pro toto PDF. Složka je možná jen pro čtení."
   },
   "organize": {
     "pages": "Stránky",
@@ -177,7 +180,7 @@
     "manageWatermarks": "Spravovat vodoznaky",
     "manage": "Spravovat",
     "straighten": "Narovnat Stránku",
-    "ocr": "Recognize Text (OCR)",
+    "ocr": "Rozpoznávání textu (OCR)",
     "shiftPage": "Posunout stránku"
   },
   "help": {

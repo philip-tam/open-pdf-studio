@@ -78,7 +78,9 @@
     "find": "Tìm",
     "findCtrlF": "Tìm (Ctrl+F)",
     "resizePages": "Resize Pages",
-    "resize": "Resize"
+    "resize": "Resize",
+    "cadExport": "Sang CAD",
+    "cadExportTitle": "Xuất bản vẽ vectơ sang DXF hoặc DWG"
   },
   "comment": {
     "drawing": "Vẽ",
@@ -154,7 +156,8 @@
     "appearance": "Giao diện",
     "keystrokes": "Keystrokes",
     "readerMode": "Chế độ đọc",
-    "readerModeTip": "Ghi nhớ trang, vị trí cuộn và mức thu phóng của mỗi PDF khi đóng và mở lại"
+    "readerModeTip": "Ghi nhớ trang, vị trí cuộn và mức thu phóng của PDF này khi đóng và mở lại. Khi đang bật, một tệp nhỏ được lưu bên cạnh PDF này nên tệp đó cũng xuất hiện trong các thư mục đồng bộ với đám mây (OneDrive, Dropbox, v.v.); tắt tính năng này sẽ xóa tệp đó.",
+    "readerModeSaveFailed": "Chế độ đọc không thể lưu thiết lập cho PDF này. Thư mục có thể ở chế độ chỉ đọc."
   },
   "organize": {
     "pages": "Trang",
@@ -177,7 +180,7 @@
     "manageWatermarks": "Quản lý Hình mờ",
     "manage": "Quản lý",
     "straighten": "Làm Thẳng Trang",
-    "ocr": "Recognize Text (OCR)",
+    "ocr": "Nhận dạng văn bản (OCR)",
     "shiftPage": "Dịch chuyển trang"
   },
   "help": {

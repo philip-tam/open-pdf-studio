@@ -80,11 +80,20 @@ export interface DocumentState {
   selectedAnnotations: Annotation[];
   modified: boolean;
   scrollPosition: ScrollPosition;
+  /** Reader Mode: the reading position of this document is tracked (js/core/reader-mode-tracking.js). */
+  readerModeActive: boolean;
+  /** Reader Mode: stored position that still has to be shown; blocks saving until applied. */
+  _readerRestore?: { page?: number; scale?: number; scrollTop?: number; scrollHeight?: number; viewMode?: string } | null;
+  /** Reader Mode: a jump to the stored position is under way. */
+  _readerRestoring?: boolean;
   pageRotations: Record<number, number>;
   pageDims?: Record<number, { widthPt: number; heightPt: number; rotation?: number }>;
   pdfaCompliance: string | null;
   pdfADismissed: boolean;
   measureScale: MeasureScale | null;
+  /** Meetschalen uit de PDF zelf (/VP + /Measure), per 1-gebaseerd paginanummer,
+   *  in app-ruimte; alleen gelezen (js/pdf/pdf-viewports.js, #400). */
+  pdfViewports?: Record<number, Array<{ x: number; y: number; width: number; height: number; pixelsPerUnit: number; unit: string; mmPerPoint: number; ratio: string; name: string }>>;
   /** Benoemde lijnstijl-presets — persist in de PDF (catalog /OPS_StylePresets). */
   stylePresets: StylePreset[];
   // Internal loader state

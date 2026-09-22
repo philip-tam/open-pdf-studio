@@ -1,10 +1,17 @@
-import { createSignal, onMount, Show } from 'solid-js';
+import { createSignal, onMount, Show, untrack } from 'solid-js';
 import Dialog from '../Dialog.jsx';
 import { closeDialog, showMessage } from '../../stores/dialogStore.js';
 import { useTranslation } from '../../../i18n/useTranslation.js';
+import { getActiveDocument, getPageRotation } from '../../../core/state.js';
+import {
+  MAX_SHIFT_MM, MM_TO_POINTS, parseFromPageInput, parseShiftInput, previewLayout,
+} from '../../../pdf/shift-page-geometry.js';
 
 const PREVIEW_MAX_WIDTH = 260;
-const MM_TO_POINTS = 72 / 25.4;
+const PREVIEW_MAX_HEIGHT = 400;
+// The shared 80px label column wraps "Horizontal (mm):" onto two lines, and
+// most translations are longer still.
+const LABEL_STYLE = { width: '130px' };
 
 export default function ShiftPageDialog(props) {
   const { t } = useTranslation('dialogs');
@@ -16,10 +23,14 @@ export default function ShiftPageDialog(props) {
   const [dxMm, setDxMm] = createSignal(0);
   const [dyMm, setDyMm] = createSignal(0);
   const [applyTo, setApplyTo] = createSignal('current');
-  const [fromPage, setFromPage] = createSignal(currentPage);
+  // "All pages" means the whole document, as in the sibling dialogs (Crop,
+  // Straighten, Resize); a later start page is something the user opts into.
+  const [fromPage, setFromPage] = createSignal(1);
 
   let previewBoxRef;
   let previewImgRef;
+  let dxInputRef;
+  let dyInputRef;
   let pxPerMm = 1;
   let dragging = false;
   let dragStartX = 0;
@@ -32,31 +43,46 @@ export default function ShiftPageDialog(props) {
     previewImgRef.style.transform = `translate(${dxMm() * pxPerMm}px, ${-dyMm() * pxPerMm}px)`;
   };
 
+  // The number fields are NOT bound to the signals: a bound field is
+  // rewritten on every keystroke, and the "" a number input reports after a
+  // typed "-" came back as "0", turning -5 into 5. The fields are written only
+  // when the value changes from outside the field (drag, reset) or on commit.
+  const writeFields = () => {
+    if (dxInputRef) dxInputRef.value = String(dxMm());
+    if (dyInputRef) dyInputRef.value = String(dyMm());
+  };
+
   const reset = () => {
     setDxMm(0);
     setDyMm(0);
+    writeFields();
     applyPreviewTransform();
   };
 
   onMount(async () => {
     try {
-      const { renderPageOffscreen } = await import('../../../pdf/exporter.js');
-      const canvas = await renderPageOffscreen(currentPage, 1.5);
-      const displayScale = Math.min(1, PREVIEW_MAX_WIDTH / canvas.width);
-      const dispW = Math.round(canvas.width * displayScale);
-      const dispH = Math.round(canvas.height * displayScale);
+      // The page as displayed: its own /Rotate plus the in-app rotation.
+      const page = await getActiveDocument().pdfDoc.getPage(currentPage);
+      const rotation = (page.rotate + (getPageRotation(currentPage) || 0)) % 360;
+      const visual = page.getViewport({ scale: 1, rotation });
+      const layout = previewLayout(
+        visual.width, visual.height, PREVIEW_MAX_WIDTH, PREVIEW_MAX_HEIGHT, window.devicePixelRatio,
+      );
+      // Size the box before the render, so the dialog does not grow afterwards.
       if (previewBoxRef) {
-        previewBoxRef.style.width = dispW + 'px';
-        previewBoxRef.style.height = dispH + 'px';
+        previewBoxRef.style.width = layout.width + 'px';
+        previewBoxRef.style.height = layout.height + 'px';
       }
+      // layout.width px represents the page's visual width in points; convert to mm.
+      pxPerMm = layout.width / (visual.width / MM_TO_POINTS);
+
+      const { renderPageOffscreen } = await import('../../../pdf/exporter.js');
+      const canvas = await renderPageOffscreen(currentPage, layout.scale);
       if (previewImgRef) {
         previewImgRef.src = canvas.toDataURL('image/png');
-        previewImgRef.style.width = dispW + 'px';
-        previewImgRef.style.height = dispH + 'px';
+        previewImgRef.style.width = layout.width + 'px';
+        previewImgRef.style.height = layout.height + 'px';
       }
-      // dispW px represents the page's own width in points; convert to mm.
-      const pageWidthMm = (canvas.width / 1.5) / MM_TO_POINTS;
-      pxPerMm = dispW / pageWidthMm;
       applyPreviewTransform();
     } catch (e) {
       console.warn('Shift page preview failed:', e?.message || e);
@@ -64,6 +90,7 @@ export default function ShiftPageDialog(props) {
   });
 
   const onPointerDown = (e) => {
+    if (e.button !== 0) return; // left button only
     dragging = true;
     dragStartX = e.clientX;
     dragStartY = e.clientY;
@@ -76,8 +103,9 @@ export default function ShiftPageDialog(props) {
     if (!dragging) return;
     const dxPx = e.clientX - dragStartX;
     const dyPx = e.clientY - dragStartY;
-    setDxMm(Math.round((dragStartDx + dxPx / pxPerMm) * 10) / 10);
-    setDyMm(Math.round((dragStartDy - dyPx / pxPerMm) * 10) / 10);
+    setDxMm(parseShiftInput(Math.round((dragStartDx + dxPx / pxPerMm) * 10) / 10));
+    setDyMm(parseShiftInput(Math.round((dragStartDy - dyPx / pxPerMm) * 10) / 10));
+    writeFields();
     applyPreviewTransform();
   };
 
@@ -94,10 +122,17 @@ export default function ShiftPageDialog(props) {
     const fromVal = Math.max(1, Math.min(fromPage() || 1, totalPages));
     close();
 
-    const { shiftPages } = await import('../../../pdf/shift-page.js');
-    const result = await shiftPages(dx, dy, applyToVal, fromVal);
-    if (!result.shifted) {
-      showMessage(t('shiftPage.noShift'));
+    try {
+      const { shiftPages } = await import('../../../pdf/shift-page.js');
+      const result = await shiftPages(dx, dy, applyToVal, fromVal);
+      if (!result.shifted) {
+        showMessage(t(result.reason === 'no-pages' ? 'shiftPage.noPages' : 'shiftPage.noShift'));
+      }
+    } catch (e) {
+      // The dialog is already closed: without a message the user would see
+      // the loading overlay vanish and nothing else.
+      console.warn('Shift page failed:', e?.message || e);
+      showMessage(t(e?.code === 'encrypted' ? 'shiftPage.encrypted' : 'shiftPage.failed'));
     }
   };
 
@@ -131,9 +166,8 @@ export default function ShiftPageDialog(props) {
             style={{
               position: 'relative',
               overflow: 'hidden',
-              border: '1px solid #d4d4d4',
-              background: '#f5f5f5',
-              cursor: dragging ? 'grabbing' : 'grab',
+              border: '1px solid var(--theme-border, #d4d4d4)',
+              background: 'var(--theme-bg, #f5f5f5)',
               'touch-action': 'none',
               'user-select': 'none',
             }}
@@ -147,23 +181,31 @@ export default function ShiftPageDialog(props) {
         </div>
 
         <div class="crop-margins-row">
-          <label class="crop-margins-label">{t('shiftPage.horizontal')}</label>
+          <label class="crop-margins-label" style={LABEL_STYLE}>{t('shiftPage.horizontal')}</label>
           <input
+            ref={dxInputRef}
             type="number"
             class="crop-margins-input"
-            value={dxMm()}
+            value="0"
+            min={-MAX_SHIFT_MM}
+            max={MAX_SHIFT_MM}
             step="0.5"
-            onInput={(e) => { setDxMm(parseFloat(e.target.value) || 0); applyPreviewTransform(); }}
+            onInput={(e) => { setDxMm(parseShiftInput(e.target.value)); applyPreviewTransform(); }}
+            onChange={writeFields}
           />
         </div>
         <div class="crop-margins-row">
-          <label class="crop-margins-label">{t('shiftPage.vertical')}</label>
+          <label class="crop-margins-label" style={LABEL_STYLE}>{t('shiftPage.vertical')}</label>
           <input
+            ref={dyInputRef}
             type="number"
             class="crop-margins-input"
-            value={dyMm()}
+            value="0"
+            min={-MAX_SHIFT_MM}
+            max={MAX_SHIFT_MM}
             step="0.5"
-            onInput={(e) => { setDyMm(parseFloat(e.target.value) || 0); applyPreviewTransform(); }}
+            onInput={(e) => { setDyMm(parseShiftInput(e.target.value)); applyPreviewTransform(); }}
+            onChange={writeFields}
           />
         </div>
         <div style={{ display: 'flex', 'justify-content': 'flex-end' }}>
@@ -171,9 +213,9 @@ export default function ShiftPageDialog(props) {
         </div>
 
         <div class="crop-margins-row">
-          <label class="crop-margins-label">{t('cropMargins.applyTo')}</label>
+          <label class="crop-margins-label" style={LABEL_STYLE}>{t('shiftPage.applyTo')}</label>
           <select class="crop-margins-select" value={applyTo()} onChange={(e) => setApplyTo(e.target.value)}>
-            <option value="current">{t('cropMargins.currentPage')}</option>
+            <option value="current">{t('shiftPage.currentPage')}</option>
             <option value="all">{t('shiftPage.allPages')}</option>
             <option value="even">{t('shiftPage.evenPages')}</option>
             <option value="odd">{t('shiftPage.oddPages')}</option>
@@ -181,15 +223,19 @@ export default function ShiftPageDialog(props) {
         </div>
         <Show when={applyTo() !== 'current'}>
           <div class="crop-margins-row">
-            <label class="crop-margins-label">{t('shiftPage.fromPage')}</label>
+            <label class="crop-margins-label" style={LABEL_STYLE}>{t('shiftPage.fromPage')}</label>
             <input
               type="number"
               class="crop-margins-input"
-              value={fromPage()}
+              value={untrack(fromPage)}
               min="1"
               max={totalPages}
               step="1"
-              onInput={(e) => setFromPage(parseInt(e.target.value) || 1)}
+              onInput={(e) => {
+                const page = parseFromPageInput(e.target.value, totalPages);
+                if (page !== null) setFromPage(page);
+              }}
+              onChange={(e) => { e.target.value = String(fromPage()); }}
             />
           </div>
         </Show>

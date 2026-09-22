@@ -78,7 +78,9 @@
     "find": "Gasire",
     "findCtrlF": "Gasire (Ctrl+F)",
     "resizePages": "Resize Pages",
-    "resize": "Resize"
+    "resize": "Resize",
+    "cadExport": "Spre CAD",
+    "cadExportTitle": "Exportă desenul vectorial în DXF sau DWG"
   },
   "comment": {
     "drawing": "Desen",
@@ -154,7 +156,8 @@
     "appearance": "Aspect",
     "keystrokes": "Keystrokes",
     "readerMode": "Mod citire",
-    "readerModeTip": "Ține minte pagina, poziția de derulare și zoom-ul fiecărui PDF la închidere și redeschidere"
+    "readerModeTip": "Ține minte pagina, poziția de derulare și zoom-ul acestui PDF la închidere și redeschidere. Cât timp este activat, lângă acest PDF se păstrează un fișier mic, care apare astfel și în folderele sincronizate în cloud (OneDrive, Dropbox etc.); la dezactivare, fișierul este șters.",
+    "readerModeSaveFailed": "Modul citire nu a putut salva setarea pentru acest PDF. Este posibil ca folderul să fie doar pentru citire."
   },
   "organize": {
     "pages": "Pagini",
@@ -177,7 +180,7 @@
     "manageWatermarks": "Administrare filigrane",
     "manage": "Administrare",
     "straighten": "Îndreaptă Pagina",
-    "ocr": "Recognize Text (OCR)",
+    "ocr": "Recunoaștere text (OCR)",
     "shiftPage": "Deplasează pagina"
   },
   "help": {

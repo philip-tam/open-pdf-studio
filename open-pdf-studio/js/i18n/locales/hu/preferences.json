@@ -27,7 +27,7 @@
     "aiLink": "MI-kapcsolat (MCP)",
     "aiLinkAllow": "MI-asszisztensek (pl. Claude Desktop) vezérelhetik ezt az alkalmazást",
     "aiLinkPort": "Port",
-    "aiLinkHint": "A kapcsolat csak ezen a számítógépen működik (127.0.0.1). Egy MI-asszisztens ekkor dokumentumokat nyithat meg, mérhet, jegyzetelhet és menthet. Csak akkor kapcsolja be, ha MI-asszisztenst használ.",
+    "aiLinkHint": "A kapcsolat csak ezen a számítógépen működik (127.0.0.1). Egy MI-asszisztens ekkor dokumentumokat nyithat meg, mérhet, jegyzetelhet és menthet. Alapértelmezés szerint be van kapcsolva; kapcsolja ki, ha nem használ MI-asszisztenst.",
     "aiLinkActive": "Aktív: {{adres}}",
     "aiLinkViaFlag": "Aktív indítási kapcsolóval ({{adres}})",
     "aiLinkOff": "Ki",
@@ -160,7 +160,7 @@
   },
   "virtualPrinter": {
     "title": "Virtuális nyomtató",
-    "description": "Telepítse a \"PT PDF Studio\" alkalmazást Windows nyomtatóként. Ha bármely alkalmazásból (Word, Chrome, Jegyzettömb stb.) nyomtat, és ezt a nyomtatót választja, a létrejövő PDF automatikusan megnyílik ebben az alkalmazásban.",
+    "description": "Telepítse a \"PT PDF Printer\" alkalmazást Windows nyomtatóként. Ha bármely alkalmazásból (Word, Chrome, Jegyzettömb stb.) nyomtat, és ezt a nyomtatót választja, a létrejövő PDF automatikusan megnyílik ebben az alkalmazásban.",
     "status": "Állapot:",
     "installButton": "Virtuális nyomtató telepítése",
     "removeButton": "Virtuális nyomtató eltávolítása",

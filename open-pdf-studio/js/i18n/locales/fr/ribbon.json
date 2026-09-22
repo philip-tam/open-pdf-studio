@@ -78,7 +78,9 @@
     "find": "Rechercher",
     "findCtrlF": "Rechercher (Ctrl+F)",
     "resizePages": "Resize Pages",
-    "resize": "Resize"
+    "resize": "Resize",
+    "cadExport": "Vers la CAO",
+    "cadExportTitle": "Exporter le dessin vectoriel en DXF ou DWG"
   },
   "comment": {
     "drawing": "Dessin",
@@ -154,7 +156,8 @@
     "appearance": "Apparence",
     "keystrokes": "Keystrokes",
     "readerMode": "Mode lecture",
-    "readerModeTip": "Mémorise la page, la position de défilement et le zoom de chaque PDF entre deux ouvertures"
+    "readerModeTip": "Mémorise la page, la position de défilement et le zoom de ce PDF entre deux ouvertures. Tant que l'option est activée, un petit fichier est conservé à côté de ce PDF ; il apparaît donc aussi dans les dossiers synchronisés avec le cloud (OneDrive, Dropbox, etc.). La désactiver supprime ce fichier.",
+    "readerModeSaveFailed": "Le mode lecture n'a pas pu enregistrer son réglage pour ce PDF. Le dossier est peut-être en lecture seule."
   },
   "organize": {
     "pages": "Pages",
@@ -177,7 +180,7 @@
     "manageWatermarks": "Gérer les filigranes",
     "manage": "Gérer",
     "straighten": "Redresser la Page",
-    "ocr": "Recognize Text (OCR)",
+    "ocr": "Reconnaissance de texte (OCR)",
     "shiftPage": "Décaler la page"
   },
   "help": {

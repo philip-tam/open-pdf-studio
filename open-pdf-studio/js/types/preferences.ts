@@ -207,9 +207,6 @@ export interface Preferences {
   restoreLastSession: boolean;
   dontAskDefaultPdf: boolean;
 
-  // Reader Mode: remember each PDF's page/scroll/zoom across close+reopen.
-  readerMode: boolean;
-
   // Screenshot annotate: intercept the system PrtScn key as a global hotkey
   interceptPrintScreen: boolean;
 
@@ -274,6 +271,12 @@ export interface Preferences {
 
   // Print dialog — settings of the last print action (null = dialog defaults)
   printSettings: PrintSettings | null;
+
+  // CAD export/import (#400) — last used settings (null = dialog defaults);
+  // validated on read by cad-export-instellingen.js / cad-import-instellingen.js
+  cadExportSettings: Record<string, unknown> | null;
+  cadImportSettings: Record<string, unknown> | null;
+  cadImportPresets: Array<{ name: string; settings: Record<string, unknown> }> | null;
 }
 
 export interface PrintSettings {

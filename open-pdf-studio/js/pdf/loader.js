@@ -1,7 +1,7 @@
 import { state, getNextUntitledName, getActiveDocument } from '../core/state.js';
 import { showLoading, hideLoading } from '../ui/chrome/dialogs.js';
 import { updateAllStatus } from '../ui/chrome/status-bar.js';
-import { setViewMode, fitPage, goToPage, setZoom } from './renderer.js';
+import { setViewMode, fitPage } from './renderer.js';
 import { generateThumbnails, refreshActiveTab } from '../ui/panels/left-panel.js';
 import { createTab, updateWindowTitle, markDocumentModified } from '../ui/chrome/tabs.js';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -9,7 +9,7 @@ import { isTauri, readBinaryFile, openFileDialog, lockFile, invoke } from '../co
 import { PDFDocument } from 'pdf-lib';
 import { resetAnnotationStorage } from './form-layer.js';
 import { addRecentFile, getRecentFiles } from '../mobile/recent-files.js';
-import { getReaderPosition } from '../core/reader-mode.js';
+import { resumeReaderTracking } from './reader-mode-view.js';
 import { extractFileName } from '../core/platform.js';
 import i18next from '../i18n/config.js';
 import { showMessage } from '../bridge.js';
@@ -20,6 +20,7 @@ import { extractAnnotationColors } from './loader/color-extraction.js';
 import { extractStampImagesHybrid } from './loader/image-extraction.js';
 import { convertPdfAnnotation } from './loader/annotation-converter.js';
 import { statusReplyFromPdfAnnotation, applyStatusReplies } from './loader/status-replies.js';
+import { loadIfNeeded } from './queued-load.js';
 
 
 // Convert one batch of pdf.js annotations and push them to doc.annotations,
@@ -454,38 +455,19 @@ export async function loadPDF(filePath, docIndex, preloadedData = null) {
       // loading, so it's swallowed rather than surfaced.
       //
       // Per-file, not global: every newly opened PDF starts with tracking
-      // OFF, regardless of whether Reader Mode is on for whatever document
-      // you had open before — otherwise every PDF you ever open leaves a
-      // permanent .readerpos.json next to it, cluttering folders with files
-      // the user never asked to track individually. A file that already has
-      // a sidecar (from a previous session with tracking on) resumes being
-      // tracked automatically; the ribbon toggle turns it on/off per file.
-      doc.readerModeActive = false;
-      if (filePath) {
-        try {
-          const saved = await getReaderPosition(filePath);
-          // goToPage/setZoom and the scroll container all act on the ACTIVE
-          // tab, so if focus moved to another document while we were awaiting
-          // (user switched tab, or a slow session restore activated its own
-          // tab), applying the saved position would scroll/zoom the wrong PDF.
-          if (isClosed()) return;
-          if (saved) doc.readerModeActive = true;
-          if (saved && isActive()) {
-            if (saved.page && saved.page !== doc.currentPage) {
-              await goToPage(saved.page);
-              if (isClosed()) return;
-            }
-            if (saved.scale && isActive()) {
-              await setZoom(saved.scale);
-              if (isClosed()) return;
-            }
-            if (isActive() && pdfContainer && saved.scrollHeight > 0) {
-              pdfContainer.scrollTop = (saved.scrollTop / saved.scrollHeight) * pdfContainer.scrollHeight;
-            }
-          }
-        } catch (e) {
-          console.warn('[reader-mode] restore failed:', e);
-        }
+      // OFF (createDocument), regardless of whether Reader Mode is on for
+      // whatever document you had open before — otherwise every PDF you
+      // ever open leaves a permanent .readerpos.json next to it, cluttering
+      // folders with files the user never asked to track individually. A
+      // file that already has a sidecar (from a previous session with
+      // tracking on) resumes being tracked automatically; the ribbon toggle
+      // turns it on/off per file. The flag is never reset here: loading the
+      // same file again into its open tab must not undo the toggle.
+      try {
+        await resumeReaderTracking(doc);
+        if (isClosed()) return;
+      } catch (e) {
+        console.warn('[reader-mode] restore failed:', e);
       }
 
       // Check for PDF/A compliance and show info bar if applicable
@@ -501,6 +483,18 @@ export async function loadPDF(filePath, docIndex, preloadedData = null) {
       // Not active — still check PDF/A but don't show bar
       checkPdfACompliance(doc);
       verifieerHandtekeningen(doc);
+
+      // Reader Mode: a document that finishes loading in a background tab
+      // (multi-file open, session restore) resumes being tracked just the
+      // same; its stored position is shown the first time the tab comes to
+      // the front (switchToTab), and until then closing it leaves the
+      // stored position alone.
+      try {
+        await resumeReaderTracking(doc);
+        if (isClosed()) return;
+      } catch (e) {
+        console.warn('[reader-mode] restore failed:', e);
+      }
     }
 
     // Load bookmarks from PDF outline (data-only, always run)
@@ -528,6 +522,24 @@ export async function loadPDF(filePath, docIndex, preloadedData = null) {
       }).catch(() => { /* presets zijn optioneel — negeer leesfouten */ });
     }
 
+    // Meetschalen uit de PDF zelf (/VP + /Measure): CAD-plots en de DWG/DXF-
+    // import brengen ze mee, zodat de maatvoering meteen klopt (#400). Alleen
+    // lezen, niet-blokkerend, net als de stijl-presets hierboven.
+    // De lezing draagt een kenmerk: wijzigt de gebruiker de pagina's terwijl
+    // ze nog loopt, dan komt deze uitkomst (van de oude bytes) niet meer
+    // binnen en leest de paginabeheerder de nieuwe bytes zelf.
+    import('./pdf-viewports.js').then(async ({ leesPdfViewports, beginViewportLezing, rondViewportLezingAf }) => {
+      if (isClosed()) return;
+      const kenmerk = beginViewportLezing(doc);
+      try {
+        const pdfLibDoc = await getSharedPdfLibDoc(doc);
+        const geldig = !isClosed() && pdfLibDoc;
+        rondViewportLezingAf(doc, kenmerk, geldig ? leesPdfViewports(pdfLibDoc) : null);
+      } catch {
+        rondViewportLezingAf(doc, kenmerk, null); // viewports zijn optioneel
+      }
+    }).catch(() => { /* viewports zijn optioneel — negeer leesfouten */ });
+
     // Load persisted measure scale for this document (data-only)
     {
       const { loadDocumentScale } = await import('../annotations/measurement.js');
@@ -535,12 +547,14 @@ export async function loadPDF(filePath, docIndex, preloadedData = null) {
       loadDocumentScale(doc);
     }
 
-    // Auto-detect scale from title block text if no scale is already set (fire-and-forget)
+    // Auto-detect scale from title block text if no scale is already set (fire-and-forget).
+    // Always on THIS document: it may be loading in a background tab, and the
+    // active document is then a different drawing with its own scale.
     if (!doc.measureScale) {
       import('../annotations/scale-bar.js').then(async ({ detectScaleFromPdf }) => {
         if (isClosed() || doc.measureScale) return;
         try {
-          const result = await detectScaleFromPdf(1);
+          const result = await detectScaleFromPdf(1, doc);
           if (isClosed() || doc.measureScale) return;
           if (result && result.ratio > 0) {
             const pixelsPerUnit = 72 / (25.4 * result.ratio);
@@ -551,7 +565,7 @@ export async function loadPDF(filePath, docIndex, preloadedData = null) {
               scaleRatio: `1:${result.ratio}`,
             };
             const { saveDocumentScale } = await import('../annotations/measurement.js');
-            saveDocumentScale();
+            saveDocumentScale(doc);
             console.log(`Auto-detected scale: 1:${result.ratio} from "${result.scaleText}"`);
           }
         } catch (e) {
@@ -596,7 +610,7 @@ export async function loadPDF(filePath, docIndex, preloadedData = null) {
       const loadedScaleBar = doc.annotations.find(a => a.type === 'scaleBar');
       if (loadedScaleBar) {
         const { syncDocScale } = await import('../annotations/scale-bar.js');
-        syncDocScale(loadedScaleBar);
+        syncDocScale(loadedScaleBar, doc);
       }
       // Redraw annotations on the current page now that background loading is done
       if (isActive() && doc.pdfDoc) {
@@ -716,6 +730,19 @@ export async function loadPDF(filePath, docIndex, preloadedData = null) {
   }
 }
 
+// Load a file into the tab an open route just got from createTab() - unless
+// that tab already has its document. For a path that is already open
+// createTab() returns the EXISTING tab, and loadPDF() would empty it: back to
+// page 1, unsaved annotations and undo history gone, while doc.modified stays
+// set so the next save writes the emptied model over the file. Such a tab is
+// only shown (createTab switched to it). Returns true when a load ran.
+//
+// The reload after an export wrote a new file to a path that may be open is
+// deliberate and keeps calling loadPDF() directly.
+export function loadPDFIfNeeded(filePath, docIndex, preloadedData = null) {
+  return loadIfNeeded(state.documents, docIndex, () => loadPDF(filePath, docIndex, preloadedData));
+}
+
 // Open file dialog and load PDF
 export async function openPDFFile() {
   try {
@@ -736,7 +763,8 @@ export async function openPDFFile() {
     } catch { /* recents is best-effort */ }
 
     // Allow selecting multiple PDFs at once; each opens in its own tab.
-    const result = await openFileDialog(undefined, { defaultPath, multiple: true });
+    // CAD-tekeningen mogen ook: die gaan via het importvenster (#400).
+    const result = await openFileDialog(['pdf', 'dwg', 'dxf'], { defaultPath, multiple: true });
     if (result) {
       // Tauri returns an array with { multiple: true }; the invoke-fallback
       // still returns a single string — normalize to an array of paths.
@@ -745,9 +773,12 @@ export async function openPDFFile() {
       // The last selected file ends up as the active tab — same behaviour as
       // opening files one after another by hand.
       for (const path of paths) {
+        // Een CAD-tekening is geen PDF: die gaat via het importvenster (#400).
+        const { openAlsCadTekening } = await import('./cad-import.js');
+        if (await openAlsCadTekening(path)) continue;
         // Create a new tab for the file (will switch to existing tab if already open)
         const { index } = createTab(path);
-        await loadPDF(path, index);
+        await loadPDFIfNeeded(path, index);
       }
     }
   } catch (error) {

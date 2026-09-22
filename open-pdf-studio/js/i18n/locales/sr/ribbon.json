@@ -78,7 +78,9 @@
     "find": "Пронађи",
     "findCtrlF": "Пронађи (Ctrl+F)",
     "resizePages": "Resize Pages",
-    "resize": "Resize"
+    "resize": "Resize",
+    "cadExport": "У CAD",
+    "cadExportTitle": "Извези векторски цртеж у DXF или DWG"
   },
   "comment": {
     "drawing": "Цртање",
@@ -154,7 +156,8 @@
     "appearance": "Изглед",
     "keystrokes": "Keystrokes",
     "readerMode": "Режим читања",
-    "readerModeTip": "Памти страницу, позицију померања и зум сваког PDF-а приликом затварања и поновног отварања"
+    "readerModeTip": "Памти страницу, позицију померања и зум овог PDF-а приликом затварања и поновног отварања. Док је укључено, поред овог PDF-а чува се мала датотека, па се она појављује и у фасциклама синхронизованим са облаком (OneDrive, Dropbox итд.); искључивањем се та датотека уклања.",
+    "readerModeSaveFailed": "Режим читања није могао да сачува подешавање за овај PDF. Фасцикла је можда само за читање."
   },
   "organize": {
     "pages": "Странице",
@@ -177,7 +180,7 @@
     "manageWatermarks": "Управљај воденим жиговима",
     "manage": "Управљај",
     "straighten": "Исправи Страницу",
-    "ocr": "Recognize Text (OCR)",
+    "ocr": "Препознавање текста (OCR)",
     "shiftPage": "Помери страницу"
   },
   "help": {

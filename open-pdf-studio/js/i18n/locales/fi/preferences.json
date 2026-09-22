@@ -27,7 +27,7 @@
     "aiLink": "Tekoälyliitäntä (MCP)",
     "aiLinkAllow": "Salli tekoälyavustajien (kuten Claude Desktop) käyttää tätä sovellusta",
     "aiLinkPort": "Portti",
-    "aiLinkHint": "Liitäntä toimii vain tällä tietokoneella (127.0.0.1). Tekoälyavustaja voi silloin avata, mitata, merkitä ja tallentaa asiakirjoja. Ota käyttöön vain, jos käytät tekoälyavustajaa.",
+    "aiLinkHint": "Liitäntä toimii vain tällä tietokoneella (127.0.0.1). Tekoälyavustaja voi silloin avata, mitata, merkitä ja tallentaa asiakirjoja. On oletuksena käytössä; poista käytöstä, jos et käytä tekoälyavustajaa.",
     "aiLinkActive": "Käytössä osoitteessa {{adres}}",
     "aiLinkViaFlag": "Käytössä käynnistysparametrin kautta ({{adres}})",
     "aiLinkOff": "Pois",
@@ -160,7 +160,7 @@
   },
   "virtualPrinter": {
     "title": "Virtuaalitulostin",
-    "description": "Asenna \"PT PDF Studio\" Windows-tulostimeksi. Kun tulostat mistä tahansa sovelluksesta (Word, Chrome, Muistio jne.) ja valitset tämän tulostimen, tulostettava PDF avautuu automaattisesti tässä sovelluksessa.",
+    "description": "Asenna \"PT PDF Printer\" Windows-tulostimeksi. Kun tulostat mistä tahansa sovelluksesta (Word, Chrome, Muistio jne.) ja valitset tämän tulostimen, tulostettava PDF avautuu automaattisesti tässä sovelluksessa.",
     "status": "Tila:",
     "installButton": "Asenna virtuaalitulostin",
     "removeButton": "Poista virtuaalitulostin",

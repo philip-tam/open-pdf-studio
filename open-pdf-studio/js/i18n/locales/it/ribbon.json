@@ -78,7 +78,9 @@
     "find": "Trova",
     "findCtrlF": "Trova (Ctrl+F)",
     "resizePages": "Resize Pages",
-    "resize": "Resize"
+    "resize": "Resize",
+    "cadExport": "Verso CAD",
+    "cadExportTitle": "Esporta il disegno vettoriale in DXF o DWG"
   },
   "comment": {
     "drawing": "Disegno",
@@ -154,7 +156,8 @@
     "appearance": "Aspetto",
     "keystrokes": "Keystrokes",
     "readerMode": "Modalità lettura",
-    "readerModeTip": "Ricorda pagina, posizione di scorrimento e zoom di ogni PDF alla chiusura e riapertura"
+    "readerModeTip": "Ricorda pagina, posizione di scorrimento e zoom di questo PDF alla chiusura e riapertura. Finché è attiva, accanto a questo PDF viene conservato un piccolo file, che compare quindi anche nelle cartelle sincronizzate con il cloud (OneDrive, Dropbox, ecc.); disattivandola il file viene rimosso.",
+    "readerModeSaveFailed": "La modalità lettura non ha potuto salvare l'impostazione per questo PDF. La cartella potrebbe essere di sola lettura."
   },
   "organize": {
     "pages": "Pagine",
@@ -177,7 +180,7 @@
     "manageWatermarks": "Gestisci filigrane",
     "manage": "Gestisci",
     "straighten": "Raddrizza Pagina",
-    "ocr": "Recognize Text (OCR)",
+    "ocr": "Riconoscimento testo (OCR)",
     "shiftPage": "Sposta pagina"
   },
   "help": {

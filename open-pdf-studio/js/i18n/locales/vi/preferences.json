@@ -27,7 +27,7 @@
     "aiLink": "Kết nối AI (MCP)",
     "aiLinkAllow": "Cho phép trợ lý AI (như Claude Desktop) điều khiển ứng dụng này",
     "aiLinkPort": "Cổng",
-    "aiLinkHint": "Kết nối chỉ hoạt động trên máy tính này (127.0.0.1). Trợ lý AI có thể mở, đo, chú thích và lưu tài liệu. Chỉ bật khi bạn dùng trợ lý AI.",
+    "aiLinkHint": "Kết nối chỉ hoạt động trên máy tính này (127.0.0.1). Trợ lý AI có thể mở, đo, chú thích và lưu tài liệu. Được bật theo mặc định; hãy tắt nếu bạn không dùng trợ lý AI.",
     "aiLinkActive": "Đang hoạt động tại {{adres}}",
     "aiLinkViaFlag": "Đang hoạt động qua tham số khởi động ({{adres}})",
     "aiLinkOff": "Tắt",
@@ -160,7 +160,7 @@
   },
   "virtualPrinter": {
     "title": "Máy in Ảo",
-    "description": "Cài đặt \"PT PDF Studio\" làm máy in Windows. Khi bạn in từ bất kỳ ứng dụng nào (Word, Chrome, Notepad, v.v.) và chọn máy in này, tệp PDF đầu ra sẽ tự động mở trong ứng dụng này.",
+    "description": "Cài đặt \"PT PDF Printer\" làm máy in Windows. Khi bạn in từ bất kỳ ứng dụng nào (Word, Chrome, Notepad, v.v.) và chọn máy in này, tệp PDF đầu ra sẽ tự động mở trong ứng dụng này.",
     "status": "Trạng thái:",
     "installButton": "Cài đặt Máy in Ảo",
     "removeButton": "Gỡ bỏ Máy in Ảo",

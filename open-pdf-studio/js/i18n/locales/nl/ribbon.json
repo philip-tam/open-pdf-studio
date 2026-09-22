@@ -97,7 +97,9 @@
     "resizePages": "Paginaformaat",
     "resize": "Formaat",
     "ifcExport": "Opslaan als IFC-report (.ifcreport)",
-    "emailPdf": "Verzenden per e-mail (PDF als bijlage)"
+    "emailPdf": "Verzenden per e-mail (PDF als bijlage)",
+    "cadExport": "Naar CAD",
+    "cadExportTitle": "Exporteer de vectortekening naar DXF of DWG"
   },
   "comment": {
     "scaleRegion": "Schaalgebied",
@@ -193,7 +195,8 @@
     "keystrokes": "Toetsaanslagen",
     "keystrokesHint": "Toon ingedrukte sneltoetsen links onderin (voor video-opnames)",
     "readerMode": "Leesmodus",
-    "readerModeTip": "Onthoud de pagina, scrollpositie en zoomniveau van elke PDF, ook nadat je hem sluit en weer opent"
+    "readerModeTip": "Onthoud de pagina, scrollpositie en het zoomniveau van deze PDF, ook nadat je hem sluit en weer opent. Zolang dit aan staat, staat er een klein bestand naast deze PDF; dat verschijnt dus ook in mappen die met de cloud synchroniseren (OneDrive, Dropbox, enz.). Uitzetten verwijdert dat bestand.",
+    "readerModeSaveFailed": "Leesmodus kon de instelling voor deze PDF niet opslaan. De map is mogelijk alleen-lezen."
   },
   "elementVisibility": {
     "buttonTitle": "Zichtbaarheid Elementen — toon/verberg en dim annotatie-soorten",
@@ -272,7 +275,7 @@
     "reorderPages": "Volgorde",
     "reorderPagesTitle": "Open miniaturen om pagina’s in een nieuwe volgorde te slepen",
     "straighten": "Pagina Rechtzetten",
-    "ocr": "Recognize Text (OCR)",
+    "ocr": "Tekst herkennen (OCR)",
     "shiftPage": "Pagina verschuiven"
   },
   "help": {

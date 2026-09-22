@@ -27,7 +27,7 @@
     "aiLink": "Koneksi AI (MCP)",
     "aiLinkAllow": "Izinkan asisten AI (seperti Claude Desktop) mengoperasikan aplikasi ini",
     "aiLinkPort": "Port",
-    "aiLinkHint": "Koneksi hanya berfungsi di komputer ini (127.0.0.1). Asisten AI dapat membuka, mengukur, memberi anotasi, dan menyimpan dokumen. Aktifkan hanya jika Anda menggunakan asisten AI.",
+    "aiLinkHint": "Koneksi hanya berfungsi di komputer ini (127.0.0.1). Asisten AI dapat membuka, mengukur, memberi anotasi, dan menyimpan dokumen. Aktif secara default; nonaktifkan jika Anda tidak menggunakan asisten AI.",
     "aiLinkActive": "Aktif di {{adres}}",
     "aiLinkViaFlag": "Aktif melalui parameter awal ({{adres}})",
     "aiLinkOff": "Mati",
@@ -160,7 +160,7 @@
   },
   "virtualPrinter": {
     "title": "Printer Virtual",
-    "description": "Instal \"PT PDF Studio\" sebagai printer Windows. Ketika Anda mencetak dari aplikasi apa pun (Word, Chrome, Notepad, dll.) dan memilih printer ini, PDF hasil keluaran akan terbuka secara otomatis di aplikasi ini.",
+    "description": "Instal \"PT PDF Printer\" sebagai printer Windows. Ketika Anda mencetak dari aplikasi apa pun (Word, Chrome, Notepad, dll.) dan memilih printer ini, PDF hasil keluaran akan terbuka secara otomatis di aplikasi ini.",
     "status": "Status:",
     "installButton": "Instal Printer Virtual",
     "removeButton": "Hapus Printer Virtual",

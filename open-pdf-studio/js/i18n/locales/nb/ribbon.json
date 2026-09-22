@@ -78,7 +78,9 @@
     "find": "Finn",
     "findCtrlF": "Finn (Ctrl+F)",
     "resizePages": "Resize Pages",
-    "resize": "Resize"
+    "resize": "Resize",
+    "cadExport": "Til CAD",
+    "cadExportTitle": "Eksporter vektortegningen til DXF eller DWG"
   },
   "comment": {
     "drawing": "Tegning",
@@ -154,7 +156,8 @@
     "appearance": "Utseende",
     "keystrokes": "Keystrokes",
     "readerMode": "Lesemodus",
-    "readerModeTip": "Husker side, rulleposisjon og zoom for hver PDF når den lukkes og åpnes på nytt"
+    "readerModeTip": "Husker side, rulleposisjon og zoom for denne PDF-en når den lukkes og åpnes på nytt. Så lenge funksjonen er slått på, ligger det en liten fil ved siden av denne PDF-en, slik at den også vises i mapper som synkroniseres med skyen (OneDrive, Dropbox osv.); når du slår den av, fjernes filen.",
+    "readerModeSaveFailed": "Lesemodus kunne ikke lagre innstillingen for denne PDF-en. Mappen er muligens skrivebeskyttet."
   },
   "organize": {
     "pages": "Sider",
@@ -177,7 +180,7 @@
     "manageWatermarks": "Administrer vannmerker",
     "manage": "Administrer",
     "straighten": "Rett Opp Siden",
-    "ocr": "Recognize Text (OCR)",
+    "ocr": "Tekstgjenkjenning (OCR)",
     "shiftPage": "Forskyv side"
   },
   "help": {

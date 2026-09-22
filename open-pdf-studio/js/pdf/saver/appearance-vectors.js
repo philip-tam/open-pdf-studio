@@ -18,6 +18,7 @@ import { hexToRgb } from './utils.js';
 import { getHatchLineFamilies } from './hatch-catalog.js';
 import { catmullRomToBezier, splineArrowEndTangent } from '../../annotations/spline-arrow-geometry.js';
 import { toWinAnsiText, winAnsiLiteral } from './pdf-text.js';
+import { klemMaat, MIN_VORM_MAAT_PT } from '../../annotations/minimummaat.js';
 import {
   rotToWorld as srRotToWorld,
   SYSTEEM_RAVEEL_OFFSET_MM as srRaveelOffsetMm,
@@ -240,7 +241,9 @@ function sampleArc(cx, cy, r, a0, a1, out, steps = 8) {
 
 // Rectangular cloud outline (mirrors shapes.js buildCloudPath).
 export function cloudRectOutlinePts(x, y, w, h, puff = 15) {
-  const W = Math.max(1, w), H = Math.max(1, h);
+  // Alleen de technische ondergrens (spiegel van buildCloudPath in shapes.js):
+  // anders staat een wolk kleiner dan 1 pt in de PDF groter dan op het scherm.
+  const W = klemMaat(w), H = klemMaat(h);
   const THETA = 252 * Math.PI / 180;
   const perim = [];
   const addEdge = (x0, y0, x1, y1) => {
@@ -258,7 +261,7 @@ export function cloudRectOutlinePts(x, y, w, h, puff = 15) {
     const [x0, y0] = perim[i];
     const [x1, y1] = perim[(i + 1) % perim.length];
     const dx = x1 - x0, dy = y1 - y0, c = Math.hypot(dx, dy);
-    if (c < 0.01) continue;
+    if (!(c > 0)) continue; // delingswacht, zie shapes.js
     const r = c / (2 * sinHalf);
     const nx = dy / c, ny = -dx / c;
     const ccx = (x0 + x1) / 2 + nx * r * cosHalf;
@@ -282,7 +285,7 @@ export function cloudPolyOutlinePts(points, closed = true) {
     const p2 = points[(i + 1) % points.length];
     const dx = p2.x - p1.x, dy = p2.y - p1.y;
     const edgeLen = Math.hypot(dx, dy);
-    if (edgeLen < 1) continue;
+    if (!(edgeLen >= MIN_VORM_MAAT_PT)) continue; // spiegel van buildCloudPolylinePath
     const numBumps = Math.max(1, Math.round(edgeLen / (TARGET_BUMP * 1.5)));
     const bumpRadius = edgeLen / numBumps / 2;
     const angle = Math.atan2(dy, dx);
@@ -300,8 +303,10 @@ export function cloudPolyOutlinePts(points, closed = true) {
 // ════════════════════════════════════════════════════════════════════════════
 
 // filledArea: optional solid fill + optional hatch + outline.
+// heeftRand: false = vorm zonder rand (#431), de omtrek vervalt; vulling en
+// arcering blijven. Geldt ook voor het meetvlak en de wolk hieronder.
 export function buildFilledAreaAP({ points, holes, X, Y, fillColorHex, strokeColorHex,
-  lineWidth, borderStyle, hatchPattern, hatchColorHex, hatchScale, hatchAngle }) {
+  lineWidth, borderStyle, hatchPattern, hatchColorHex, hatchScale, hatchAngle, heeftRand = true }) {
   if (!points || points.length < 3) return null;
   const stroke = hexToRgb(strokeColorHex || '#000000');
   let s = '';
@@ -313,7 +318,7 @@ export function buildFilledAreaAP({ points, holes, X, Y, fillColorHex, strokeCol
       hatchColorRgb: hexToRgb(hatchColorHex || strokeColorHex || '#000000'),
       hatchScale, hatchAngle, X, Y });
   }
-  s += strokeOutlineOps(points, holes, stroke, lineWidth ?? 1, borderStyle, X, Y);
+  if (heeftRand) s += strokeOutlineOps(points, holes, stroke, lineWidth ?? 1, borderStyle, X, Y);
   return { content: s, needsFont: false };
 }
 
@@ -324,7 +329,7 @@ export function buildFilledAreaAP({ points, holes, X, Y, fillColorHex, strokeCol
 // caller (attachVectorAP) add the /GSf ExtGState to the resources.
 export function buildMeasureAreaAP({ points, holes, X, Y, fillColorHex, strokeColorHex,
   lineWidth, borderStyle, hatchPattern, hatchColorHex, hatchScale, hatchAngle,
-  text, labelX, labelY, fillAlpha }) {
+  text, labelX, labelY, fillAlpha, heeftRand = true }) {
   if (!points || points.length < 3) return null;
   const stroke = hexToRgb(strokeColorHex || '#ff0000');
   const alpha = (typeof fillAlpha === 'number' && fillAlpha >= 0 && fillAlpha < 1) ? fillAlpha : undefined;
@@ -344,7 +349,7 @@ export function buildMeasureAreaAP({ points, holes, X, Y, fillColorHex, strokeCo
       hatchColorRgb: hexToRgb(hatchColorHex || strokeColorHex || '#ff0000'),
       hatchScale, hatchAngle, X, Y });
   }
-  s += strokeOutlineOps(points, holes, stroke, lineWidth ?? 1, borderStyle, X, Y);
+  if (heeftRand) s += strokeOutlineOps(points, holes, stroke, lineWidth ?? 1, borderStyle, X, Y);
   let cx = 0, cy = 0;
   for (const p of points) { cx += p.x; cy += p.y; }
   cx /= points.length; cy /= points.length;
@@ -641,7 +646,7 @@ export function buildSysteemrasterAP({ geom, X, Y, strokeColorHex, lineWidth }) 
 
 // cloud / cloudPolyline: scalloped outline (optional fill).
 export function buildCloudAP({ kind, x, y, w, h, points, puff, X, Y,
-  fillColorHex, strokeColorHex, lineWidth, borderStyle }) {
+  fillColorHex, strokeColorHex, lineWidth, borderStyle, heeftRand = true }) {
   const outline = kind === 'rect'
     ? cloudRectOutlinePts(x, y, w, h, puff || 15)
     : cloudPolyOutlinePts(points, true);
@@ -651,8 +656,10 @@ export function buildCloudAP({ kind, x, y, w, h, points, puff, X, Y,
   if (fillColorHex && fillColorHex !== 'none' && fillColorHex !== 'transparent') {
     s += solidFillOps(outline, null, hexToRgb(fillColorHex), X, Y);
   }
-  s += `${f(stroke[0])} ${f(stroke[1])} ${f(stroke[2])} RG\n${f(lineWidth ?? 1)} w\n${dashOp(borderStyle)}`;
-  s += pathOps(outline, X, Y, true) + 'S\n';
+  if (heeftRand) {
+    s += `${f(stroke[0])} ${f(stroke[1])} ${f(stroke[2])} RG\n${f(lineWidth ?? 1)} w\n${dashOp(borderStyle)}`;
+    s += pathOps(outline, X, Y, true) + 'S\n';
+  }
   return { content: s, needsFont: false };
 }
 

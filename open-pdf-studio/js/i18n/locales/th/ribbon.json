@@ -78,7 +78,9 @@
     "find": "ค้นหา",
     "findCtrlF": "ค้นหา (Ctrl+F)",
     "resizePages": "Resize Pages",
-    "resize": "Resize"
+    "resize": "Resize",
+    "cadExport": "ไปยัง CAD",
+    "cadExportTitle": "ส่งออกแบบเวกเตอร์เป็น DXF หรือ DWG"
   },
   "comment": {
     "drawing": "การวาด",
@@ -154,7 +156,8 @@
     "appearance": "ลักษณะ",
     "keystrokes": "Keystrokes",
     "readerMode": "โหมดการอ่าน",
-    "readerModeTip": "จดจำหน้า ตำแหน่งเลื่อน และการซูมของแต่ละ PDF เมื่อปิดและเปิดใหม่"
+    "readerModeTip": "จดจำหน้า ตำแหน่งเลื่อน และการซูมของ PDF นี้เมื่อปิดและเปิดใหม่ ขณะเปิดใช้งาน จะมีไฟล์ขนาดเล็กเก็บไว้ข้าง PDF นี้ จึงปรากฏในโฟลเดอร์ที่ซิงค์กับคลาวด์ด้วย (OneDrive, Dropbox ฯลฯ) เมื่อปิดใช้งาน ไฟล์นั้นจะถูกลบ",
+    "readerModeSaveFailed": "โหมดการอ่านไม่สามารถบันทึกการตั้งค่าสำหรับ PDF นี้ได้ โฟลเดอร์อาจเป็นแบบอ่านอย่างเดียว"
   },
   "organize": {
     "pages": "หน้า",
@@ -177,7 +180,7 @@
     "manageWatermarks": "จัดการลายน้ำ",
     "manage": "จัดการ",
     "straighten": "จัดหน้าให้ตรง",
-    "ocr": "Recognize Text (OCR)",
+    "ocr": "การจดจำข้อความ (OCR)",
     "shiftPage": "เลื่อนหน้า"
   },
   "help": {

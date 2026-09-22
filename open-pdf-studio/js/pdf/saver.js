@@ -2,7 +2,7 @@ import { state, getPageRotation, getActiveDocument } from '../core/state.js';
 import { ifcCategoryForAnnotationType } from '../solid/data/ifcCategoryMap.js';
 import { showLoading, hideLoading } from '../ui/chrome/dialogs.js';
 import { hexToColorArray } from '../utils/colors.js';
-import { hasFill } from '../annotations/fill-utils.js';
+import { hasFill, hasStroke, colorWithoutStroke } from '../annotations/fill-utils.js';
 import { layoutTextboxForExport } from '../annotations/rendering/shapes.js';
 import { markDocumentSaved, updateWindowTitle } from '../ui/chrome/tabs.js';
 import { updateStatusMessage } from '../ui/chrome/status-bar.js';
@@ -20,7 +20,8 @@ import { showMessage } from '../bridge.js';
 
 // Sub-modules
 import { hexToRgb, buildBorderStyle, computeAnnotFlags, mapFontToPdfName,
-  ensureAcroFormFonts, stripPdfAMetadata, generateAppearanceStream } from './saver/utils.js';
+  ensureAcroFormFonts, stripPdfAMetadata, generateAppearanceStream,
+  randSleutelZonderRand, markeerZonderRand } from './saver/utils.js';
 import { saveTextEditsToPages } from './saver/text-edits.js';
 import { hasMixedRuns, textboxLineRuns, runsToText } from '../annotations/rendering/textbox-layout.js';
 import { saveWatermarksToPages } from './saver/watermarks.js';
@@ -315,6 +316,12 @@ async function _savePDFNu(saveAsPath) {
     }
 
     const pdfDocLib = await PDFDocument.load(existingPdfBytes);
+    // Een voorbeeld van het importvenster kan inhoud missen en wordt nooit
+    // als document opgeslagen (#400).
+    {
+      const { isVoorbeeldPdf } = await import('./cad-import-logica.js');
+      if (isVoorbeeldPdf(pdfDocLib, { PDFName })) throw new Error(i18next.t('previewPdfRefused'));
+    }
     // Alles met een hoger objectnummer maakt deze save zelf aan — zie het
     // knipsel-opruimen vlak voor pdfDocLib.save().
     const eersteNieuwObject = pdfDocLib.context.largestObjectNumber;
@@ -650,7 +657,7 @@ async function _savePDFNu(saveAsPath) {
             // meer te verplaatsen, wel nog steeds vector.
             if (ann.flattened) {
               try {
-                await tekenKnipselInPagina(page, gebouwd.ingebed.ref, gebouwd.plaatsing, opacity);
+                await tekenKnipselInPagina(page, gebouwd.ingebed.ref, gebouwd.plaatsing, opacity, ann.belowContent === true);
               } catch (err) {
                 console.warn(`[saver] knipsel ${ann.id} vastleggen mislukt:`, err.message);
               }
@@ -670,6 +677,9 @@ async function _savePDFNu(saveAsPath) {
               OPS_SnippetKey: pdfTextString(String(ann.snippetKey)),
               OPS_SrcBox: [ann.srcBox.left, ann.srcBox.bottom, ann.srcBox.right, ann.srcBox.top],
               OPS_SrcLabel: pdfTextString(ann.srcLabel || ''),
+              // Een tekening die als onderlegger geplaatst is, komt bij het
+              // vastzetten onder de bestaande inhoud; dat blijft zo na heropenen.
+              ...(ann.belowContent === true ? { OPS_BelowContent: true } : {}),
             });
             attachVectorAP(context, annotDict, gebouwd, kRect);
             break;
@@ -1101,7 +1111,7 @@ async function _savePDFNu(saveAsPath) {
             // tekst- en beeldinhoud.
             if (ann.type === 'polygon' && polyVertices.length >= 6) {
               const pgFill = hasFill(ann.fillColor);
-              const pgStroke = borderWidth > 0 && ann.strokeColor !== 'none' && ann.strokeColor !== 'transparent';
+              const pgStroke = borderWidth > 0 && hasStroke(ann.strokeColor);
               let pad = '';
               for (let vi = 0; vi < polyVertices.length; vi += 2) {
                 pad += `${polyVertices[vi]} ${polyVertices[vi + 1]} ${vi === 0 ? 'm' : 'l'}\n`;
@@ -1148,6 +1158,7 @@ async function _savePDFNu(saveAsPath) {
                   X: convertX, Y: convertY, fillColorHex: ann.fillColor,
                   strokeColorHex: ann.strokeColor || ann.color || '#000000',
                   lineWidth: borderWidth, borderStyle: ann.borderStyle,
+                  heeftRand: !randSleutelZonderRand(ann),
                 }), cRect);
               }
             }
@@ -1326,8 +1337,10 @@ async function _savePDFNu(saveAsPath) {
               const tbY2 = tbY1 + ftH;
 
               let ftStreamContent = '';
-              const [sr, sg, sb] = ann.strokeColor && ann.strokeColor !== 'none'
-                ? hexToRgb(ann.strokeColor) : [0, 0, 0];
+              // Zonder rand (#431) blijft de aanhaallijn staan, in de kleur
+              // waarin het scherm hem tekent.
+              const [sr, sg, sb] = !hasStroke(ann.strokeColor) ? hexToRgb(colorWithoutStroke(ann))
+                : ann.strokeColor ? hexToRgb(ann.strokeColor) : [0, 0, 0];
 
               // Draw callout leader line and arrowhead first (using absolute page coords)
               if (isCallout) {
@@ -2474,9 +2487,14 @@ async function _savePDFNu(saveAsPath) {
             }
             // Vector /AP so the outline + fill AND the measurement value label
             // (Contents-only today) render in other viewers — issue #256.
+            // Zonder rand (#431): geen omtrek; het label krijgt de kleur waarin
+            // het scherm het tekent.
+            const maZonderRand = !!randSleutelZonderRand(ann);
             attachVectorAP(context, annotDict, buildMeasureAreaAP({
               points: ann.points, holes: ann.holes, X: convertX, Y: convertY,
-              fillColorHex: ann.fillColor, strokeColorHex: ann.strokeColor || '#ff0000',
+              fillColorHex: ann.fillColor,
+              strokeColorHex: maZonderRand ? colorWithoutStroke(ann) : (ann.strokeColor || '#ff0000'),
+              heeftRand: !maZonderRand,
               lineWidth: borderWidth, borderStyle: ann.borderStyle,
               hatchPattern: ann.hatchPattern, hatchColorHex: ann.hatchColor,
               hatchScale: ann.hatchScale, hatchAngle: ann.hatchAngle,
@@ -2571,9 +2589,14 @@ async function _savePDFNu(saveAsPath) {
             }
             // Vector /AP so the solid fill + hatch pattern show in other viewers
             // (they render only /AP, not our OPS_Hatch* keys) — issue #256.
+            // Zonder rand (#431): geen omtrek; een arcering zonder eigen kleur
+            // krijgt de kleur waarin het scherm haar tekent.
+            const faZonderRand = !!randSleutelZonderRand(ann);
             attachVectorAP(context, annotDict, buildFilledAreaAP({
               points: ann.points, holes: ann.holes, X: convertX, Y: convertY,
-              fillColorHex: ann.fillColor, strokeColorHex: ann.strokeColor || ann.color || '#000000',
+              fillColorHex: ann.fillColor,
+              strokeColorHex: faZonderRand ? colorWithoutStroke(ann) : (ann.strokeColor || ann.color || '#000000'),
+              heeftRand: !faZonderRand,
               lineWidth: borderWidth, borderStyle: ann.borderStyle,
               hatchPattern: ann.hatchPattern, hatchColorHex: ann.hatchColor,
               hatchScale: ann.hatchScale, hatchAngle: ann.hatchAngle,
@@ -2860,6 +2883,13 @@ async function _savePDFNu(saveAsPath) {
               && typeof annotDict.set === 'function') {
             annotDict.set(PDFName.of('OPS_FillOpacity'), context.obj(fillOpacity));
           }
+          // Vorm zonder rand (#431): geen randkleur, /BS /W 0 en /OPS_NoStroke —
+          // ook één plek voor alle soorten. De appearance is hierboven al
+          // zonder omtrek gebouwd.
+          const randSleutel = randSleutelZonderRand(ann);
+          if (randSleutel && typeof annotDict.set === 'function') {
+            markeerZonderRand(context, annotDict, ann, randSleutel);
+          }
           parentAnnotRef = context.register(annotDict);
           annotsArray.push(parentAnnotRef);
         }
@@ -2898,7 +2928,7 @@ async function _savePDFNu(saveAsPath) {
           const _bh = ann.height || 50;
           const _box = { x: ann.x, y: ann.y, width: _bw, height: _bh };
           const _lwLdr = ann.lineWidth !== undefined ? ann.lineWidth : 1;
-          const _strokeArr = ann.strokeColor && ann.strokeColor !== 'none'
+          const _strokeArr = ann.strokeColor && hasStroke(ann.strokeColor)
             ? hexToColorArray(ann.strokeColor)
             : (ann.color ? hexToColorArray(ann.color) : [0, 0, 0]);
           for (const leader of ann.leaders) {
@@ -3154,6 +3184,15 @@ export async function savePDFAs() {
         try {
           if (window.__TAURI__?.fs?.remove) await window.__TAURI__.fs.remove(tempPath);
         } catch (e) { console.warn('[blank-pdf] temp cleanup failed:', e); }
+      }
+      // And every other working file the app made for this document (the PDF
+      // of an imported drawing, earlier `opds-edit` copies) that it no longer
+      // refers to (#400).
+      if (doc) {
+        try {
+          const { losgelatenWerkbestanden, ruimWerkbestandenOp } = await import('./document-release.js');
+          await ruimWerkbestandenOp(doc, losgelatenWerkbestanden(doc, state.documents.filter((d) => d !== doc)));
+        } catch (e) { console.warn('[save-as] working files not removed:', e); }
       }
     }
     return success || false;

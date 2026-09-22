@@ -27,7 +27,7 @@
     "aiLink": "Conexión de IA (MCP)",
     "aiLinkAllow": "Permitir que asistentes de IA (como Claude Desktop) controlen esta aplicación",
     "aiLinkPort": "Puerto",
-    "aiLinkHint": "La conexión solo funciona en este ordenador (127.0.0.1). Un asistente de IA podrá abrir, medir, anotar y guardar documentos. Actívela solo si utiliza un asistente de IA.",
+    "aiLinkHint": "La conexión solo funciona en este ordenador (127.0.0.1). Un asistente de IA podrá abrir, medir, anotar y guardar documentos. Está activada de forma predeterminada; desactívela si no utiliza un asistente de IA.",
     "aiLinkActive": "Activa en {{adres}}",
     "aiLinkViaFlag": "Activa mediante parámetro de inicio ({{adres}})",
     "aiLinkOff": "Desactivada",
@@ -143,7 +143,7 @@
   },
   "virtualPrinter": {
     "title": "Impresora virtual",
-    "description": "Instale \"PT PDF Studio\" como impresora de Windows. Cuando imprima desde cualquier aplicación (Word, Chrome, Bloc de notas, etc.) y seleccione esta impresora, el PDF generado se abrirá automáticamente en esta aplicación.",
+    "description": "Instale \"PT PDF Printer\" como impresora de Windows. Cuando imprima desde cualquier aplicación (Word, Chrome, Bloc de notas, etc.) y seleccione esta impresora, el PDF generado se abrirá automáticamente en esta aplicación.",
     "status": "Estado:",
     "installButton": "Instalar impresora virtual",
     "removeButton": "Eliminar impresora virtual",

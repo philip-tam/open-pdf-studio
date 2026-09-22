@@ -27,7 +27,7 @@
     "aiLink": "Sambungan AI (MCP)",
     "aiLinkAllow": "Benarkan pembantu AI (seperti Claude Desktop) mengendalikan aplikasi ini",
     "aiLinkPort": "Port",
-    "aiLinkHint": "Sambungan hanya berfungsi pada komputer ini (127.0.0.1). Pembantu AI boleh membuka, mengukur, menganotasi dan menyimpan dokumen. Hidupkan hanya jika anda menggunakan pembantu AI.",
+    "aiLinkHint": "Sambungan hanya berfungsi pada komputer ini (127.0.0.1). Pembantu AI boleh membuka, mengukur, menganotasi dan menyimpan dokumen. Dihidupkan secara lalai; matikan jika anda tidak menggunakan pembantu AI.",
     "aiLinkActive": "Aktif di {{adres}}",
     "aiLinkViaFlag": "Aktif melalui parameter permulaan ({{adres}})",
     "aiLinkOff": "Mati",
@@ -160,7 +160,7 @@
   },
   "virtualPrinter": {
     "title": "Pencetak Maya",
-    "description": "Pasang \"PT PDF Studio\" sebagai pencetak Windows. Apabila anda mencetak dari mana-mana aplikasi (Word, Chrome, Notepad, dll.) dan memilih pencetak ini, output PDF akan dibuka secara automatik dalam aplikasi ini.",
+    "description": "Pasang \"PT PDF Printer\" sebagai pencetak Windows. Apabila anda mencetak dari mana-mana aplikasi (Word, Chrome, Notepad, dll.) dan memilih pencetak ini, output PDF akan dibuka secara automatik dalam aplikasi ini.",
     "status": "Status:",
     "installButton": "Pasang Pencetak Maya",
     "removeButton": "Buang Pencetak Maya",

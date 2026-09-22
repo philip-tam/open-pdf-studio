@@ -27,7 +27,7 @@
     "aiLink": "Yapay zekâ bağlantısı (MCP)",
     "aiLinkAllow": "Yapay zekâ asistanlarının (Claude Desktop gibi) bu uygulamayı kullanmasına izin ver",
     "aiLinkPort": "Bağlantı noktası",
-    "aiLinkHint": "Bağlantı yalnızca bu bilgisayarda çalışır (127.0.0.1). Bir yapay zekâ asistanı belgeleri açabilir, ölçebilir, işaretleyebilir ve kaydedebilir. Yalnızca bir yapay zekâ asistanı kullanıyorsanız açın.",
+    "aiLinkHint": "Bağlantı yalnızca bu bilgisayarda çalışır (127.0.0.1). Bir yapay zekâ asistanı belgeleri açabilir, ölçebilir, işaretleyebilir ve kaydedebilir. Varsayılan olarak açıktır; yapay zekâ asistanı kullanmıyorsanız kapatın.",
     "aiLinkActive": "{{adres}} üzerinde etkin",
     "aiLinkViaFlag": "Başlatma parametresiyle etkin ({{adres}})",
     "aiLinkOff": "Kapalı",
@@ -143,7 +143,7 @@
   },
   "virtualPrinter": {
     "title": "Sanal Yazıcı",
-    "description": "\"PT PDF Studio\"yu bir Windows yazıcısı olarak yükleyin. Herhangi bir uygulamadan (Word, Chrome, Not Defteri vb.) yazdırıp bu yazıcıyı seçtiğinizde, çıktı PDF dosyası bu uygulamada otomatik olarak açılacaktır.",
+    "description": "\"PT PDF Printer\"yu bir Windows yazıcısı olarak yükleyin. Herhangi bir uygulamadan (Word, Chrome, Not Defteri vb.) yazdırıp bu yazıcıyı seçtiğinizde, çıktı PDF dosyası bu uygulamada otomatik olarak açılacaktır.",
     "status": "Durum:",
     "installButton": "Sanal Yazıcıyı Yükle",
     "removeButton": "Sanal Yazıcıyı Kaldır",

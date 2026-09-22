@@ -78,7 +78,9 @@
     "find": "Pronađi",
     "findCtrlF": "Pronađi (Ctrl+F)",
     "resizePages": "Resize Pages",
-    "resize": "Resize"
+    "resize": "Resize",
+    "cadExport": "U CAD",
+    "cadExportTitle": "Izvezi vektorski crtež u DXF ili DWG"
   },
   "comment": {
     "drawing": "Crtanje",
@@ -154,7 +156,8 @@
     "appearance": "Izgled",
     "keystrokes": "Keystrokes",
     "readerMode": "Način čitanja",
-    "readerModeTip": "Pamti stranicu, položaj pomicanja i zumiranje svakog PDF-a pri zatvaranju i ponovnom otvaranju"
+    "readerModeTip": "Pamti stranicu, položaj pomicanja i zumiranje ovog PDF-a pri zatvaranju i ponovnom otvaranju. Dok je uključeno, uz ovaj PDF čuva se mala datoteka, pa se ona pojavljuje i u mapama sinkroniziranima s oblakom (OneDrive, Dropbox itd.); isključivanjem se ta datoteka uklanja.",
+    "readerModeSaveFailed": "Način čitanja nije mogao spremiti postavku za ovaj PDF. Mapa je možda samo za čitanje."
   },
   "organize": {
     "pages": "Stranice",
@@ -177,7 +180,7 @@
     "manageWatermarks": "Upravljaj vodenim žigovima",
     "manage": "Upravljaj",
     "straighten": "Ispravi Stranicu",
-    "ocr": "Recognize Text (OCR)",
+    "ocr": "Prepoznavanje teksta (OCR)",
     "shiftPage": "Pomakni stranicu"
   },
   "help": {

@@ -27,7 +27,7 @@
     "aiLink": "AI連携（MCP）",
     "aiLinkAllow": "AIアシスタント（Claude Desktop など）にこのアプリの操作を許可する",
     "aiLinkPort": "ポート",
-    "aiLinkHint": "この連携はこのコンピューター上でのみ動作します（127.0.0.1）。AIアシスタントが文書を開く、計測する、注釈を付ける、保存することができます。AIアシスタントを使う場合のみオンにしてください。",
+    "aiLinkHint": "この連携はこのコンピューター上でのみ動作します（127.0.0.1）。AIアシスタントが文書を開く、計測する、注釈を付ける、保存することができます。既定でオンになっています。AIアシスタントを使わない場合はオフにしてください。",
     "aiLinkActive": "{{adres}} で有効",
     "aiLinkViaFlag": "起動オプションで有効（{{adres}}）",
     "aiLinkOff": "オフ",
@@ -143,7 +143,7 @@
   },
   "virtualPrinter": {
     "title": "仮想プリンター",
-    "description": "「PT PDF Studio」を Windows プリンターとしてインストールします。任意のアプリケーション（Word、Chrome、メモ帳など）から印刷してこのプリンターを選択すると、出力された PDF がこのアプリで自動的に開きます。",
+    "description": "「PT PDF Printer」を Windows プリンターとしてインストールします。任意のアプリケーション（Word、Chrome、メモ帳など）から印刷してこのプリンターを選択すると、出力された PDF がこのアプリで自動的に開きます。",
     "status": "状態：",
     "installButton": "仮想プリンターをインストール",
     "removeButton": "仮想プリンターを削除",

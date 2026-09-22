@@ -78,7 +78,9 @@
     "find": "ढूंढें",
     "findCtrlF": "ढूंढें (Ctrl+F)",
     "resizePages": "Resize Pages",
-    "resize": "Resize"
+    "resize": "Resize",
+    "cadExport": "CAD में",
+    "cadExportTitle": "वेक्टर ड्राइंग को DXF या DWG में निर्यात करें"
   },
   "comment": {
     "drawing": "आरेखण",
@@ -154,7 +156,8 @@
     "appearance": "दिखावट",
     "keystrokes": "Keystrokes",
     "readerMode": "रीडर मोड",
-    "readerModeTip": "हर PDF को बंद और फिर से खोलते समय पृष्ठ, स्क्रोल स्थिति और ज़ूम याद रखता है"
+    "readerModeTip": "इस PDF को बंद और फिर से खोलते समय पृष्ठ, स्क्रोल स्थिति और ज़ूम याद रखता है। चालू रहने पर इस PDF के बगल में एक छोटी फ़ाइल रखी जाती है, इसलिए वह क्लाउड से सिंक होने वाले फ़ोल्डरों (OneDrive, Dropbox आदि) में भी दिखाई देती है; बंद करने पर वह फ़ाइल हटा दी जाती है।",
+    "readerModeSaveFailed": "रीडर मोड इस PDF के लिए अपनी सेटिंग सहेज नहीं सका। फ़ोल्डर केवल-पढ़ने योग्य हो सकता है।"
   },
   "organize": {
     "pages": "पृष्ठ",
@@ -177,7 +180,7 @@
     "manageWatermarks": "वॉटरमार्क प्रबंधित करें",
     "manage": "प्रबंधित करें",
     "straighten": "पृष्ठ सीधा करें",
-    "ocr": "Recognize Text (OCR)",
+    "ocr": "टेक्स्ट पहचान (OCR)",
     "shiftPage": "पृष्ठ स्थानांतरित करें"
   },
   "help": {

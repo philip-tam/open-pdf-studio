@@ -27,7 +27,7 @@
     "aiLink": "Prepojenie s AI (MCP)",
     "aiLinkAllow": "Povoliť asistentom AI (napr. Claude Desktop) ovládať túto aplikáciu",
     "aiLinkPort": "Port",
-    "aiLinkHint": "Prepojenie funguje len na tomto počítači (127.0.0.1). Asistent AI potom môže otvárať, merať, anotovať a ukladať dokumenty. Zapnite len vtedy, ak používate asistenta AI.",
+    "aiLinkHint": "Prepojenie funguje len na tomto počítači (127.0.0.1). Asistent AI potom môže otvárať, merať, anotovať a ukladať dokumenty. V predvolenom nastavení je zapnuté; vypnite, ak asistenta AI nepoužívate.",
     "aiLinkActive": "Aktívne na {{adres}}",
     "aiLinkViaFlag": "Aktívne cez spúšťací parameter ({{adres}})",
     "aiLinkOff": "Vypnuté",
@@ -160,7 +160,7 @@
   },
   "virtualPrinter": {
     "title": "Virtuálna tlačiareň",
-    "description": "Nainštalujte \"PT PDF Studio\" ako tlačiareň systému Windows. Keď tlačíte z ľubovoľnej aplikácie (Word, Chrome, Poznámkový blok atď.) a vyberiete túto tlačiareň, výstupný PDF sa automaticky otvorí v tejto aplikácii.",
+    "description": "Nainštalujte \"PT PDF Printer\" ako tlačiareň systému Windows. Keď tlačíte z ľubovoľnej aplikácie (Word, Chrome, Poznámkový blok atď.) a vyberiete túto tlačiareň, výstupný PDF sa automaticky otvorí v tejto aplikácii.",
     "status": "Stav:",
     "installButton": "Nainštalovať virtuálnu tlačiareň",
     "removeButton": "Odstrániť virtuálnu tlačiareň",

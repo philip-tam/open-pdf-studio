@@ -1,10 +1,10 @@
-import { createSignal, createEffect, onMount } from 'solid-js';
+import { createSignal, createEffect, onMount, For } from 'solid-js';
 import Dialog from '../Dialog.jsx';
 import { closeDialog } from '../../stores/dialogStore.js';
 import { useTranslation } from '../../../i18n/useTranslation.js';
 import { getActiveDocument, getPageRotation } from '../../../core/state.js';
 import {
-  PAPIERFORMATEN, startPaginaInstelling, bewaarPaginaInstelling,
+  PAPIERFORMATEN, formaatTekst, startPaginaInstelling, bewaarPaginaInstelling,
 } from '../../../pdf/print-pagina-instelling.js';
 import { viewportOpties } from '../../../pdf/getoonde-pagina.js';
 
@@ -24,6 +24,28 @@ export let pageSetupSettings = {
 
 export function getPageSetupSettings() {
   return { ...pageSetupSettings };
+}
+
+// Telt op bij elke wijziging (OK hier, of stelPaginaInstellingIn), zodat een
+// open printdialoog zijn papierkop bijwerkt. pageSetupSettings zelf is geen
+// signaal; lees dit in een memo/effect en daarna getPageSetupSettings().
+const [versie, setVersie] = createSignal(0);
+export const paginaInstellingVersie = versie;
+
+/**
+ * Formaat en oriëntatie van buitenaf zetten (na OK in de eigenschappen van de
+ * printer, zie instellingNaEigenschappen in print-papier.js). Marges en
+ * papierbron blijven staan. null/undefined → niets.
+ */
+export function stelPaginaInstellingIn(instelling) {
+  if (!instelling) return;
+  pageSetupSettings.docId = instelling.docId ?? null;
+  pageSetupSettings.handmatig = Boolean(instelling.handmatig);
+  if (typeof instelling.size === 'string') pageSetupSettings.size = instelling.size;
+  if (instelling.orientation === 'portrait' || instelling.orientation === 'landscape') {
+    pageSetupSettings.orientation = instelling.orientation;
+  }
+  setVersie((v) => v + 1);
 }
 
 // Maat van de huidige pagina zoals getoond (inclusief draaiing), in pt.
@@ -174,6 +196,7 @@ export default function PageSetupDialog() {
     pageSetupSettings.marginRight = parseInt(marginRight()) || 0;
     pageSetupSettings.marginTop = parseInt(marginTop()) || 0;
     pageSetupSettings.marginBottom = parseInt(marginBottom()) || 0;
+    setVersie((v) => v + 1);
     close();
   };
 
@@ -211,13 +234,10 @@ export default function PageSetupDialog() {
             onChange={(e) => { aangeraakt = true; setSize(e.target.value); }}
           >
             <option value="printer">{t('pageSetup.printerDefault')}</option>
-            <option value="a2">A2 (420 x 594 mm)</option>
-            <option value="a3">A3 (297 x 420 mm)</option>
-            <option value="a4">A4 (210 x 297 mm)</option>
-            <option value="a5">A5 (148 x 210 mm)</option>
-            <option value="letter">Letter (216 x 279 mm)</option>
-            <option value="legal">Legal (216 x 356 mm)</option>
-            <option value="tabloid">Tabloid (279 x 432 mm)</option>
+            {/* Eén bron: dezelfde lijst waaruit het formaat wordt afgeleid. */}
+            <For each={Object.keys(PAPIERFORMATEN)}>
+              {(sleutel) => <option value={sleutel}>{formaatTekst(sleutel)}</option>}
+            </For>
           </select>
         </div>
         <div class="page-setup-row">

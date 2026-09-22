@@ -39,6 +39,8 @@ import { recalculateAllMeasurements, calculateArea, calculatePerimeter, calculat
 import { applyTemplateRealSize } from '../../symbols/real-size.js';
 import { applyStampLineWidth, applyStampColor, stampLineWidthOf } from '../../annotations/stamp-line-width.js';
 import { pendingParams, setPendingParams } from './parametricSymbolStore.js';
+import { klemMaat, leesMaatInvoer, toonMaat, veiligeVerhouding, RECHTHOEK_VORMEN } from '../../annotations/minimummaat.js';
+import { kanZonderRand } from '../../annotations/fill-utils.js';
 
 // Types whose single 'color' control IS their stroke colour and which render
 // via `strokeColor || color`. For these, the 'color' control must mirror onto
@@ -165,6 +167,7 @@ const [sectionVis, setSectionVis] = createStore({
   iconGroup: false,
   fillColorGroup: false,
   strokeColorGroup: false,
+  strokeNoneAllowed: false,
   colorGroup: false,
   lineWidthGroup: false,
   borderStyleGroup: false,
@@ -256,6 +259,7 @@ function computeSectionVisibility(type) {
     iconGroup: type === 'comment',
     fillColorGroup: hasFillColor,
     strokeColorGroup: isShape || type === 'measureDistance' || type === 'measureArea' || type === 'measurePerimeter' || type === 'filledArea',
+    strokeNoneAllowed: kanZonderRand(type),
     colorGroup: !hideColor || isTextMarkup,
     lineWidthGroup: !hideLineWidth,
     borderStyleGroup: hasBorderStyle,
@@ -324,8 +328,9 @@ export function storeShowProperties(annotation) {
     textAlign: annotation.textAlign || 'left',
     lineSpacing: annotation.lineSpacing || '1.5',
     rotation: annotation.rotation || 0,
-    imageWidth: annotation.type === 'image' ? Math.round(annotation.width) : 0,
-    imageHeight: annotation.type === 'image' ? Math.round(annotation.height) : 0,
+    // Met decimalen: een afbeelding van 0,4 pt toonde anders "0".
+    imageWidth: annotation.type === 'image' ? toonMaat(annotation.width) : 0,
+    imageHeight: annotation.type === 'image' ? toonMaat(annotation.height) : 0,
     imageRotation: annotation.type === 'image' ? Math.round(annotation.rotation || 0) : 0,
     lockAspectRatio: annotation.type === 'image' ? (annotation.lockAspectRatio || false) : false,
     linkedPath: annotation.linkedPath || '',
@@ -506,6 +511,7 @@ export function storeHideProperties() {
     iconGroup: false,
     fillColorGroup: false,
     strokeColorGroup: false,
+  strokeNoneAllowed: false,
     colorGroup: false,
     lineWidthGroup: false,
     borderStyleGroup: false,
@@ -664,6 +670,7 @@ export function storeShowMultiSelection(selected) {
     iconGroup: allSameType && sharedType === 'comment',
     fillColorGroup: allMatch(t => fillColorTypes.has(t)),
     strokeColorGroup: allMatch(t => strokeColorTypes.has(t)),
+    strokeNoneAllowed: allMatch(t => kanZonderRand(t)),
     colorGroup: allMatch(t => !hideColorTypes.has(t) || textMarkupTypes.has(t)),
     lineWidthGroup: allMatch(t => !hideLineWidthTypes.has(t)),
     borderStyleGroup: allMatch(t => borderStyleTypes.has(t)),
@@ -763,6 +770,7 @@ export function storeShowTextEditProperties(info) {
     iconGroup: false,
     fillColorGroup: false,
     strokeColorGroup: false,
+  strokeNoneAllowed: false,
     colorGroup: false,
     lineWidthGroup: false,
     borderStyleGroup: false,
@@ -1149,7 +1157,10 @@ function applyPropToAnnotation(ann, key, value) {
     case 'scaleRegionUnits': ann.units = String(value || 'mm'); break;
     case 'scaleRegionLabel': ann.label = String(value || ''); break;
     case 'tintColor': ann.tintColor = value || undefined; break;
-    default: ann[key] = value; break;
+    default:
+      ann[key] = ((key === 'width' || key === 'height') && RECHTHOEK_VORMEN.has(ann.type))
+        ? klemMaat(value) : value;
+      break;
   }
 }
 
@@ -1410,26 +1421,32 @@ export function updateAnnotProp(key, value) {
       break;
     }
     case 'rotation': currentAnnotation.rotation = Math.max(-360, Math.min(360, parseInt(value) || 0)); break;
+    // Breedte/hoogte van een afbeelding: ELKE positieve waarde mag, met
+    // decimalen. Was geheeltallig met "leeg of 0 -> 20 pt" en een vloer van
+    // 1 pt (35 mm op 1:100) op de partner-as. Een tussenstand tijdens het
+    // typen ("", "0", "0.") laat het model met rust. De partner-as volgt de
+    // verhouding exact (#315) en is alleen technisch begrensd.
     case 'imageWidth': {
-      const newW = parseInt(value) || 20;
+      const newW = leesMaatInvoer(value);
+      if (newW == null) break;
       currentAnnotation.width = newW;
-      if (currentAnnotation.lockAspectRatio && currentAnnotation.originalWidth && currentAnnotation.originalHeight) {
-        const ratio = currentAnnotation.originalWidth / currentAnnotation.originalHeight;
-        // Floor of 1 unit, not 20: on a very wide image (ratio ≈ 8) the
-        // partner axis is legitimately far below 20 and a 20-unit floor
-        // would silently break the locked ratio (issue #315).
-        currentAnnotation.height = Math.max(1, Math.round(newW / ratio));
-        setAnnotProps('imageHeight', currentAnnotation.height);
+      const ratio = currentAnnotation.lockAspectRatio
+        ? veiligeVerhouding(currentAnnotation.originalWidth, currentAnnotation.originalHeight) : 0;
+      if (ratio) {
+        currentAnnotation.height = klemMaat(newW / ratio);
+        setAnnotProps('imageHeight', toonMaat(currentAnnotation.height));
       }
       break;
     }
     case 'imageHeight': {
-      const newH = parseInt(value) || 20;
+      const newH = leesMaatInvoer(value);
+      if (newH == null) break;
       currentAnnotation.height = newH;
-      if (currentAnnotation.lockAspectRatio && currentAnnotation.originalWidth && currentAnnotation.originalHeight) {
-        const ratio = currentAnnotation.originalWidth / currentAnnotation.originalHeight;
-        currentAnnotation.width = Math.max(1, Math.round(newH * ratio));
-        setAnnotProps('imageWidth', currentAnnotation.width);
+      const ratio = currentAnnotation.lockAspectRatio
+        ? veiligeVerhouding(currentAnnotation.originalWidth, currentAnnotation.originalHeight) : 0;
+      if (ratio) {
+        currentAnnotation.width = klemMaat(newH * ratio);
+        setAnnotProps('imageWidth', toonMaat(currentAnnotation.width));
       }
       break;
     }
@@ -1438,10 +1455,11 @@ export function updateAnnotProp(key, value) {
     case 'tintColor': currentAnnotation.tintColor = value || undefined; break;
     case 'lockAspectRatio': {
       currentAnnotation.lockAspectRatio = value;
-      if (value && currentAnnotation.type === 'image' && currentAnnotation.originalWidth && currentAnnotation.originalHeight) {
-        const ratio = currentAnnotation.originalWidth / currentAnnotation.originalHeight;
-        currentAnnotation.height = Math.max(1, Math.round(currentAnnotation.width / ratio));
-        setAnnotProps('imageHeight', currentAnnotation.height);
+      const lockRatio = (value && currentAnnotation.type === 'image')
+        ? veiligeVerhouding(currentAnnotation.originalWidth, currentAnnotation.originalHeight) : 0;
+      if (lockRatio) {
+        currentAnnotation.height = klemMaat(currentAnnotation.width / lockRatio);
+        setAnnotProps('imageHeight', toonMaat(currentAnnotation.height));
       }
       break;
     }
@@ -1601,10 +1619,13 @@ export function updateAnnotProp(key, value) {
       // page-pixel bbox, top-left anchored.
       const real = parseFloat(String(value).replace(',', '.'));
       if (!(real > 0)) break;
-      const px = real * _scaleRegionPpu(currentAnnotation);
+      // Elke positieve waarde mag (ook kleiner dan de schermpixel-grens bij
+      // slepen: die duwt een al kleiner gebied niet omhoog); alleen technisch
+      // begrensd.
+      const px = klemMaat(real * _scaleRegionPpu(currentAnnotation));
       if (key === 'scaleRegionWidth') currentAnnotation.width = px;
       else currentAnnotation.height = px;
-      setAnnotProps(key, Math.round(real * 10) / 10);
+      setAnnotProps(key, toonMaat(real));
       import('../../annotations/scale-region.js').then(m => m.invalidateScaleRegionCache());
       recalculateAllMeasurements();
       break;
@@ -1647,6 +1668,10 @@ export function updateAnnotProp(key, value) {
           target = target[seg];
         }
         target[parts[parts.length - 1]] = value;
+      } else if ((key === 'width' || key === 'height') && RECHTHOEK_VORMEN.has(currentAnnotation.type)) {
+        // Technische wacht op het schrijfpad van de zwevende B/H-invoer: nooit
+        // nul, negatief of NaN in het model (elke positieve waarde mag wel).
+        currentAnnotation[key] = klemMaat(value);
       } else {
         currentAnnotation[key] = value;
       }

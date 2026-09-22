@@ -78,7 +78,9 @@
     "find": "חיפוש",
     "findCtrlF": "חיפוש (Ctrl+F)",
     "resizePages": "Resize Pages",
-    "resize": "Resize"
+    "resize": "Resize",
+    "cadExport": "ל-CAD",
+    "cadExportTitle": "ייצוא השרטוט הווקטורי ל-DXF או ל-DWG"
   },
   "comment": {
     "drawing": "ציור",
@@ -154,7 +156,8 @@
     "appearance": "מראה",
     "keystrokes": "Keystrokes",
     "readerMode": "מצב קריאה",
-    "readerModeTip": "זוכר את העמוד, מיקום הגלילה והזינוק של כל קובץ PDF בין סגירה לפתיחה מחדש"
+    "readerModeTip": "זוכר את העמוד, מיקום הגלילה והזום של קובץ PDF זה בין סגירה לפתיחה מחדש. כל עוד האפשרות פעילה, נשמר קובץ קטן לצד קובץ ה-PDF הזה, ולכן הוא מופיע גם בתיקיות המסונכרנות לענן (OneDrive, Dropbox וכו'); כיבוי האפשרות מסיר את הקובץ.",
+    "readerModeSaveFailed": "מצב קריאה לא הצליח לשמור את ההגדרה עבור קובץ PDF זה. ייתכן שהתיקייה היא לקריאה בלבד."
   },
   "organize": {
     "pages": "עמודים",
@@ -177,7 +180,7 @@
     "manageWatermarks": "ניהול סימני מים",
     "manage": "ניהול",
     "straighten": "יישור עמוד",
-    "ocr": "Recognize Text (OCR)",
+    "ocr": "זיהוי טקסט (OCR)",
     "shiftPage": "הזזת עמוד"
   },
   "help": {

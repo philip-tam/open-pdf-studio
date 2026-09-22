@@ -27,7 +27,7 @@
     "aiLink": "AI-forbindelse (MCP)",
     "aiLinkAllow": "Tillad AI-assistenter (som Claude Desktop) at betjene denne app",
     "aiLinkPort": "Port",
-    "aiLinkHint": "Forbindelsen virker kun på denne computer (127.0.0.1). En AI-assistent kan så åbne, måle, annotere og gemme dokumenter. Slå det kun til, hvis du bruger en AI-assistent.",
+    "aiLinkHint": "Forbindelsen virker kun på denne computer (127.0.0.1). En AI-assistent kan så åbne, måle, annotere og gemme dokumenter. Er slået til som standard; slå det fra, hvis du ikke bruger en AI-assistent.",
     "aiLinkActive": "Aktiv på {{adres}}",
     "aiLinkViaFlag": "Aktiv via startparameter ({{adres}})",
     "aiLinkOff": "Fra",
@@ -160,7 +160,7 @@
   },
   "virtualPrinter": {
     "title": "Virtuel printer",
-    "description": "Installer \"PT PDF Studio\" som en Windows-printer. Når du udskriver fra et hvilket som helst program (Word, Chrome, Notesblok osv.) og vælger denne printer, åbnes den genererede PDF automatisk i dette program.",
+    "description": "Installer \"PT PDF Printer\" som en Windows-printer. Når du udskriver fra et hvilket som helst program (Word, Chrome, Notesblok osv.) og vælger denne printer, åbnes den genererede PDF automatisk i dette program.",
     "status": "Status:",
     "installButton": "Installer virtuel printer",
     "removeButton": "Fjern virtuel printer",

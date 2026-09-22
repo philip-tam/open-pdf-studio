@@ -1,6 +1,6 @@
 [package]
 name = "open-pdf-studio"
-version = "0.10.0"
+version = "0.11.0"
 description = "A free, open-source PDF annotation editor"
 authors = ["OpenAEC Foundation"]
 license = "LGPL-3.0-or-later"
@@ -27,6 +27,10 @@ tauri-plugin-shell = "2.3.5"
 tauri-plugin-os = "2.3.2"
 tauri-plugin-process = "2"
 dirs = "5"
+# Windows-verbatimpaden (\\?\C:\...) terugzetten naar gewone paden voor
+# C-bibliotheken die er zelf "/" achter plakken (Tesseract-taaldata).
+# Staat al in Cargo.lock; geen nieuwe crate.
+dunce = "1"
 whoami = "1"
 base64 = "0.22"
 open = "5"
@@ -40,6 +44,9 @@ tauri-plugin-store = "2"
 tauri-plugin-clipboard-manager = "2"
 reqwest = { version = "0.12", features = ["rustls-tls", "json", "multipart"], default-features = false }
 open-pdf-render = { path = "../../open-pdf-render" }
+# Export van een PDF-pagina naar DXF/DWG (#400); trekt acadrust mee (pure Rust,
+# MPL-2.0). De app-crate bevat alleen de commando-schil in src/cad_export.rs.
+open-pdf-cad = { path = "../../open-pdf-cad" }
 image = { version = "0.25", default-features = false, features = ["jpeg", "png"] }
 pdfium-render = { version = "0.9", features = ["thread_safe", "image_025"] }
 clap = { version = "4", features = ["derive"] }
@@ -111,10 +118,15 @@ flate2 = "1"
 # see the "Build Tauri app / Build macOS app" steps there. Windows has no
 # equivalent "system-installed Tesseract" story without adding a vcpkg
 # dependency, and that CI leg already builds cleanly from source.
+#
+# Android: no OCR. The source build of Tesseract/Leptonica does not work with
+# the NDK (CMake misses CpuFeaturesNdkCompat, the link step misses
+# -lleptonica), so the crate is left out entirely and `ocr_pdf_page` is a
+# stub that returns an error (see src/lib.rs).
 [target.'cfg(target_os = "linux")'.dependencies]
 tesseract-rs = { version = "0.4", default-features = false, features = ["use-system-tesseract"] }
 
-[target.'cfg(not(target_os = "linux"))'.dependencies]
+[target.'cfg(not(any(target_os = "linux", target_os = "android")))'.dependencies]
 tesseract-rs = { version = "0.4", default-features = false, features = ["build-tesseract"] }
 
 [target.'cfg(not(target_os = "android"))'.dependencies]

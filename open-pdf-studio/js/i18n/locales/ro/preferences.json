@@ -27,7 +27,7 @@
     "aiLink": "Conexiune AI (MCP)",
     "aiLinkAllow": "Permite asistenților AI (precum Claude Desktop) să controleze această aplicație",
     "aiLinkPort": "Port",
-    "aiLinkHint": "Conexiunea funcționează doar pe acest computer (127.0.0.1). Un asistent AI poate deschide, măsura, adnota și salva documente. Activați doar dacă folosiți un asistent AI.",
+    "aiLinkHint": "Conexiunea funcționează doar pe acest computer (127.0.0.1). Un asistent AI poate deschide, măsura, adnota și salva documente. Este activată în mod implicit; dezactivați-o dacă nu folosiți un asistent AI.",
     "aiLinkActive": "Activă pe {{adres}}",
     "aiLinkViaFlag": "Activă prin parametru de pornire ({{adres}})",
     "aiLinkOff": "Oprită",
@@ -160,7 +160,7 @@
   },
   "virtualPrinter": {
     "title": "Imprimanta virtuala",
-    "description": "Instalati \"PT PDF Studio\" ca imprimanta Windows. Cand tipariti din orice aplicatie (Word, Chrome, Notepad, etc.) si selectati aceasta imprimanta, fisierul PDF rezultat se va deschide automat in aceasta aplicatie.",
+    "description": "Instalati \"PT PDF Printer\" ca imprimanta Windows. Cand tipariti din orice aplicatie (Word, Chrome, Notepad, etc.) si selectati aceasta imprimanta, fisierul PDF rezultat se va deschide automat in aceasta aplicatie.",
     "status": "Stare:",
     "installButton": "Instalare imprimanta virtuala",
     "removeButton": "Eliminare imprimanta virtuala",

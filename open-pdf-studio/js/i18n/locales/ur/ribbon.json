@@ -78,7 +78,9 @@
     "find": "تلاش",
     "findCtrlF": "تلاش کریں (Ctrl+F)",
     "resizePages": "Resize Pages",
-    "resize": "Resize"
+    "resize": "Resize",
+    "cadExport": "CAD کی طرف",
+    "cadExportTitle": "ویکٹر ڈرائنگ کو DXF یا DWG میں برآمد کریں"
   },
   "comment": {
     "drawing": "ڈرائنگ",
@@ -154,7 +156,8 @@
     "appearance": "ظاہری شکل",
     "keystrokes": "Keystrokes",
     "readerMode": "ریڈر موڈ",
-    "readerModeTip": "بند کرنے اور دوبارہ کھولنے پر ہر PDF کا صفحہ، اسکرول پوزیشن اور زوم یاد رکھیں"
+    "readerModeTip": "بند کرنے اور دوبارہ کھولنے پر اس PDF کا صفحہ، اسکرول پوزیشن اور زوم یاد رکھیں۔ جب تک یہ آن ہے، اس PDF کے ساتھ ایک چھوٹی فائل محفوظ رہتی ہے، اس لیے وہ کلاؤڈ سے ہم آہنگ فولڈرز (OneDrive، Dropbox وغیرہ) میں بھی نظر آتی ہے؛ آف کرنے پر وہ فائل ہٹا دی جاتی ہے۔",
+    "readerModeSaveFailed": "ریڈر موڈ اس PDF کے لیے اپنی ترتیب محفوظ نہیں کر سکا۔ ممکن ہے فولڈر صرف پڑھنے کے لیے ہو۔"
   },
   "organize": {
     "pages": "صفحات",
@@ -177,7 +180,7 @@
     "manageWatermarks": "واٹر مارکس کا انتظام",
     "manage": "انتظام",
     "straighten": "صفحہ سیدھا کریں",
-    "ocr": "Recognize Text (OCR)",
+    "ocr": "متن کی شناخت (OCR)",
     "shiftPage": "صفحہ منتقل کریں"
   },
   "help": {

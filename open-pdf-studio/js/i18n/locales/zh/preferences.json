@@ -27,7 +27,7 @@
     "aiLink": "AI 连接（MCP）",
     "aiLinkAllow": "允许 AI 助手（如 Claude Desktop）操作此应用",
     "aiLinkPort": "端口",
-    "aiLinkHint": "该连接仅在本机上运行（127.0.0.1）。AI 助手可以打开、测量、批注和保存文档。仅在使用 AI 助手时开启。",
+    "aiLinkHint": "该连接仅在本机上运行（127.0.0.1）。AI 助手可以打开、测量、批注和保存文档。默认开启；如果不使用 AI 助手，请将其关闭。",
     "aiLinkActive": "已在 {{adres}} 运行",
     "aiLinkViaFlag": "通过启动参数运行（{{adres}}）",
     "aiLinkOff": "关闭",
@@ -143,7 +143,7 @@
   },
   "virtualPrinter": {
     "title": "虚拟打印机",
-    "description": "将“PT PDF Studio”安装为 Windows 打印机。当您从任何应用程序（Word、Chrome、记事本等）打印并选择此打印机时，输出的 PDF 将自动在此应用中打开。",
+    "description": "将“PT PDF Printer”安装为 Windows 打印机。当您从任何应用程序（Word、Chrome、记事本等）打印并选择此打印机时，输出的 PDF 将自动在此应用中打开。",
     "status": "状态：",
     "installButton": "安装虚拟打印机",
     "removeButton": "移除虚拟打印机",

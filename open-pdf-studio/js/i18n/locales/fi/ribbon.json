@@ -78,7 +78,9 @@
     "find": "Etsi",
     "findCtrlF": "Etsi (Ctrl+F)",
     "resizePages": "Resize Pages",
-    "resize": "Resize"
+    "resize": "Resize",
+    "cadExport": "CAD:iin",
+    "cadExportTitle": "Vie vektoripiirustus DXF- tai DWG-muotoon"
   },
   "comment": {
     "drawing": "Piirros",
@@ -154,7 +156,8 @@
     "appearance": "Ulkoasu",
     "keystrokes": "Keystrokes",
     "readerMode": "Lukutila",
-    "readerModeTip": "Muistaa jokaisen PDF:n sivun, vierityskohdan ja zoomauksen sulkemisen ja uudelleenavaamisen välillä"
+    "readerModeTip": "Muistaa tämän PDF:n sivun, vierityskohdan ja zoomauksen sulkemisen ja uudelleenavaamisen välillä. Kun toiminto on päällä, tämän PDF:n viereen tallennetaan pieni tiedosto, joten se näkyy myös pilveen synkronoiduissa kansioissa (OneDrive, Dropbox jne.); toiminnon poistaminen käytöstä poistaa tiedoston.",
+    "readerModeSaveFailed": "Lukutila ei voinut tallentaa tämän PDF:n asetusta. Kansio saattaa olla vain luku -tilassa."
   },
   "organize": {
     "pages": "Sivut",
@@ -177,7 +180,7 @@
     "manageWatermarks": "Hallitse vesileimoja",
     "manage": "Hallitse",
     "straighten": "Suorista Sivu",
-    "ocr": "Recognize Text (OCR)",
+    "ocr": "Tekstintunnistus (OCR)",
     "shiftPage": "Siirrä sivua"
   },
   "help": {
