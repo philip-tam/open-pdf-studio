@@ -8,6 +8,7 @@ pub mod cad_export;
 pub mod cad_import;
 mod email;
 pub mod linux_runtime;
+pub mod logboek;
 pub mod mcp_app_bridge;
 pub mod mcp_koppeling;
 pub mod mcp_server;
@@ -516,6 +517,10 @@ fn no_window_command(program: &str) -> std::process::Command {
 
 /// Enumerate installed printers via PowerShell CIM.
 /// Returns a JSON array of printer objects.
+/// Alleen opvragen: er wordt niets geïnstalleerd, gewijzigd of gestart.
+/// PortName hoort erbij omdat de printdialoog en `app_list_printers` daaraan
+/// zien of een wachtrij naar een bestand schrijft (js/pdf/print-doel.js,
+/// `isBestandsPrinter`).
 /// async: sync commands run on the main event-loop thread, and this one
 /// blocks on a PowerShell subprocess for ~1s — long enough to freeze window
 /// show and input processing at startup. Async moves it to the runtime pool.
@@ -526,7 +531,7 @@ async fn get_printers() -> Result<String, String> {
         let output = no_window_command("powershell")
             .args(&[
                 "-NoProfile", "-NonInteractive", "-Command",
-                "Get-CimInstance -ClassName Win32_Printer | Select-Object Name, DriverName, Default, PrinterStatus | ConvertTo-Json -Compress"
+                "Get-CimInstance -ClassName Win32_Printer | Select-Object Name, DriverName, PortName, Default, PrinterStatus | ConvertTo-Json -Compress"
             ])
             .output()
             .map_err(|e| format!("Failed to enumerate printers: {}", e))?;
@@ -593,10 +598,11 @@ async fn get_printers() -> Result<String, String> {
             if name.is_empty() { continue; }
             let status_num: i32 = if rest.contains("disabled") { 0 } else { 3 }; // 3 = idle on Win32
             let is_default = name == default_name;
-            // Match the Windows JSON shape: { Name, DriverName, Default, PrinterStatus }
+            // Match the Windows JSON shape: { Name, DriverName, PortName, Default, PrinterStatus }.
+            // CUPS has no port; an empty PortName keeps the shape the same.
             let escaped = name.replace('\\', "\\\\").replace('"', "\\\"");
             entries.push(format!(
-                "{{\"Name\":\"{}\",\"DriverName\":\"CUPS\",\"Default\":{},\"PrinterStatus\":{}}}",
+                "{{\"Name\":\"{}\",\"DriverName\":\"CUPS\",\"PortName\":\"\",\"Default\":{},\"PrinterStatus\":{}}}",
                 escaped,
                 if is_default { "true" } else { "false" },
                 status_num
@@ -2741,6 +2747,14 @@ pub fn run(opts: StartupOpts) {
 
     builder
         .setup(move |app| {
+            // Als eerste, zodat alles wat hierna met `log::` gemeld wordt ook
+            // ergens aankomt. Zonder logger zijn die macro's lege hulzen.
+            // Mislukt het opzetten, dan draait de app gewoon door.
+            match logboek::registreer(app.handle()) {
+                Ok(map) => eprintln!("[startup] logboek in {}", map.display()),
+                Err(e) => eprintln!("[startup] geen logboek: {e}"),
+            }
+
             let diagnostics_path = app
                 .path()
                 .app_log_dir()

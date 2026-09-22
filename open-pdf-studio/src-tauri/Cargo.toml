@@ -1,6 +1,6 @@
 [package]
 name = "open-pdf-studio"
-version = "0.13.0"
+version = "0.14.0"
 description = "A free, open-source PDF annotation editor"
 authors = ["OpenAEC Foundation"]
 license = "LGPL-3.0-or-later"
@@ -161,3 +161,9 @@ objc2 = "0.6.3"
 objc2-foundation = { version = "0.3.2", default-features = false, features = ["NSURL", "NSBundle", "NSString", "NSObject"] }
 objc2-app-kit = { version = "0.3.2", default-features = false, features = ["NSWorkspace", "block2", "objc2-uniform-type-identifiers"] }
 objc2-uniform-type-identifiers = { version = "0.3.2", default-features = false, features = ["UTType"] }
+
+# De mock-runtime van Tauri, zodat een test een AppHandle kan maken zonder
+# venster (logboek::registreer schrijft daarmee echt een logbestand). Alleen
+# voor `cargo test`: met resolver 2 komt de feature niet in gewone builds.
+[dev-dependencies]
+tauri = { version = "2.10.2", features = ["test"] }

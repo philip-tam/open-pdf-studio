@@ -62,7 +62,7 @@ import { initTextSelection } from './text/text-selection.js';
 import { initTabs, createTab, switchToTab, closeActiveTab } from './ui/chrome/tabs.js';
 
 // Search/Find
-import { initFindBar } from './search/find-bar.js';
+import { initFindBar, applySourcePreferences } from './search/find-bar.js';
 
 // Font utilities
 import { initFontDropdowns } from './utils/fonts.js';
@@ -284,6 +284,7 @@ async function init() {
     initBookmarks();
     initLeftPanel();
     initFindBar();
+    applySourcePreferences();
     initFontDropdowns();
   }
 
