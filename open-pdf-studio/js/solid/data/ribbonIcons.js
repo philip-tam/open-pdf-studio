@@ -58,8 +58,6 @@ export const wipeoutBrushIcon = `<svg fill="none" stroke="currentColor" viewBox=
 
 export const shiftPageIcon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1" stroke-width="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m0-8l-2.5 2.5M12 8l2.5 2.5m-2.5 5.5l-2.5-2.5m2.5 2.5l2.5-2.5"/></svg>`;
 
-export const shiftPageIcon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1" stroke-width="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m0-8l-2.5 2.5M12 8l2.5 2.5m-2.5 5.5l-2.5-2.5m2.5 2.5l2.5-2.5"/></svg>`;
-
 // --- Home tab: Navigate ---
 
 export const firstPageIcon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>`;
