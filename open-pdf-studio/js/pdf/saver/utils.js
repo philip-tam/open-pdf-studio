@@ -1,6 +1,7 @@
 import { PDFName } from 'pdf-lib';
 import { kruisEindpuntenEllips } from '../../annotations/kruis-geometrie.js';
 import { hasFill, hasStroke, colorWithoutStroke, kanZonderRand } from '../../annotations/fill-utils.js';
+import { vlakOmhullende } from '../../annotations/vlak-ringen.js';
 
 // Convert hex color to RGB values (0-1 range)
 export function hexToRgb(hex) {
@@ -52,6 +53,20 @@ export function randSleutelZonderRand(ann) {
   return RANDSLEUTEL[ann.type] || null;
 }
 
+// Onzichtbaar vlak (#435): de loader merkt een vorm zo aan als het BESTAND
+// uitdrukkelijk lijndikte 0 opgeeft, zonder randkleur en zonder vulling (zie
+// loader/geen-rand.js) — zoals een tekenpakket zijn doorzoekbare tekst
+// wegschrijft. Elke lezer toont daar niets. Het scherm tekent er een dunne
+// hulplijn omheen zodat het vlak vindbaar blijft (rendering.js maakt de
+// lijndikte dan 0,5), maar die hulplijn hoort niet in de appearance: als
+// haarlijn (`0 w ... re S`) zou hij het vlak in élke lezer zichtbaar maken.
+//
+// Geeft de gebruiker het vlak alsnog een lijndikte of een vulling, dan is het
+// niet langer onzichtbaar en wordt het gewoon getekend.
+export function onzichtbaarVlak(ann) {
+  return !!ann && ann.onzichtbaarVlak === true && ann.lineWidth === 0 && !hasFill(ann.fillColor);
+}
+
 // Vorm zonder rand in het annotatie-woordenboek (#431). Elke lezer moet hem
 // zonder omtrek tonen: de randkleur gaat eruit en /BS krijgt /W 0 (de lijnstijl
 // /S en /D blijven). Wat de app nodig heeft voor een exacte rondgang staat in
@@ -69,6 +84,22 @@ export function markeerZonderRand(context, annotDict, ann, randSleutel) {
   annotDict.delete(PDFName.of(randSleutel));
   if (hasFill(ann.color)) bewaard.C = hexToRgb(ann.color);
   annotDict.set(PDFName.of('OPS_NoStroke'), context.obj(bewaard));
+}
+
+// /Rect van een vlak-annotatie (meetvlak / getekend vlak), in PDF-coördinaten.
+// De omhullende loopt over ÁLLE ringen, dus ook over een tweede deel dat naast
+// de buitenring ligt. Eerder telde alleen `points` mee: zo'n deel viel dan
+// buiten de /Rect — en daarmee buiten de /BBox van de appearance, waardoor een
+// andere lezer het wegknipte (GitHub #457).
+export function vlakRect(ann, X, Y, pad = 2) {
+  const grens = vlakOmhullende(ann.points, ann.holes);
+  if (!grens) return [0, 0, 0, 0];
+  const xs = [X(grens.minX), X(grens.maxX)];
+  const ys = [Y(grens.minY), Y(grens.maxY)];
+  return [
+    Math.min(...xs) - pad, Math.min(...ys) - pad,
+    Math.max(...xs) + pad, Math.max(...ys) + pad,
+  ];
 }
 
 // Compute annotation flags (F entry) from annotation properties
@@ -245,6 +276,16 @@ export function generateAppearanceStream(context, ann, convertY) {
           break;
         }
         const [r, g, b] = hexToRgb(ann.strokeColor || ann.color || '#000000');
+        // Onzichtbaar vlak (#435): het kader krijgt geen streek. `re n` legt
+        // vast dat er bewust niets geschilderd wordt, zodat geen enkele lezer
+        // er alsnog zelf een rand bij verzint.
+        if (onzichtbaarVlak(ann)) {
+          streamContent = `0 0 ${w} ${h} re n\n`;
+          if (ann.type === 'box' && ann.cross) {
+            streamContent += `${lw} w\n${r} ${g} ${b} RG\n0 0 m ${w} ${h} l ${w} 0 m 0 ${h} l S\n`;
+          }
+          break;
+        }
         streamContent = `${lw} w\n${r} ${g} ${b} RG\n`;
         if (ann.fillColor) {
           const [fr, fg, fb] = hexToRgb(ann.fillColor);
@@ -293,6 +334,12 @@ export function generateAppearanceStream(context, ann, convertY) {
           break;
         }
         const [r, g, b] = hexToRgb(ann.strokeColor || ann.color || '#000000');
+        // Onzichtbaar vlak (#435): zie de rechthoek hierboven.
+        if (onzichtbaarVlak(ann)) {
+          streamContent = `${ellips}n\n`;
+          if (kruis) streamContent += `${lw} w\n${r} ${g} ${b} RG\n${kruis}`;
+          break;
+        }
         streamContent = `${lw} w\n${r} ${g} ${b} RG\n`;
         if (ann.fillColor) {
           const [fr, fg, fb] = hexToRgb(ann.fillColor);
