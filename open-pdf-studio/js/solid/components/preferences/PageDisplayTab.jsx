@@ -1,5 +1,4 @@
 import { useTranslation } from '../../../i18n/useTranslation.js';
-import PrefSelect from './PrefSelect.jsx';
 
 export default function PageDisplayTab(props) {
   const { t } = useTranslation('preferences');
@@ -25,14 +24,6 @@ export default function PageDisplayTab(props) {
             <input type="checkbox" checked={p.progressiveRender[0]()} onChange={e => p.progressiveRender[1](e.target.checked)} />
             <span>{t('pageDisplay.progressiveRender')}</span>
           </label>
-        </div>
-        <div class="pref-row">
-          <label>{t('pageDisplay.textContrast')}</label>
-          <PrefSelect
-            value={p.textContrast[0]}
-            setValue={p.textContrast[1]}
-            options={[0, 1, 2, 3].map(v => ({ value: v, label: t('pageDisplay.textContrastLevel' + v) }))}
-          />
         </div>
       </fieldset>
       <fieldset class="pref-fieldset">
