@@ -81,6 +81,7 @@ export default function PreferencesDialog(props) {
 
   function handleSave() {
     const prevThinLines = state.preferences.thinLines;
+    const prevTextContrast = state.preferences.textContrast;
     for (const key of Object.keys(DEFAULT_PREFERENCES)) {
       state.preferences[key] = prefs[key][0]();
     }
@@ -99,6 +100,22 @@ export default function PreferencesDialog(props) {
       } else {
         import('../../../pdf/renderer.js').then(m => m.renderPage(getActiveDocument()?.currentPage || 1));
       }
+    }
+    // Cached bitmaps already have the old contrast baked in: flush and redraw.
+    if (state.preferences.textContrast !== prevTextContrast && getActiveDocument()?.pdfDoc) {
+      Promise.all([
+        import('../../../pdf/page-bitmap-cache.js'),
+        import('../../../pdf/tile-cache.js'),
+      ]).then(([pbc, tc]) => {
+        pbc.clearAllBitmaps();
+        tc.tileCacheClearAll();
+        const doc = getActiveDocument();
+        if (doc?.viewMode === 'continuous') {
+          import('../../../pdf/renderer.js').then(m => m.renderContinuous());
+        } else {
+          import('../../../pdf/renderer.js').then(m => m.renderPage(doc?.currentPage || 1));
+        }
+      });
     }
     close();
   }

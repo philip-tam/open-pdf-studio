@@ -1,3 +1,4 @@
+import { pasTekstContrastToe } from './text-contrast-pref.js';
 import { state, getNextUntitledName, getActiveDocument } from '../core/state.js';
 import { showLoading, hideLoading } from '../ui/chrome/dialogs.js';
 import { updateAllStatus } from '../ui/chrome/status-bar.js';
@@ -297,7 +298,7 @@ export async function loadPDF(filePath, docIndex, preloadedData = null) {
           const view = new DataView(bytes.buffer, bytes.byteOffset, 8);
           const w = view.getUint32(0, true);
           const h = view.getUint32(4, true);
-          const rgba = new Uint8ClampedArray(bytes.buffer, bytes.byteOffset + 8, bytes.length - 8);
+          const rgba = pasTekstContrastToe(new Uint8ClampedArray(bytes.buffer, bytes.byteOffset + 8, bytes.length - 8));
           const imageData = new ImageData(rgba, w, h);
           const bitmap = await createImageBitmap(imageData);
           if (isClosed() || doc.pdfDoc || !isActive()) { bitmap.close(); return; }

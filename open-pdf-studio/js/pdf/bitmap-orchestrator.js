@@ -19,6 +19,7 @@ import { computeZoomBucket, ensureBitmap, ensureExactBitmap, getBestAvailableBit
 import { tileCacheFindCovering, tileCacheGet, tileCacheSet } from './tile-cache.js';
 import { tileCoversViewport, visiblePdfRegion } from './tile-coverage.js';
 import { state } from '../core/state.js';
+import { pasTekstContrastToe } from './text-contrast-pref.js';
 import {
     ensureProgressiveBitmapForCurrentView,
     isExtremePage,
@@ -260,7 +261,7 @@ export async function prewarmZoomTiles(filePath, pageNum) {
                     if (w * h * 4 === bytes.length - 8) {
                         const cacheStarted = performance.now();
                         const imageData = new ImageData(
-                            new Uint8ClampedArray(bytes.buffer, bytes.byteOffset + 8, w * h * 4),
+                            pasTekstContrastToe(new Uint8ClampedArray(bytes.buffer, bytes.byteOffset + 8, w * h * 4)),
                             w,
                             h,
                         );
@@ -346,7 +347,7 @@ export async function prewarmZoomTiles(filePath, pageNum) {
             const h = dv.getUint32(4, true);
             if (w * h * 4 !== bytes.length - 8) continue;
             const _pw1 = performance.now();
-            const imageData = new ImageData(new Uint8ClampedArray(bytes.buffer, bytes.byteOffset + 8, w * h * 4), w, h);
+            const imageData = new ImageData(pasTekstContrastToe(new Uint8ClampedArray(bytes.buffer, bytes.byteOffset + 8, w * h * 4)), w, h);
             await tileCacheSet(filePath, pageNum, zoomBucket, viewport.rotation, regionBucket, imageData, {
                 regionXpt: region.x,
                 regionYpt: region.y,
@@ -492,7 +493,7 @@ export async function ensureTileForCurrentView(canvas) {
             console.warn('[tile-orch] size mismatch', w, h, bytes.length - 8);
             return;
         }
-        const rgba = new Uint8ClampedArray(bytes.buffer, bytes.byteOffset + 8, bytes.length - 8);
+        const rgba = pasTekstContrastToe(new Uint8ClampedArray(bytes.buffer, bytes.byteOffset + 8, bytes.length - 8));
         const imageData = new ImageData(rgba, w, h);
         const regionMeta = {
             regionXpt: bufferedRegion.x,

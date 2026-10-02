@@ -204,6 +204,11 @@
     "panels": "Panels",
     "showPropertiesPanel": "Show Properties Panel by default",
     "showToolPalette": "Show Tool Palette by default",
+    "textContrast": "Tekstcontrast (grijze letterranden donkerder maken)",
+    "textContrastLevel0": "Uit (zoals gerenderd)",
+    "textContrastLevel1": "Licht",
+    "textContrastLevel2": "Gemiddeld",
+    "textContrastLevel3": "Sterk",
     "showScrollbars": "Canvas-schuifbalken tonen"
   },
   "measurement": {
