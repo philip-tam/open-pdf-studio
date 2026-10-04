@@ -206,6 +206,7 @@
     "pageSharpenLevel1": "Light",
     "pageSharpenLevel2": "Medium",
     "pageSharpenLevel3": "Strong",
+    "pageSharpenLevel4": "Maximum",
     "showScrollbars": "Show canvas scrollbars",
     "panels": "Panels",
     "showPropertiesPanel": "Show Properties Panel by default",

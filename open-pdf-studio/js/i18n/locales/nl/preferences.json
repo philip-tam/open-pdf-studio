@@ -210,6 +210,7 @@
     "pageSharpenLevel1": "Licht",
     "pageSharpenLevel2": "Gemiddeld",
     "pageSharpenLevel3": "Sterk",
+    "pageSharpenLevel4": "Maximaal",
     "showScrollbars": "Canvas-schuifbalken tonen"
   },
   "measurement": {

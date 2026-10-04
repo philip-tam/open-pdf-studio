@@ -35,7 +35,7 @@ export default function PageDisplayTab(props) {
           <PrefSelect
             value={p.pageSharpen[0]}
             setValue={p.pageSharpen[1]}
-            options={[0, 1, 2, 3].map(v => ({ value: v, label: t('pageDisplay.pageSharpenLevel' + v) }))}
+            options={[0, 1, 2, 3, 4].map(v => ({ value: v, label: t('pageDisplay.pageSharpenLevel' + v) }))}
           />
         </div>
       </fieldset>

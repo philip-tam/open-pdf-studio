@@ -47,4 +47,5 @@ test('onbruikbare maat of hoeveelheid laat de pixels staan', () => {
   assert.equal(sharpenRgba(a, 2, 2, 0.5), a);
   assert.equal(sharpenAmount(9), 0);
   assert.equal(sharpenAmount(2), 0.5);
+  assert.equal(sharpenAmount(4), 1.2);
 });

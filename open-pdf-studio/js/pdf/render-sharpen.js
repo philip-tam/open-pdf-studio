@@ -3,7 +3,8 @@
 // pulls the edge contrast and stroke darkness close to Acrobat's text, without
 // touching flat areas. Alpha is left alone; the 1px border is not processed.
 
-export const SHARPEN_LEVELS = [0, 0.3, 0.5, 0.8];
+// 0.5 ~ Acrobat's text, 1.2 ~ Brave/Chrome's heavier text (measured on screenshots).
+export const SHARPEN_LEVELS = [0, 0.3, 0.5, 0.8, 1.2];
 
 export function sharpenAmount(level) {
   return SHARPEN_LEVELS[level] ?? 0;
