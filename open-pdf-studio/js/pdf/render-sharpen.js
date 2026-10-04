@@ -1,9 +1,9 @@
 // Mild unsharp mask on a freshly rendered RGBA page bitmap. PDFium draws small
 // glyphs with soft, grey edges; a light 3x3 sharpen (src + amount * (src - blur))
-// pulls the edge contrast and stroke darkness close to Acrobat's text, without
+// pulls up edge contrast and stroke darkness, without
 // touching flat areas. Alpha is left alone; the 1px border is not processed.
 
-// 0.5 ~ Acrobat's text, 1.2 ~ Brave/Chrome's heavier text (measured on screenshots).
+// Light to heavy: 0.3, 0.5 (default), 0.8, 1.2.
 export const SHARPEN_LEVELS = [0, 0.3, 0.5, 0.8, 1.2];
 
 export function sharpenAmount(level) {

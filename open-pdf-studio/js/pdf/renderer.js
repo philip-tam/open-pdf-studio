@@ -2270,7 +2270,7 @@ export async function actualSize() {
   if (!doc) return;
 
   // Vector viewport mode: 100% = 96 dpi (1 PDF point = 96/72 CSS pixels),
-  // anchored at canvas center, matching browsers and Acrobat.
+  // anchored at canvas center.
   const vp = window.__pdfViewport;
   // Same blank-doc guard as zoomIn() — see comment there.
   if (vp && vp.active && doc.filePath) {

@@ -1,7 +1,7 @@
-// The zoom shown to the user is relative to a screen resolution (dpi), like
-// Acrobat's "Resolution" page-display setting: at 100% a PDF point (1/72 in)
-// is drawn dpi/72 CSS pixels wide. 110 matches Acrobat's 100% on the
-// author's 2560x1440 screen (measured); browsers use 96. Internally doc.scale / viewport.zoom stay
+// The zoom shown to the user is relative to a screen resolution (dpi), a
+// page-display setting: at 100% a PDF point (1/72 in) is drawn dpi/72 CSS
+// pixels wide. 110 gives a comfortable reading size on a 2560x1440 screen;
+// 96 is the usual browser value. Internally doc.scale / viewport.zoom stay
 // in "CSS pixels per PDF point".
 export const DEFAULT_ZOOM_DPI = 110;
 export const MIN_ZOOM_DPI = 50;

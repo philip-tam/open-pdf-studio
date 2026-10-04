@@ -5,7 +5,7 @@ import {
   DEFAULT_ZOOM_DPI,
 } from './zoom-display.js';
 
-test('standaard 110 dpi (gelijk aan Acrobat): 100% is 110/72 CSS px per pt', () => {
+test('standaard 110 dpi: 100% is 110/72 CSS px per pt', () => {
   assert.equal(DEFAULT_ZOOM_DPI, 110);
   assert.equal(cssPxPerPtAt100(), 110 / 72);
   assert.equal(percentToScale(100), 110 / 72);
@@ -16,7 +16,7 @@ test('de oude schaal 1,5 toont 98% bij 110 dpi', () => {
   assert.equal(scaleToPercent(1.5), 98);
 });
 
-test('een hogere dpi maakt 100% groter (zoals Acrobat op dit scherm)', () => {
+test('een hogere dpi maakt 100% groter (grotere pagina op hetzelfde scherm)', () => {
   assert.ok(Math.abs(percentToScale(100, 120) - 120 / 72) < 1e-12);
   assert.equal(scaleToPercent(120 / 72, 120), 100);
   assert.ok(percentToScale(100, 120) > percentToScale(100, 110));
