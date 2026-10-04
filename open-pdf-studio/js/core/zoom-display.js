@@ -35,3 +35,27 @@ export function scaleToPercent(scale, dpi = _dpi) {
 export function percentToScale(percent, dpi = _dpi) {
   return (percent / 100) * cssPxPerPtAt100(dpi);
 }
+
+// Round zoom levels for the zoom buttons and keys, like other PDF viewers.
+export const ZOOM_PERCENT_STEPS = [
+  10, 25, 33, 50, 67, 75, 100, 125, 150, 200, 300, 400, 600, 800, 1200, 1600, 2400, 3200, 6400,
+];
+
+/** Next step above (direction > 0) or below the given percentage; clamped at the ends. */
+export function nextZoomPercent(percent, direction) {
+  const eps = 0.5;
+  if (direction > 0) {
+    for (const step of ZOOM_PERCENT_STEPS) if (step > percent + eps) return step;
+    return ZOOM_PERCENT_STEPS[ZOOM_PERCENT_STEPS.length - 1];
+  }
+  for (let i = ZOOM_PERCENT_STEPS.length - 1; i >= 0; i--) {
+    if (ZOOM_PERCENT_STEPS[i] < percent - eps) return ZOOM_PERCENT_STEPS[i];
+  }
+  return ZOOM_PERCENT_STEPS[0];
+}
+
+/** Next round-percentage zoom as an internal scale (CSS px per PDF point). */
+export function nextScaleStep(scale, direction, dpi = _dpi) {
+  const percent = (scale / cssPxPerPtAt100(dpi)) * 100;
+  return percentToScale(nextZoomPercent(percent, direction), dpi);
+}

@@ -2,6 +2,7 @@
 // Modeled after Open2D Studio's CADRenderer pattern.
 // The ONLY render path for PDF pages. No fallback, no CSS-scale, no debounce.
 
+import { nextScaleStep } from '../core/zoom-display.js';
 import { renderVectorPage } from './vector-renderer.js';
 import { state, getActiveDocument } from '../core/state.js';
 import { findAnnotationAt as _findAnnotationAt } from '../annotations/geometry.js';
@@ -1118,18 +1119,8 @@ const ZOOM_MAX = ZOOM_STEPS[ZOOM_STEPS.length - 1];
 // counts as past it (otherwise repeated wheel ticks at e.g. 1.0 would never
 // move because 1.0 is technically not strictly less than 1.0).
 function nextZoomStep(current, direction) {
-  const eps = current * 1e-4;
-  if (direction > 0) {
-    for (let i = 0; i < ZOOM_STEPS.length; i++) {
-      if (ZOOM_STEPS[i] > current + eps) return ZOOM_STEPS[i];
-    }
-    return ZOOM_MAX;
-  } else {
-    for (let i = ZOOM_STEPS.length - 1; i >= 0; i--) {
-      if (ZOOM_STEPS[i] < current - eps) return ZOOM_STEPS[i];
-    }
-    return ZOOM_MIN;
-  }
+  const next = nextScaleStep(current, direction);
+  return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, next));
 }
 
 // Re-anchor pan offsets so the world point under (screenX, screenY) stays
