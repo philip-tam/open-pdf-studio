@@ -205,6 +205,11 @@
     "showPropertiesPanel": "Show Properties Panel by default",
     "showToolPalette": "Show Tool Palette by default",
     "zoomDpi": "Schermresolutie voor 100% zoom (dpi; 110 = zoals Acrobat op dit scherm, 96 = browsers)",
+    "pageSharpen": "Pagina scherper maken (scherpere tekst, dichter bij Acrobat)",
+    "pageSharpenLevel0": "Uit (zoals gerenderd)",
+    "pageSharpenLevel1": "Licht",
+    "pageSharpenLevel2": "Gemiddeld",
+    "pageSharpenLevel3": "Sterk",
     "showScrollbars": "Canvas-schuifbalken tonen"
   },
   "measurement": {

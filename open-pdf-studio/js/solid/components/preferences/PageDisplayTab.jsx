@@ -1,4 +1,5 @@
 import { useTranslation } from '../../../i18n/useTranslation.js';
+import PrefSelect from './PrefSelect.jsx';
 
 export default function PageDisplayTab(props) {
   const { t } = useTranslation('preferences');
@@ -28,6 +29,14 @@ export default function PageDisplayTab(props) {
         <div class="pref-row">
           <label>{t('pageDisplay.zoomDpi')}</label>
           <input type="number" min="50" max="300" value={p.zoomDpi[0]()} onInput={e => p.zoomDpi[1](parseInt(e.target.value) || 96)} />
+        </div>
+        <div class="pref-row">
+          <label>{t('pageDisplay.pageSharpen')}</label>
+          <PrefSelect
+            value={p.pageSharpen[0]}
+            setValue={p.pageSharpen[1]}
+            options={[0, 1, 2, 3].map(v => ({ value: v, label: t('pageDisplay.pageSharpenLevel' + v) }))}
+          />
         </div>
       </fieldset>
       <fieldset class="pref-fieldset">

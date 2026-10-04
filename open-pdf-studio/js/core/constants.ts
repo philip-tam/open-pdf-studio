@@ -297,6 +297,8 @@ export const DEFAULT_PREFERENCES: Preferences = {
   progressiveRender: true,
   // Screen resolution that defines 100% zoom (like Acrobat's Resolution setting).
   zoomDpi: 110,
+  // Page text sharpening 0-3 (0 = as rendered); closes the gap to Acrobat's crisper text.
+  pageSharpen: 2,
 
   // Panels
   propertiesPanelVisible: true,
