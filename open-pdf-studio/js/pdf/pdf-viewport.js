@@ -741,8 +741,11 @@ function _render() {
   if (viewport.currentBitmap) {
     _ctx.save();
     _ctx.setTransform(1, 0, 0, 1, 0, 0); // identity (device-pixel space)
-    const destX = viewport.offsetX * dpr;
-    const destY = viewport.offsetY * dpr;
+    // Whole device pixels: a bitmap drawn at a fractional offset is bilinearly
+    // blended with its neighbours, which softens every glyph even when the
+    // bitmap is already at the exact screen resolution.
+    const destX = Math.round(viewport.offsetX * dpr);
+    const destY = Math.round(viewport.offsetY * dpr);
     const destW = displayPageW * viewport.zoom * dpr;
     const destH = displayPageH * viewport.zoom * dpr;
     _ctx.fillStyle = '#ffffff';
@@ -794,8 +797,8 @@ function _render() {
     _ctx.save();
     _ctx.setTransform(1, 0, 0, 1, 0, 0);
     const m = viewport.currentTileMeta;
-    const destX = (viewport.offsetX + m.regionXpt * viewport.zoom) * dpr;
-    const destY = (viewport.offsetY + m.regionYpt * viewport.zoom) * dpr;
+    const destX = Math.round((viewport.offsetX + m.regionXpt * viewport.zoom) * dpr);
+    const destY = Math.round((viewport.offsetY + m.regionYpt * viewport.zoom) * dpr);
     const destW = m.regionWpt * viewport.zoom * dpr;
     const destH = m.regionHpt * viewport.zoom * dpr;
     const _tileSnap = _snapDrawSize(destW, destH, viewport.currentTile);
