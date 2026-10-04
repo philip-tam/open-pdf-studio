@@ -95,7 +95,7 @@ async function handleZoomInput(e) {
       // Vector viewport mode is the source of truth — setZoom() handles
       // the dispatch (viewport.setZoomAtPoint vs legacy doc.scale path).
       const { setZoom } = await import('../../pdf/renderer.js');
-      await setZoom(pct / 100);
+      await setZoom(percentToScale(pct, state.preferences.zoomDpi));
     }
   }
   e.target.blur();
@@ -106,13 +106,14 @@ async function handleZoomBlur(e) {
   let pct = parseInt(val, 10);
   if (isNaN(pct) || pct < 10 || pct > 500) {
     const doc = state.documents[state.activeDocumentIndex];
-    e.target.value = Math.round((doc ? doc.scale : 1.5) * 100) + '%';
+    e.target.value = scaleToPercent(doc ? doc.scale : 1.5, state.preferences.zoomDpi) + '%';
   } else if (!e.target.value.includes('%')) {
     e.target.value = pct + '%';
   }
 }
 
 import { engineFor } from '../stores/engineStatusStore.js';
+import { scaleToPercent, percentToScale } from '../../core/zoom-display.js';
 
 export default function StatusBar() {
   const { t } = useTranslation('statusbar');
@@ -132,7 +133,7 @@ export default function StatusBar() {
   };
   const zoomText = () => {
     const doc = state.documents[state.activeDocumentIndex];
-    return localizeNumber(Math.round((doc ? doc.scale : 1.5) * 100)) + '%';
+    return localizeNumber(scaleToPercent(doc ? doc.scale : 1.5, state.preferences.zoomDpi)) + '%';
   };
   const viewMode = () => state.documents[state.activeDocumentIndex]?.viewMode || 'continuous';
   const bookSpread = () => !!state.documents[state.activeDocumentIndex]?.bookSpread;

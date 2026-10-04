@@ -226,6 +226,7 @@ export interface Preferences {
   thinLines: boolean;
   showScrollbars: boolean;
   progressiveRender: boolean;
+  zoomDpi: number;
 
   // Panels
   propertiesPanelVisible: boolean;

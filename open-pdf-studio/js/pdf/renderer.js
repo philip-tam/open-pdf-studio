@@ -1,3 +1,4 @@
+import { cssPxPerPtAt100 } from '../core/zoom-display.js';
 import { state, getActiveDocument, getPageRotation, setPageRotation } from '../core/state.js';
 import { isTauri, invoke } from '../core/platform.js';
 import { pdfjsFallbackNodig } from './render-route.js';
@@ -2268,9 +2269,8 @@ export async function actualSize() {
   const doc = state.documents[state.activeDocumentIndex];
   if (!doc) return;
 
-  // Vector viewport mode: 100% = 1.0 zoom, anchored at canvas center.
-  // This makes 1 PDF point = 1 CSS pixel, the standard "Actual Size"
-  // interpretation.
+  // Vector viewport mode: 100% = 96 dpi (1 PDF point = 96/72 CSS pixels),
+  // anchored at canvas center, matching browsers and Acrobat.
   const vp = window.__pdfViewport;
   // Same blank-doc guard as zoomIn() — see comment there.
   if (vp && vp.active && doc.filePath) {
@@ -2280,17 +2280,17 @@ export async function actualSize() {
     // Anchor in CSS pixels (same unit as zoomStepAtCenter) — the backing
     // store is dpr-scaled and would mis-centre on 125%/150% displays.
     const dpr = window.devicePixelRatio || 1;
-    m.setZoomAtPoint(pdfCanvas.width / dpr / 2, pdfCanvas.height / dpr / 2, 1.0);
+    m.setZoomAtPoint(pdfCanvas.width / dpr / 2, pdfCanvas.height / dpr / 2, cssPxPerPtAt100());
     return;
   }
 
   if (doc.viewMode === 'continuous' && doc.pdfDoc) {
     const _old = doc.scale;
-    doc.scale = 1;
+    doc.scale = cssPxPerPtAt100();
     await _continuousRezoom(_old);
     return;
   }
-  doc.scale = 1;
+  doc.scale = cssPxPerPtAt100();
   if (doc.pdfDoc) {
     await renderPage(doc.currentPage);
   }

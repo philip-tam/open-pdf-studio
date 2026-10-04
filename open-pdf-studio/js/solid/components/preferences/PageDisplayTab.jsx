@@ -25,6 +25,10 @@ export default function PageDisplayTab(props) {
             <span>{t('pageDisplay.progressiveRender')}</span>
           </label>
         </div>
+        <div class="pref-row">
+          <label>{t('pageDisplay.zoomDpi')}</label>
+          <input type="number" min="50" max="300" value={p.zoomDpi[0]()} onInput={e => p.zoomDpi[1](parseInt(e.target.value) || 96)} />
+        </div>
       </fieldset>
       <fieldset class="pref-fieldset">
         <legend>{t('pageDisplay.panels')}</legend>
