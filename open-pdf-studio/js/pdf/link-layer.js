@@ -3,6 +3,7 @@ import { goToPage } from './renderer.js';
 import { openExternal } from '../core/platform.js';
 import { destTopOffsetPt, isSafeLinkUrl, parseDestinationArray } from './link-destination.js';
 import i18next from '../i18n/config.js';
+import { viewportRectangle } from './pdfjs-record.js';
 
 /**
  * Link Layer Management Module
@@ -121,7 +122,7 @@ function createLinkElement(ann, viewport, pageNum) {
   if (Math.abs(rx2 - rx1) < 0.5 || Math.abs(ry2 - ry1) < 0.5) return null;
 
   // PDF coordinates have origin at bottom-left, viewport has origin at top-left
-  const viewportRect = viewport.convertToViewportRectangle(ann.rect);
+  const viewportRect = viewportRectangle(viewport, ann.rect);
 
   // viewportRect is [x1, y1, x2, y2] but may need normalization
   const left = Math.min(viewportRect[0], viewportRect[2]);
@@ -241,9 +242,10 @@ export async function handleInternalLink(dest) {
       const baseViewport = targetPdfPage.getViewport({ scale: 1 });
       const extraRotation = getPageRotation(targetPage) || 0;
       // Bestemmingscoördinaten staan in ongeroteerde gebruikersruimte. Bij een
-      // gedraaide weergave laten we de pagina gewoon bovenaan beginnen in
-      // plaats van naar een verkeerde plek te springen.
-      if (extraRotation % 360 === 0 && (baseViewport.rotation || 0) % 360 === 0) {
+      // gedraaide pagina of weergave (#200) laten we de pagina gewoon bovenaan
+      // beginnen in plaats van naar een verkeerde plek te springen.
+      if (extraRotation % 360 === 0 && (baseViewport.rotation || 0) % 360 === 0
+          && !(Number(doc.viewRotation) % 360)) {
         topOffsetPt = destTopOffsetPt(destInfo, baseViewport.height);
       }
     } catch { /* paginahoogte onbekend: bovenaan de pagina beginnen */ }

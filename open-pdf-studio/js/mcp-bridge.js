@@ -100,6 +100,19 @@ async function waitForActiveLoad(targetDoc, timeoutMs = 30000) {
  *  — the regression-test harness only cares about the page view. For a
  *  full-window grab the caller can use OS-level screenshotting. */
 async function compositeCurrentView(maxWidth = 2000) {
+  const { getActiveDocument } = await import('./core/state.js');
+  const doc = getActiveDocument();
+  const pagina = doc?.currentPage;
+  const knipsels = doc?.annotations?.filter(a => a.page === pagina && a.type === 'vectorSnippet') || [];
+  if (knipsels.length) {
+    const { wachtOpKnipselPreviews } = await import('./annotations/vector-snippet-preview.js');
+    const zoom = window.__pdfViewport?.active ? window.__pdfViewport.zoom : doc.scale;
+    await wachtOpKnipselPreviews(knipsels, zoom);
+    if (getActiveDocument() !== doc || doc.currentPage !== pagina) throw new Error('Document changed during screenshot');
+    const rendering = await import('./annotations/rendering.js');
+    if (doc.viewMode === 'continuous') rendering.redrawContinuous();
+    else rendering.redrawAnnotations();
+  }
   const pdfCanvas = document.getElementById('pdf-canvas');
   const annCanvas = document.getElementById('annotation-canvas');
   const hlCanvas  = document.getElementById('text-highlight-canvas');
@@ -580,6 +593,7 @@ async function handleGetViewportState() {
   let activePageNum = null;
   let viewMode = null;
   let bookSpread = null;
+  let viewRotation = null;
   let currentTool = null;
   let annotationCount = null;
   let selectedCount = null;
@@ -597,6 +611,9 @@ async function handleGetViewportState() {
     activePageNum = doc?.currentPage ?? null;
     viewMode = doc?.viewMode ?? null;
     bookSpread = !!doc?.bookSpread;
+    // Weergave draaien (#200): alleen hoe het tabblad de pagina's toont; de
+    // annotatiecoördinaten en paginarotaties blijven die van het document.
+    viewRotation = Number(doc?.viewRotation) || 0;
     annotationCount = (doc?.annotations || []).length;
     selectedCount = (doc?.selectedAnnotations || []).length;
     pageCount = doc?.pdfDoc?.numPages ?? null;
@@ -623,6 +640,7 @@ async function handleGetViewportState() {
       currentPage: activePageNum,
       viewMode,
       bookSpread,
+      viewRotation,
     },
     // viewport singleton (pdf-viewport.js): the transform that maps world→screen
     viewport: vp ? {
@@ -634,6 +652,7 @@ async function handleGetViewportState() {
       pageH: vp.pageH ?? null,
       filePath: vp.filePath ?? null,
       pageNum: vp.pageNum ?? null,
+      viewRotation: vp.viewRotation ?? 0,
     } : null,
     // The main canvas backing store
     canvas: pdfCanvas ? {
@@ -965,6 +984,22 @@ async function _redrawActive() {
   else rendering.redrawAnnotations();
 }
 
+// ── Annotatielagen (#468) ─────────────────────────────────────────────────
+// De regels staan in annotations/annotatie-lagen-mcp.js; hier het document,
+// de weergavenaam van de standaardlaag en het bijwerken van paneel en canvas.
+async function _lagenMcp() {
+  const regels = await import('./annotations/annotatie-lagen-mcp.js');
+  const brug = await import('./bridge.js');
+  return { regels, brug, standaardNaam: brug.annotationDefaultLayerName() };
+}
+
+/** Samenvatting van een annotatie, met de naam van haar laag (niet de standaardlaag). */
+function _metLaag(regels, doc, ann, standaardNaam, s) {
+  const naam = regels.annotatieLaagNaam(doc, ann, standaardNaam);
+  if (naam) s.layer = naam;
+  return s;
+}
+
 function _isNum(v) {
   return typeof v === 'number' && Number.isFinite(v);
 }
@@ -1070,6 +1105,7 @@ async function handleGetCurrentTool() {
  *  or { error } when required geometry is missing. */
 async function _buildCreateProps(type, page, props) {
   const stateMod = await import('./core/state.js');
+  const { randkleurenUitVoorkeur } = await import('./annotations/fill-utils.js');
   const prefs = stateMod.state.preferences || {};
   const p = props || {};
 
@@ -1088,6 +1124,7 @@ async function _buildCreateProps(type, page, props) {
     case 'line':
     case 'arrow':
     case 'wall':
+    case 'betonbalk':
     case 'box':
     case 'mask':
     case 'redaction':
@@ -1097,7 +1134,7 @@ async function _buildCreateProps(type, page, props) {
     case 'cloud':
     case 'polygon':
     case 'textbox': {
-      const lineLike = type === 'line' || type === 'arrow' || type === 'wall';
+      const lineLike = type === 'line' || type === 'arrow' || type === 'wall' || type === 'betonbalk';
       const bad = lineLike ? needLine() : needRect();
       if (bad) return bad;
       const creators = await import('./tools/annotation-creators.js');
@@ -1129,8 +1166,8 @@ async function _buildCreateProps(type, page, props) {
       return { base: {
         type, page,
         points: p.points.map(pt => ({ ...pt })),
-        color: prefs.cloudStrokeColor || prefs.polylineStrokeColor || '#000000',
-        strokeColor: prefs.cloudStrokeColor || prefs.polylineStrokeColor || '#000000',
+        ...randkleurenUitVoorkeur(prefs, 'cloud', 'cloudPolyline',
+          prefs.polylineStrokeColor || '#000000'),
         lineWidth: prefs.cloudLineWidth || prefs.polylineLineWidth || 1,
         opacity: (prefs.cloudOpacity || 100) / 100,
       } };
@@ -1182,8 +1219,7 @@ async function _buildCreateProps(type, page, props) {
       const base = {
         type, page,
         points: pts,
-        color: prefs.filledAreaStrokeColor || '#000000',
-        strokeColor: prefs.filledAreaStrokeColor || '#000000',
+        ...randkleurenUitVoorkeur(prefs, 'filledArea', 'filledArea'),
         fillColor: prefs.filledAreaFillNone ? null : (prefs.filledAreaFillColor || '#cccccc'),
         lineWidth: prefs.filledAreaLineWidth ?? 1,
         borderStyle: prefs.filledAreaBorderStyle || 'solid',
@@ -1250,8 +1286,7 @@ async function _buildCreateProps(type, page, props) {
         x: p.x, y: p.y, width: p.width, height: p.height,
         arrowX, arrowY, kneeX, kneeY: armOriginY, armOriginX, armOriginY,
         text: typeof p.text === 'string' ? p.text : '',
-        color: prefs.calloutStrokeColor || '#000000',
-        strokeColor: prefs.calloutStrokeColor || '#000000',
+        ...randkleurenUitVoorkeur(prefs, 'callout', 'callout'),
         fillColor: prefs.calloutFillNone ? 'none' : (prefs.calloutFillColor || '#ffffff'),
         textColor: '#000000',
         fontSize: prefs.calloutFontSize || 12,
@@ -1286,8 +1321,7 @@ async function _buildCreateProps(type, page, props) {
       const base = {
         type, page,
         points: p.points.map(pt => ({ ...pt })),
-        color: prefs.measureAreaStrokeColor || '#ff0000',
-        strokeColor: prefs.measureAreaStrokeColor || '#ff0000',
+        ...randkleurenUitVoorkeur(prefs, 'measureArea', 'measureArea', '#ff0000'),
         lineWidth: prefs.measureAreaLineWidth || 1,
         opacity: (prefs.measureAreaOpacity || 100) / 100,
         fillColor: prefs.measureAreaFillNone ? null : (prefs.measureAreaFillColor || null),
@@ -1373,7 +1407,12 @@ async function _buildCreateProps(type, page, props) {
       const reg = await import('./symbols/registry.js');
       const tpl = reg.getTemplate(p.symbolId);
       if (!tpl) return { error: `unknown template: ${p.symbolId}` };
-      const params = { ...reg.defaultParams(tpl), ...(p.params || {}) };
+      // Lijst-parameters (de onderdelen van een aanrecht) meteen genormaliseerd:
+      // wat de assistent terugleest is wat er getekend staat.
+      const params = reg.normalizeParams(tpl, { ...reg.defaultParams(tpl), ...(p.params || {}) });
+      const ankerMod = await import('./symbols/anker.js');
+      const anker = ankerMod.ankerArgument(p.anchor);
+      if (!anker.ok) return { error: anker.error };
       // Bbox: explicit rect wins; otherwise real-world size at (x,y) centre
       // (steel profiles), falling back to the template's defaultSize.
       let rect;
@@ -1386,7 +1425,12 @@ async function _buildCreateProps(type, page, props) {
           const k = rs.pxPerMmAt(page, p.x, p.y);
           const hPx = mm.height * k;
           const wPx = mm.width > 0 ? mm.width * k : hPx * 4; // free-length beam
-          rect = { x: p.x - wPx / 2, y: p.y - hPx / 2, width: wPx, height: hPx };
+          // (x,y) is het gekozen ankerpunt van het symbool (standaard het
+          // midden), met de rotatie meegerekend: bij anchor "back" is het
+          // een punt op het wandvlak (#478).
+          rect = ankerMod.vakUitAnker(
+            { x: p.x, y: p.y }, wPx, hPx, _isNum(p.rotation) ? p.rotation : 0, anker.anker,
+          );
         } else {
           const ds = tpl.defaultSize || { width: 80, height: 80 };
           rect = { x: p.x, y: p.y, width: ds.width, height: ds.height };
@@ -1448,6 +1492,20 @@ async function handleCreateAnnotation(params) {
     merged.width = built.base.width;
     merged.height = built.base.height;
   }
+  if (type === 'parametricSymbol') {
+    // De parameters zoals de bouwer ze samenstelde (standaarden + invoer,
+    // lijsten genormaliseerd); `anchor` is plaatsingsinvoer, geen veld.
+    merged.params = built.base.params;
+    delete merged.anchor;
+  }
+  // Laag (#468): `layer` naast props (of in props), op id of naam. Zonder
+  // laag landt de annotatie op de huidige laag, net als met het gereedschap.
+  const lagen = await _lagenMcp();
+  const laag = lagen.regels.laagArgument(doc, params?.layer !== undefined ? params.layer : props.layer, lagen.standaardNaam);
+  if (!laag.ok) return laag;
+  delete merged.layer;
+  if (laag.id !== undefined) merged.layer = laag.id === 'default' ? undefined : laag.id;
+
   const factory = await import('./annotations/factory.js');
   const meas = await import('./annotations/measurement.js');
   const ann = factory.createAnnotation(merged);
@@ -1471,7 +1529,8 @@ async function handleCreateAnnotation(params) {
     await _redrawActive();
   }
 
-  return { ok: true, id: ann.id, annotation: _summarizeAnnotation(ann) };
+  lagen.brug.refreshAnnotationLayers();
+  return { ok: true, id: ann.id, annotation: _metLaag(lagen.regels, doc, ann, lagen.standaardNaam, _summarizeAnnotation(ann)) };
 }
 
 async function handleListAnnotations(params) {
@@ -1486,7 +1545,16 @@ async function handleListAnnotations(params) {
     }
     anns = anns.filter(a => (a.page ?? 1) === page);
   }
-  return { ok: true, count: anns.length, annotations: anns.map(_summarizeAnnotation) };
+  // Alleen de annotaties van één laag (#468), op id of naam.
+  const lagen = await _lagenMcp();
+  const gefilterd = lagen.regels.filterOpLaag(doc, anns, params?.layer, lagen.standaardNaam);
+  if (!gefilterd.ok) return gefilterd;
+  anns = gefilterd.annotations;
+  return {
+    ok: true,
+    count: anns.length,
+    annotations: anns.map(a => _metLaag(lagen.regels, doc, a, lagen.standaardNaam, _summarizeAnnotation(a))),
+  };
 }
 
 async function handleGetAnnotation(params) {
@@ -1499,7 +1567,34 @@ async function handleGetAnnotation(params) {
   if (!doc) return { ok: false, error: 'no active document' };
   const ann = (doc.annotations || []).find(a => a.id === id);
   if (!ann) return { ok: false, error: `annotation not found: ${id}` };
-  return { ok: true, annotation: _sanitizeAnnotation(ann) };
+  const uit = { ok: true, annotation: _sanitizeAnnotation(ann) };
+  // Stramienlijn (#486): per uiteinde de koppeling met de andere uiteinden.
+  const koppelMod = await import('./annotations/stramien-koppeling.js');
+  if (koppelMod.isStramien(ann)) uit.gridAlignment = koppelMod.koppelingOverzicht(doc.annotations || [], ann);
+  return uit;
+}
+
+// ─── Stramienkoppeling (#486) ────────────────────────────────────────────
+// alignStart / alignEnd in app_update_annotation zijn geen velden maar een
+// opdracht: true koppelt dat uiteinde met de uitgelijnde uiteinden van de
+// andere stramienlijnen (zet het terug op hun lijn), false zet het los.
+
+const _UITLIJN_FOUT = {
+  'geen-uitgelijnde-uiteinden': 'no other grid line end on this page lies in line with this end (parallel, within tolerance)',
+  vergrendeld: 'the grid line is locked',
+  'geen-stramien': 'not a grid line',
+};
+
+async function _pasUitlijningToe(doc, ann, uitlijning) {
+  const slotMod = await import('./annotations/stramien-slot.js');
+  const fouten = [];
+  for (const [eind, aan] of uitlijning) {
+    const r = slotMod.schakelStramienSlot(ann, eind, aan, { doc, hertekenen: false });
+    if (!r.ok) {
+      fouten.push(`${eind === 'begin' ? 'alignStart' : 'alignEnd'}: ${_UITLIJN_FOUT[r.reden] || r.reden}`);
+    }
+  }
+  return fouten;
 }
 
 // Keys that change an annotation's shape — used to decide whether a patch
@@ -1516,7 +1611,10 @@ async function handleUpdateAnnotation(params) {
     return { ok: false, error: 'missing or invalid params.id' };
   }
   const props = params?.props;
-  if (!props || typeof props !== 'object' || Array.isArray(props) || Object.keys(props).length === 0) {
+  // Een laag-wissel (#468) alleen mag ook: `layer` naast een lege props.
+  const laagRef = params?.layer !== undefined ? params.layer : props?.layer;
+  if (!props || typeof props !== 'object' || Array.isArray(props)
+      || (Object.keys(props).length === 0 && laagRef === undefined)) {
     return { ok: false, error: 'missing or empty params.props' };
   }
   const stateMod = await import('./core/state.js');
@@ -1524,12 +1622,47 @@ async function handleUpdateAnnotation(params) {
   if (!doc) return { ok: false, error: 'no active document' };
   const ann = (doc.annotations || []).find(a => a.id === id);
   if (!ann) return { ok: false, error: `annotation not found: ${id}` };
+  const lagen = await _lagenMcp();
+  const laag = lagen.regels.laagArgument(doc, laagRef, lagen.standaardNaam);
+  if (!laag.ok) return laag;
 
   const factory = await import('./annotations/factory.js');
   const oldState = factory.cloneAnnotation(ann);
 
-  // id and type are immutable — silently drop them from the patch.
-  const { id: _id, type: _type, ...ruwePatch } = props;
+  // Stramienkoppeling (#486): alignStart / alignEnd (true = koppelen, false =
+  // los). Alleen voor een stramienlijn.
+  const koppelMod = await import('./annotations/stramien-koppeling.js');
+  const uitlijning = [];
+  if ('alignStart' in props) uitlijning.push(['begin', props.alignStart]);
+  if ('alignEnd' in props) uitlijning.push(['einde', props.alignEnd]);
+  if (uitlijning.length) {
+    if (!koppelMod.isStramien(ann)) {
+      return { ok: false, error: 'alignStart / alignEnd only apply to a grid line (parametricSymbol with symbolId "stramien")' };
+    }
+    if (uitlijning.some(([, aan]) => typeof aan !== 'boolean')) {
+      return { ok: false, error: 'alignStart / alignEnd must be true (couple) or false (unlock)' };
+    }
+  }
+
+  // id and type are immutable — silently drop them from the patch. De laag
+  // gaat via assignLayer: een naam wordt een id, de standaardlaag geen veld.
+  const { id: _id, type: _type, layer: _layer, alignStart: _as, alignEnd: _ae, ...ruwePatch } = props;
+  if (uitlijning.length && Object.keys(ruwePatch).length === 0 && laag.id === undefined) {
+    const undoMod = await import('./core/undo-manager.js');
+    undoMod.beginUndoTransaction();
+    let fouten;
+    try { fouten = await _pasUitlijningToe(doc, ann, uitlijning); } finally { undoMod.endUndoTransaction(); }
+    await _redrawActive();
+    if (doc.selectedAnnotation && doc.selectedAnnotation.id === ann.id) {
+      try {
+        const panel = await import('./ui/panels/properties-panel.js');
+        panel.showProperties(ann);
+      } catch { /* panel refresh is best-effort */ }
+    }
+    const gridAlignment = koppelMod.koppelingOverzicht(doc.annotations || [], ann);
+    if (fouten.length) return { ok: false, error: fouten.join('; '), id: ann.id, gridAlignment };
+    return { ok: true, id: ann.id, gridAlignment, annotation: _sanitizeAnnotation(ann) };
+  }
   // Technische wacht op maat en positie. Zonder deze controle kwam width 0,
   // een negatieve maat, NaN of tekst ongefilterd in het model en daarna (via
   // de JSON-kloon) als null in de undo-stapel. Een vorm mag willekeurig klein
@@ -1543,7 +1676,35 @@ async function handleUpdateAnnotation(params) {
     if (!gecontroleerd.ok) return { ok: false, error: gecontroleerd.error };
     patch = gecontroleerd.patch;
   }
+  // Parametrisch symbool (#478): params worden SAMENGEVOEGD — wie alleen de
+  // lengte van een aanrecht wijzigt, houdt zijn onderdelen — en daarna
+  // krijgt het symbool weer zijn werkelijke maat (zoals in het
+  // eigenschappenpaneel), tenzij de aanroeper zelf een maat meegeeft.
+  const psParams = ann.type === 'parametricSymbol' && 'params' in patch;
+  if (psParams) {
+    const [ankerMod, reg] = await Promise.all([
+      import('./symbols/anker.js'), import('./symbols/registry.js'),
+    ]);
+    const tpl = reg.getTemplate(ann.symbolId);
+    patch = { ...patch, params: reg.normalizeParams(tpl, ankerMod.voegParamsSamen(ann.params, patch.params)) };
+  }
+  // Nieuwe params voor een stramienlijn vervangen de oude in hun geheel; de
+  // koppeling van de uiteinden blijft staan tenzij de patch haar zelf noemt.
+  if (koppelMod.isStramien(ann) && patch.params && typeof patch.params === 'object') {
+    patch = { ...patch, params: koppelMod.bewaarKoppeling(ann.params, patch.params) };
+  }
+  const andereDikte = 'lineWidth' in patch && patch.lineWidth !== ann.lineWidth;
   Object.assign(ann, patch);
+  // Een andere randdikte laat een tekstinzet uit het bestand vallen (zie zetRanddikte).
+  if (andereDikte && !('textPadding' in patch)) delete ann.textPadding;
+  if (psParams && !('width' in patch) && !('height' in patch)) {
+    const rs = await import('./symbols/real-size.js');
+    rs.applyTemplateRealSize(ann, 'center');
+  }
+  if (laag.id !== undefined) {
+    const { assignLayer } = await import('./annotations/annotatie-lagen.js');
+    assignLayer([ann], laag.id);
+  }
   ann.modifiedAt = new Date().toISOString();
 
   // Stempel-uiterlijk: kleur en lijndikte leven IN de SVG-bron (drawImage
@@ -1565,7 +1726,15 @@ async function handleUpdateAnnotation(params) {
   }
 
   const undoMod = await import('./core/undo-manager.js');
-  undoMod.recordModify(ann.id, oldState, ann);
+  // Samen met alignStart / alignEnd: één ongedaan-stap.
+  if (uitlijning.length) undoMod.beginUndoTransaction();
+  let uitlijnFouten = [];
+  try {
+    undoMod.recordModify(ann.id, oldState, ann);
+    if (uitlijning.length) uitlijnFouten = await _pasUitlijningToe(doc, ann, uitlijning);
+  } finally {
+    if (uitlijning.length) undoMod.endUndoTransaction();
+  }
 
   if (ann.type === 'scaleRegion' &&
       (geometryTouched || 'scaleString' in patch || 'units' in patch)) {
@@ -1585,7 +1754,16 @@ async function handleUpdateAnnotation(params) {
     } catch { /* panel refresh is best-effort */ }
   }
 
-  return { ok: true, id: ann.id, annotation: _sanitizeAnnotation(ann) };
+  if (laag.id !== undefined) {
+    // Op een uitgezette of vergrendelde laag is ze niet meer te selecteren.
+    await lagen.brug.annotationLayersChanged({ modified: false });
+  }
+  const resultaat = { ok: true, id: ann.id, annotation: _sanitizeAnnotation(ann) };
+  if (uitlijning.length) {
+    resultaat.gridAlignment = koppelMod.koppelingOverzicht(doc.annotations || [], ann);
+    if (uitlijnFouten.length) resultaat.warning = uitlijnFouten.join('; ');
+  }
+  return resultaat;
 }
 
 async function handleDeleteAnnotation(params) {
@@ -1795,7 +1973,7 @@ async function handleSavePdf(params) {
   } catch { /* best-effort */ }
   let success;
   try {
-    success = await saverMod.savePDF(path, { zonderHandtekeningVraag: true });
+    success = await saverMod.savePDF(path, { zonderHandtekeningVraag: true }, doc);
   } catch (e) {
     return { ok: false, error: `savePDF: ${e?.message ?? e}` };
   }
@@ -1862,6 +2040,16 @@ async function handleGetPageCount() {
   return { ok: true, pageCount: doc.pdfDoc.numPages, currentPage: doc.currentPage ?? 1 };
 }
 
+async function handleGetPageText(params) {
+  const textTools = await import('./text/mcp-text-tools.js');
+  return textTools.getPageTextForMcp(params);
+}
+
+async function handleReplaceText(params) {
+  const textTools = await import('./text/mcp-text-tools.js');
+  return textTools.replaceTextForMcp(params);
+}
+
 async function handleSetMeasureScale(params) {
   const pixelsPerUnit = Number(params?.pixelsPerUnit);
   const unit = params?.unit;
@@ -1879,6 +2067,119 @@ async function handleSetMeasureScale(params) {
   meas.saveDocumentScale();
   meas.recalculateAllMeasurements(); // refreshes measureText everywhere + redraws
   return { ok: true, measureScale: { pixelsPerUnit, unit } };
+}
+
+/**
+ * Plattegrond-relaties (#450): een sparing hoort bij een wand, een ruimte bij
+ * de wanden eromheen, een maat bij wat hij meet. Alle rekenkunde zit in
+ * js/plattegrond/ — deze handler levert alleen de app-kant: het document, de
+ * schaal op een punt, de twee annotatie-ingangen en één undo-stap per
+ * opdracht.
+ */
+async function handleFloorplan(params) {
+  return plattegrondInApp(params);
+}
+
+/**
+ * De plattegrond-opdracht vanuit de app zelf (het maatketting-gereedschap):
+ * precies dezelfde weg als `app_floorplan`, met één ongedaan-stap per aanroep.
+ */
+export async function plattegrondInApp(params) {
+  const stateMod = await import('./core/state.js');
+  const doc = stateMod.getActiveDocument();
+  if (!doc?.pdfDoc) return { ok: false, error: 'no active document' };
+  const realSize = await import('./symbols/real-size.js');
+  const undoMod = await import('./core/undo-manager.js');
+  const { plattegrondOpdracht } = await import('./plattegrond/mcp-plattegrond.js');
+
+  let geraakt = false;
+  const uit = await plattegrondOpdracht(params, {
+    doc: {
+      currentPage: doc.currentPage || 1,
+      annotations: doc.annotations || [],
+      paginas: doc.pdfDoc?.numPages ?? null,
+    },
+    pxPerMmAt: (page, x, y) => realSize.pxPerMmAt(page, x, y),
+    maak: async (type, page, props) => {
+      geraakt = true;
+      return handleCreateAnnotation({ type, page, props });
+    },
+    werkBij: async (id, props) => {
+      geraakt = true;
+      return handleUpdateAnnotation({ id, props });
+    },
+    verwijder: async (id) => {
+      geraakt = true;
+      return handleDeleteAnnotation({ id });
+    },
+    // Tekenvolgorde (ruimten achter wanden en kozijnen): dezelfde undo-stap
+    // als het z-order-menu, binnen de transactie van de opdracht.
+    herorden: async (ids) => {
+      const lijst = doc.annotations || [];
+      const perId = new Map(lijst.map((a) => [a.id, a]));
+      if (!Array.isArray(ids) || ids.length !== lijst.length || ids.some((id) => !perId.has(id))) {
+        return { ok: false, error: 'order must list every annotation once' };
+      }
+      const oud = lijst.map((a) => a.id);
+      lijst.splice(0, lijst.length, ...ids.map((id) => perId.get(id)));
+      undoMod.recordAnnotationOrder(oud, ids);
+      geraakt = true;
+      return { ok: true };
+    },
+    // Alles wat één opdracht aanmaakt of wijzigt gaat in één undo-stap, zodat
+    // Ctrl+Z een hele gevel (of een hele verversing) in één keer terugdraait.
+    transactie: async (fn) => {
+      undoMod.beginUndoTransaction();
+      try { await fn(); } finally { undoMod.endUndoTransaction(); }
+    },
+  });
+  if (geraakt) await _redrawActive();
+  return uit;
+}
+
+/**
+ * Gevelelementen (#475): vliesgevel en kozijn — één object met stijlen op de
+ * veldgrenzen en een paneel per veld. Aanmaken (los langs een lijn of in een
+ * wand, die dan onderbroken wordt), stijlen toevoegen/verwijderen/
+ * verschuiven/wisselen, panelen wisselen en terugvragen. De rekenkunde zit
+ * in js/gevelelement/; hier alleen de app-kant, met één undo-stap per
+ * aanroep.
+ */
+async function handleFacadeElement(params) {
+  const stateMod = await import('./core/state.js');
+  const doc = stateMod.getActiveDocument();
+  if (!doc?.pdfDoc) return { ok: false, error: 'no active document' };
+  const realSize = await import('./symbols/real-size.js');
+  const undoMod = await import('./core/undo-manager.js');
+  const { gevelelementOpdracht } = await import('./gevelelement/mcp-gevelelement.js');
+
+  let geraakt = false;
+  const uit = await gevelelementOpdracht(params, {
+    doc: {
+      currentPage: doc.currentPage || 1,
+      annotations: doc.annotations || [],
+      paginas: doc.pdfDoc?.numPages ?? null,
+    },
+    pxPerMmAt: (page, x, y) => realSize.pxPerMmAt(page, x, y),
+    maak: async (type, page, props) => {
+      geraakt = true;
+      return handleCreateAnnotation({ type, page, props });
+    },
+    werkBij: async (id, props) => {
+      geraakt = true;
+      return handleUpdateAnnotation({ id, props });
+    },
+    verwijder: async (id) => {
+      geraakt = true;
+      return handleDeleteAnnotation({ id });
+    },
+    transactie: async (fn) => {
+      undoMod.beginUndoTransaction();
+      try { await fn(); } finally { undoMod.endUndoTransaction(); }
+    },
+  });
+  if (geraakt) await _redrawActive();
+  return uit;
 }
 
 /** Ask the assistant's AI (Claude/Anthropic direct) — lets an MCP client test
@@ -2029,6 +2330,142 @@ async function handlePlaceSchedule(params) {
     title: ann.title,
     columns: ann.columns,
     rowCount: Array.isArray(ann.rows) ? ann.rows.length : 0,
+  };
+}
+
+/** Maat van een profielsymbool uit de symbolenbibliotheek, in werkelijke mm.
+ *  Levert null als het symbool geen werkelijke maat kent. */
+function _profielMaat(reg, symbolId, maat) {
+  const tpl = reg.getTemplate(symbolId);
+  if (!tpl || typeof tpl.realSizeMm !== 'function') return null;
+  const mm = tpl.realSizeMm({ ...reg.defaultParams(tpl), maat, aanzicht: 'doorsnede' });
+  return (mm && mm.width > 0 && mm.height > 0)
+    ? { breedteMm: mm.width, hoogteMm: mm.height } : null;
+}
+
+/** Kent dit symbool de gevraagde `maat`? Een template zonder maat-keuzelijst
+ *  legt niets vast en gaat altijd akkoord. */
+function _profielMaatBestaat(reg, symbolId, maat) {
+  const tpl = reg.getTemplate(symbolId);
+  if (!tpl) return false;
+  const veld = (tpl.params || []).find(p => p.key === 'maat');
+  if (!veld || !Array.isArray(veld.options)) return true;
+  return veld.options.some(o => (typeof o === 'string' ? o : o?.value) === maat);
+}
+
+/** Zet een constructieplattegrond uit: stramien, kolommen, balken, vloervelden
+ *  met overspanningsrichting, positie-aanduidingen en (optioneel) de staat.
+ *
+ *  De rekenslag staat in drafting/constructie/ (puur en los getest); deze brug
+ *  voert hem uit. Alles wat er bij komt zit in EEN ongedaan-stap, zodat een
+ *  misgeplaatste plattegrond met een enkele Ctrl+Z weer weg is. `dryRun`
+ *  rekent alleen, zonder ook maar iets op de tekening te zetten. */
+async function handleStructuralLayout(params) {
+  const stateMod = await import('./core/state.js');
+  const doc = stateMod.getActiveDocument();
+  if (!doc?.pdfDoc) return { ok: false, error: 'no active document' };
+
+  const spec = (params && typeof params === 'object' && !Array.isArray(params)) ? { ...params } : {};
+  const droogloop = spec.dryRun === true;
+
+  // Pagina: zelfde regels als app_create_annotation.
+  let page = doc.currentPage || 1;
+  const paginaArg = spec.page ?? spec.pagina;
+  if (paginaArg != null) {
+    page = Number(paginaArg);
+    const numPages = doc.pdfDoc?.numPages ?? 1;
+    if (!Number.isInteger(page) || page < 1 || page > numPages) {
+      return { ok: false, error: `page ${paginaArg} out of range (doc has ${numPages} pages)` };
+    }
+  }
+  spec.pagina = page;
+  delete spec.page;
+
+  const reg = await import('./symbols/registry.js');
+  const planMod = await import('./drafting/constructie/constructieplan.js');
+  // Eigen koppelsleutel per plan: de bollen van dit raster schuiven samen
+  // mee, maar niet met die van een ander raster op hetzelfde blad (#486).
+  const koppelMod = await import('./annotations/stramien-koppeling.js');
+  const uitkomst = planMod.bouwConstructieplan(spec, {
+    kentMaat: (symbolId, maat) => _profielMaatBestaat(reg, symbolId, maat),
+    maatVanProfiel: (symbolId, maat) => _profielMaat(reg, symbolId, maat),
+    koppelSleutel: koppelMod.nieuwGroepsId(),
+  });
+  if (!uitkomst.ok) return { ok: false, error: uitkomst.fout, code: uitkomst.code };
+
+  const samenvatting = uitkomst.samenvatting;
+  if (droogloop) {
+    return {
+      ok: true, dryRun: true, page, summary: samenvatting,
+      measureScale: uitkomst.meetschaal,
+      schedule: uitkomst.staat,
+      planned: uitkomst.annotaties.map(a => ({ role: a.rol, ref: a.id, type: a.type })),
+    };
+  }
+
+  // De meetschaal eerst: daarna meet elke meting in dezelfde werkelijkheid als
+  // waarin het raster is uitgezet.
+  let meetschaal = null;
+  if (spec.setMeasureScale !== false) {
+    const r = await handleSetMeasureScale(uitkomst.meetschaal);
+    if (r?.ok) meetschaal = r.measureScale;
+  }
+
+  const factory = await import('./annotations/factory.js');
+  const undoMod = await import('./core/undo-manager.js');
+  const gemaakt = [];
+  let staatResultaat = null;
+
+  // EERST alles opbouwen, PAS DAARNA plaatsen: struikelt een opgave, dan staat
+  // er nog niets op de tekening dat de gebruiker moet opruimen.
+  const klaar = [];
+  for (const opgave of uitkomst.annotaties) {
+    const built = await _buildCreateProps(opgave.type, page, opgave.props);
+    if (built.error) return { ok: false, error: `${opgave.rol} ${opgave.id}: ${built.error}` };
+    const merged = { ...built.base, ...opgave.props, type: opgave.type, page };
+    // Een parametrisch symbool zonder eigen kader kreeg (x,y) als INVOEGPUNT;
+    // de bouwer heeft er een kader op werkelijke maat omheen gezet.
+    if (opgave.type === 'parametricSymbol'
+        && !(_isNum(opgave.props.width) && _isNum(opgave.props.height))) {
+      merged.x = built.base.x;
+      merged.y = built.base.y;
+      merged.width = built.base.width;
+      merged.height = built.base.height;
+    }
+    klaar.push({ opgave, merged });
+  }
+
+  undoMod.beginUndoTransaction();
+  try {
+    for (const { opgave, merged } of klaar) {
+      const ann = factory.createAnnotation(merged);
+      doc.annotations.push(ann);
+      undoMod.recordAdd(ann);
+      gemaakt.push({ id: ann.id, role: opgave.rol, ref: opgave.id, type: opgave.type });
+    }
+
+    if (uitkomst.staat) {
+      staatResultaat = await handlePlaceSchedule({
+        templateId: uitkomst.staat.templateId,
+        name: uitkomst.staat.name,
+        config: uitkomst.staat.config,
+        page: uitkomst.staat.page ?? page,
+        x: uitkomst.staat.x, y: uitkomst.staat.y,
+      });
+    }
+  } finally {
+    undoMod.endUndoTransaction();
+  }
+
+  await _redrawActive();
+  return {
+    ok: true, page, summary: samenvatting,
+    measureScale: meetschaal,
+    created: gemaakt.length,
+    annotations: gemaakt,
+    schedule: staatResultaat && staatResultaat.ok
+      ? { scheduleId: staatResultaat.scheduleId, annotationId: staatResultaat.annotationId, rowCount: staatResultaat.rowCount }
+      : (staatResultaat || null),
   };
 }
 
@@ -2782,6 +3219,42 @@ async function handleListPrinters(params) {
 }
 
 
+/** app_list_layers — de annotatielagen van het actieve document. */
+async function handleListLayers(params) {
+  if (params && typeof params === 'object' && Object.keys(params).length) {
+    return { ok: false, error: `unknown argument: ${Object.keys(params)[0]}` };
+  }
+  const stateMod = await import('./core/state.js');
+  const doc = stateMod.getActiveDocument();
+  if (!doc) return { ok: false, error: 'no active document' };
+  const lagen = await _lagenMcp();
+  const lijst = lagen.regels.lagenOverzicht(doc, lagen.standaardNaam);
+  return { ok: true, count: lijst.length, currentLayer: lijst.find(l => l.current)?.name ?? null, layers: lijst };
+}
+
+/** app_create_layer — een nieuwe annotatielaag. */
+async function handleCreateLayer(params) {
+  const stateMod = await import('./core/state.js');
+  const doc = stateMod.getActiveDocument();
+  const lagen = await _lagenMcp();
+  const r = lagen.regels.maakLaag(doc, params ?? {}, lagen.standaardNaam);
+  if (!r.ok) return r;
+  await lagen.brug.annotationLayersChanged();
+  return r;
+}
+
+/** app_set_layer — een laag aan/uit, (ont)grendelen, hernoemen, huidig maken. */
+async function handleSetLayer(params) {
+  const stateMod = await import('./core/state.js');
+  const doc = stateMod.getActiveDocument();
+  const lagen = await _lagenMcp();
+  const r = lagen.regels.zetLaag(doc, params ?? {}, lagen.standaardNaam);
+  if (!r.ok) return r;
+  // Alleen de huidige laag kiezen verandert de tekening niet.
+  await lagen.brug.annotationLayersChanged({ modified: r.changed.some(k => k !== 'current') });
+  return r;
+}
+
 const HANDLERS = {
   'mcp:open-pdf':           handleOpenPdf,
   'mcp:set-zoom':           handleSetZoom,
@@ -2827,11 +3300,18 @@ const HANDLERS = {
   'mcp:fit-page':           handleFitPage,
   'mcp:fit-width':          handleFitWidth,
   'mcp:get-page-count':     handleGetPageCount,
+  'mcp:get-page-text':      handleGetPageText,
+  'mcp:replace-text':       handleReplaceText,
   // App control: measurement scale
   'mcp:set-measure-scale':  handleSetMeasureScale,
+  // Plattegrond: sparingen, ruimten en verankerde maatvoering
+  'mcp:floorplan':          handleFloorplan,
+  // Gevelelement: vliesgevel en kozijn (#475)
+  'mcp:facade-element':     handleFacadeElement,
   // Take-off / schedules
   'mcp:get-takeoff':        handleGetTakeoff,
   'mcp:place-schedule':     handlePlaceSchedule,
+  'mcp:structural-layout':  handleStructuralLayout,
   // Commandolaag: elke lintknop en elk gereedschap
   'mcp:list-commands':      handleListCommands,
   'mcp:run-command':        handleRunCommand,
@@ -2848,6 +3328,10 @@ const HANDLERS = {
   'mcp:print-to-pdf':       handlePrintToPdf,
   'mcp:print':              handlePrint,
   'mcp:list-printers':      handleListPrinters,
+  // Annotatielagen (#468)
+  'mcp:list-layers':        handleListLayers,
+  'mcp:create-layer':       handleCreateLayer,
+  'mcp:set-layer':          handleSetLayer,
   // Assistant — test the AI end-to-end
   'mcp:ai-complete':        handleAiComplete,
   // Accounts introspection — deactivated (cloud accounts feature removed)

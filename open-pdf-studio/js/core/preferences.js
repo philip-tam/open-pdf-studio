@@ -7,6 +7,8 @@ import { isTauri, getUsername, savePreferencesFile, loadPreferencesFile } from '
 import { preferencesMirrorJson } from './preferences-mirror.js';
 import { voegSamenMetStandaarden } from './preferences-merge.js';
 import { setZoomDpi } from './zoom-display.js';
+import { randkleurVoorVoorkeur, randkleurenUitVoorkeur } from '../annotations/fill-utils.js';
+import { zetRanddikte } from '../annotations/rendering/textbox-layout.js';
 
 // Load preferences from Rust file storage, with localStorage migration fallback
 export async function loadPreferences() {
@@ -249,7 +251,9 @@ export function setAsDefaultStyle(annotation) {
 
   const p = m.prefix;
 
-  if (m.stroke) prefs[p + m.stroke] = annotation.strokeColor || annotation.color || prefs[p + m.stroke];
+  // "Geen rand" blijft alleen staan voor soorten waarvan de omtrek weg kan;
+  // voor de rest zou de voorkeur op 'none' een onzichtbare lijn geven (#433).
+  if (m.stroke) prefs[p + m.stroke] = randkleurVoorVoorkeur(annotation) || prefs[p + m.stroke];
   if (m.color) prefs[p + m.color] = annotation.color || annotation.fillColor || prefs[p + m.color];
   if (m.fill) {
     prefs[p + m.fill] = annotation.fillColor || prefs[p + m.fill];
@@ -298,7 +302,11 @@ export function applyDefaultStyle(annotation) {
 
   const p = m.prefix;
 
-  if (m.stroke && prefs[p + m.stroke]) annotation.strokeColor = prefs[p + m.stroke];
+  // Een voorkeur op 'none' geldt alleen voor soorten die zonder rand kunnen;
+  // een andere soort krijgt hier een zichtbare kleur (#433).
+  if (m.stroke && prefs[p + m.stroke]) {
+    annotation.strokeColor = randkleurenUitVoorkeur(prefs, p, annotation.type, annotation.color).strokeColor;
+  }
   if (m.color && prefs[p + m.color]) annotation.color = prefs[p + m.color];
   if (m.fill) {
     if (prefs[p + m.fillNone]) {
@@ -307,7 +315,7 @@ export function applyDefaultStyle(annotation) {
       annotation.fillColor = prefs[p + m.fill];
     }
   }
-  if (m.width && prefs[p + m.width] != null) annotation.lineWidth = prefs[p + m.width];
+  if (m.width && prefs[p + m.width] != null) zetRanddikte(annotation, prefs[p + m.width]);
   if (m.borderStyle && prefs[p + m.borderStyle]) annotation.borderStyle = prefs[p + m.borderStyle];
   if (m.opacity && prefs[p + m.opacity] !== undefined) annotation.opacity = prefs[p + m.opacity] / 100;
   if (m.startHead && prefs[p + m.startHead]) annotation.startHead = prefs[p + m.startHead];

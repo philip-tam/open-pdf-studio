@@ -4,8 +4,10 @@
 #![recursion_limit = "256"]
 
 mod accounts;
+mod atomic_file;
 pub mod cad_export;
 pub mod cad_import;
+pub mod datamap;
 mod email;
 pub mod linux_runtime;
 pub mod logboek;
@@ -21,9 +23,14 @@ pub mod handtekening;
 pub mod print_formulieren;
 pub mod print_instelling;
 pub mod print_plaatsing;
-// DEVMODE-hulp en de GDI-printkern: alleen Windows.
+// DEVMODE-hulp, de printerlijst uit de spooler en de GDI-printkern: alleen
+// Windows.
 #[cfg(target_os = "windows")]
 pub mod print_devmode;
+#[cfg(target_os = "windows")]
+pub mod print_lijst;
+#[cfg(target_os = "windows")]
+mod standaard_app;
 #[cfg(target_os = "windows")]
 pub mod print_windows;
 pub mod render_to_png;
@@ -94,7 +101,7 @@ fn get_opened_file(state: tauri::State<OpenedFiles>) -> Vec<String> {
 
 #[tauri::command]
 fn get_session_file_path() -> String {
-    if let Some(data_dir) = dirs::data_local_dir() {
+    if let Some(data_dir) = datamap::lokale_datamap() {
         let app_dir = data_dir.join("OpenPDFStudio");
         if !app_dir.exists() {
             let _ = fs::create_dir_all(&app_dir);
@@ -119,7 +126,7 @@ fn load_session() -> Option<String> {
 }
 
 fn get_preferences_file_path() -> String {
-    if let Some(data_dir) = dirs::data_local_dir() {
+    if let Some(data_dir) = datamap::lokale_datamap() {
         let app_dir = data_dir.join("OpenPDFStudio");
         if !app_dir.exists() {
             let _ = fs::create_dir_all(&app_dir);
@@ -149,7 +156,7 @@ fn load_preferences() -> Option<String> {
 // spiegel kent een quotum. Kleine catalogi blijven gewoon inline in de
 // voorkeuren; alleen grote landen hier (beide opties bestaan naast elkaar).
 fn get_catalogs_dir() -> std::path::PathBuf {
-    let basis = dirs::data_local_dir().unwrap_or_else(|| std::path::PathBuf::from("."));
+    let basis = datamap::lokale_datamap().unwrap_or_else(|| std::path::PathBuf::from("."));
     let dir = basis.join("OpenPDFStudio").join("catalogs");
     if !dir.exists() {
         let _ = fs::create_dir_all(&dir);
@@ -207,8 +214,26 @@ fn read_file(path: String) -> Result<Vec<u8>, String> {
 #[tauri::command]
 fn write_file(path: String, data: String) -> Result<bool, String> {
     let bytes = BASE64.decode(&data).map_err(|e| e.to_string())?;
-    fs::write(&path, bytes).map_err(|e| e.to_string())?;
+    atomic_file::write(std::path::Path::new(&path), &bytes).map_err(|e| e.to_string())?;
     Ok(true)
+}
+
+#[tauri::command]
+async fn write_file_atomic(request: tauri::ipc::Request<'_>) -> Result<(), String> {
+    let header = request.headers().get("x-opds-path")
+        .ok_or("Missing destination path")?.to_str().map_err(|e| e.to_string())?;
+    let path = urlencoding::decode(header).map_err(|e| e.to_string())?.into_owned();
+    let bytes = match request.body() {
+        tauri::ipc::InvokeBody::Raw(bytes) => bytes.clone(),
+        // Android cannot transport a raw IPC body.
+        tauri::ipc::InvokeBody::Json(value) => {
+            serde_json::from_value::<Vec<u8>>(value.get("data").cloned().ok_or("Missing file data")?)
+                .map_err(|e| e.to_string())?
+        }
+    };
+    tauri::async_runtime::spawn_blocking(move || {
+        atomic_file::write(std::path::Path::new(&path), &bytes).map_err(|e| e.to_string())
+    }).await.map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
@@ -234,49 +259,26 @@ async fn is_default_pdf_app() -> bool {
     tauri::async_runtime::spawn_blocking(|| {
         #[cfg(target_os = "windows")]
         {
-            // Get our own executable path
-            let our_exe = match std::env::current_exe() {
-                Ok(p) => p.to_string_lossy().to_lowercase(),
-                Err(_) => return false,
-            };
-
-            // Query the UserChoice ProgId for .pdf
-            let output = match no_window_command("reg")
-                .args(&["query", r"HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.pdf\UserChoice", "/v", "ProgId"])
-                .output()
-            {
-                Ok(o) => o,
-                Err(_) => return false,
-            };
-            let stdout = String::from_utf8_lossy(&output.stdout);
-
-            // Extract ProgId value from reg query output
-            let prog_id = stdout.lines()
-                .find(|line| line.contains("ProgId"))
-                .and_then(|line| line.split_whitespace().last())
-                .unwrap_or("");
-
-            if prog_id.is_empty() {
+            // Register lezen met de Windows-API, niet met reg.exe: een extra
+            // systeemproces kort na de start laat beveiligingssoftware de app
+            // afsluiten (#524).
+            use windows_sys::Win32::System::Registry::{HKEY_CLASSES_ROOT, HKEY_CURRENT_USER};
+            let eigen_exe = std::env::current_exe()
+                .map(|p| p.to_string_lossy().into_owned())
+                .unwrap_or_default();
+            let Some(prog_id) = standaard_app::lees_tekst(
+                HKEY_CURRENT_USER,
+                r"Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.pdf\UserChoice",
+                Some("ProgId"),
+            ) else {
                 return false;
-            }
-
-            // Check if the ProgId directly matches our app name
-            if prog_id.to_lowercase().contains("openpdfstudio") {
-                return true;
-            }
-
-            // Look up the shell\open\command for this ProgId in HKCR
-            let key_path = format!(r"HKCR\{}\shell\open\command", prog_id);
-            let output2 = match no_window_command("reg")
-                .args(&["query", &key_path, "/ve"])
-                .output()
-            {
-                Ok(o) => o,
-                Err(_) => return false,
             };
-            let stdout2 = String::from_utf8_lossy(&output2.stdout).to_lowercase();
-
-            stdout2.contains("openpdfstudio") || stdout2.contains(&our_exe.replace('\\', "\\\\"))
+            let open_opdracht = standaard_app::lees_tekst(
+                HKEY_CLASSES_ROOT,
+                &format!(r"{}\shell\open\command", prog_id.trim()),
+                None,
+            );
+            standaard_app::is_onze_pdf_app(&prog_id, open_opdracht.as_deref(), &eigen_exe)
         }
 
         #[cfg(target_os = "linux")]
@@ -515,40 +517,25 @@ fn no_window_command(program: &str) -> std::process::Command {
     c
 }
 
-/// Enumerate installed printers via PowerShell CIM.
-/// Returns a JSON array of printer objects.
+/// Enumerate installed printers.
+/// Returns a JSON array of printer objects: Name, DriverName, PortName,
+/// Default and PrinterStatus, the shape of Win32_Printer.
 /// Alleen opvragen: er wordt niets geïnstalleerd, gewijzigd of gestart.
 /// PortName hoort erbij omdat de printdialoog en `app_list_printers` daaraan
 /// zien of een wachtrij naar een bestand schrijft (js/pdf/print-doel.js,
 /// `isBestandsPrinter`).
-/// async: sync commands run on the main event-loop thread, and this one
-/// blocks on a PowerShell subprocess for ~1s — long enough to freeze window
-/// show and input processing at startup. Async moves it to the runtime pool.
+/// Windows: rechtstreeks uit de spooler (print_lijst.rs), zonder PowerShell;
+/// endpoint-beveiliging beëindigt de app als die bij het opstarten
+/// powershell.exe start (#524).
+/// async: the query runs on a blocking thread, so a slow spooler or printer
+/// server never holds up window show and input processing at startup.
 #[tauri::command]
 async fn get_printers() -> Result<String, String> {
     #[cfg(target_os = "windows")]
     {
-        let output = no_window_command("powershell")
-            .args(&[
-                "-NoProfile", "-NonInteractive", "-Command",
-                "Get-CimInstance -ClassName Win32_Printer | Select-Object Name, DriverName, PortName, Default, PrinterStatus | ConvertTo-Json -Compress"
-            ])
-            .output()
-            .map_err(|e| format!("Failed to enumerate printers: {}", e))?;
-
-        if !output.status.success() {
-            let stderr = String::from_utf8_lossy(&output.stderr);
-            return Err(format!("PowerShell error: {}", stderr));
-        }
-
-        let stdout = String::from_utf8_lossy(&output.stdout).to_string();
-        // PowerShell returns a single object (not array) when there's only one printer
-        let trimmed = stdout.trim();
-        if trimmed.starts_with('{') {
-            Ok(format!("[{}]", trimmed))
-        } else {
-            Ok(trimmed.to_string())
-        }
+        tauri::async_runtime::spawn_blocking(print_lijst::printers_als_json)
+            .await
+            .map_err(|e| format!("Failed to enumerate printers: {}", e))?
     }
 
     #[cfg(any(target_os = "linux", target_os = "macos"))]
@@ -1120,6 +1107,8 @@ fn remove_virtual_printer() -> Result<bool, String> {
 // merge/reorder dialog.
 
 fn vp_spool_dir() -> Result<std::path::PathBuf, String> {
+    // Bewust niet via datamap::lokale_datamap(): de spoolmap is als
+    // Windows-printerpoort vastgelegd en gedeeld met het print-subsysteem.
     let base = dirs::data_local_dir().ok_or("local data dir unknown")?;
     Ok(base.join("OpenPDFPrinter").join("spool"))
 }
@@ -1217,27 +1206,23 @@ fn virtual_printer_delete_job(file: String) -> Result<(), String> {
 /// Whether "Open PDF Printer" is in SILENT CATCH mode — i.e. its port is the
 /// spool file (no Save As dialog). Returns false when it's on PORTPROMPT (the
 /// legacy save-dialog port) so the UI can offer to reconfigure it.
+/// Windows: de poort komt uit de spooler (print_lijst.rs), zonder PowerShell
+/// (#524).
 #[tauri::command]
-fn virtual_printer_catch_enabled() -> bool {
+async fn virtual_printer_catch_enabled() -> bool {
     #[cfg(target_os = "windows")]
     {
-        let expected = match vp_spool_dir() {
-            Ok(p) => p.join("latest.pdf").to_string_lossy().to_lowercase(),
+        let spoolbestand = match vp_spool_dir() {
+            Ok(p) => p.join("latest.pdf").to_string_lossy().to_string(),
             Err(_) => return false,
         };
-        let out = no_window_command("powershell")
-            .args(&[
-                "-NoProfile", "-NonInteractive", "-Command",
-                "(Get-Printer -Name 'Open PDF Printer' -ErrorAction SilentlyContinue).PortName"
-            ])
-            .output();
-        match out {
-            Ok(o) => {
-                let port = String::from_utf8_lossy(&o.stdout).trim().to_lowercase();
-                !port.is_empty() && port == expected
-            }
-            Err(_) => false,
-        }
+        tauri::async_runtime::spawn_blocking(move || {
+            let printers = print_lijst::printers_opvragen().unwrap_or_default();
+            let poort = print_lijst::poort_van(&printers, print_formulieren::PRINTERNAAM);
+            print_lijst::vangt_in_spoolbestand(poort, &spoolbestand)
+        })
+        .await
+        .unwrap_or(false)
     }
     #[cfg(not(target_os = "windows"))]
     {
@@ -1283,27 +1268,22 @@ Set-Printer -Name 'Open PDF Printer' -PortName $port"#,
 /// Check whether the "Open PDF Printer" virtual printer is installed.
 /// Also returns `true` for the legacy "Open PDF Studio" name so users on
 /// an older installation see "installed" until they reinstall.
+/// Windows: de namen komen uit de spooler (print_lijst.rs), zonder
+/// PowerShell: deze vraag loopt bij elke start (#524).
 #[tauri::command]
-fn is_virtual_printer_installed() -> bool {
+async fn is_virtual_printer_installed() -> bool {
     #[cfg(target_os = "windows")]
     {
-        use std::os::windows::process::CommandExt;
-        const CREATE_NO_WINDOW: u32 = 0x08000000;
-        let output = std::process::Command::new("powershell")
-            .args(&[
-                "-NoProfile", "-NonInteractive", "-Command",
-                "(Get-Printer -Name 'Open PDF Printer' -ErrorAction SilentlyContinue) -or (Get-Printer -Name 'Open PDF Studio' -ErrorAction SilentlyContinue)"
-            ])
-            .creation_flags(CREATE_NO_WINDOW)
-            .output();
-
-        match output {
-            Ok(o) => {
-                let stdout = String::from_utf8_lossy(&o.stdout);
-                stdout.trim().eq_ignore_ascii_case("True")
-            }
-            Err(_) => false,
-        }
+        tauri::async_runtime::spawn_blocking(|| {
+            print_lijst::printers_opvragen().is_ok_and(|printers| {
+                print_lijst::heeft_printer(
+                    &printers,
+                    &[print_formulieren::PRINTERNAAM, print_formulieren::OUDE_PRINTERNAAM],
+                )
+            })
+        })
+        .await
+        .unwrap_or(false)
     }
 
     #[cfg(not(target_os = "windows"))]
@@ -1580,7 +1560,7 @@ fn play_alert_sound() {
 // --- Plugin Management ---
 
 fn get_plugins_dir() -> std::path::PathBuf {
-    let data_dir = dirs::data_local_dir().unwrap_or_else(|| std::path::PathBuf::from("."));
+    let data_dir = datamap::lokale_datamap().unwrap_or_else(|| std::path::PathBuf::from("."));
     let plugins_dir = data_dir.join("OpenPDFStudio").join("plugins");
     if !plugins_dir.exists() {
         let _ = fs::create_dir_all(&plugins_dir);
@@ -1829,6 +1809,13 @@ fn worker_pool_ready(
     pool.get().is_some()
 }
 
+/// True when a pool error means the worker process itself went away (EOF or a
+/// broken pipe), as opposed to a timeout or a bitmap that did not fit.
+fn worker_died(e: &anyhow::Error) -> bool {
+    let msg = e.to_string();
+    msg.ends_with(" EOF") || msg.starts_with("write to worker") || msg.starts_with("read from worker")
+}
+
 #[tauri::command]
 async fn render_pdf_page(
     path: String,
@@ -1877,6 +1864,16 @@ async fn render_pdf_page(
                 return Ok(tauri::ipc::Response::new(data));
             }
             Err(e) => {
+                // A worker can die while parsing a malformed PDF. Retrying
+                // that same file inside the GUI process would move the native
+                // PDFium crash into the app itself (observed with Tekst.pdf).
+                // The pool already retries on a second worker; keep the
+                // failure isolated and let the UI show a render error.
+                // Other failures (timeout, bitmap too large for the shared
+                // memory, an older worker) still fall back to in-proc.
+                if worker_died(&e) {
+                    return Err(format!("PDFium worker render failed: {e}"));
+                }
                 eprintln!("[render_pdf_page] pool render failed: {} — falling back to in-proc", e);
             }
         }
@@ -2001,7 +1998,8 @@ async fn render_pdf_page_region(
 
     // Try the worker pool first: region tiles are small (fit the 64 MB SHM), so
     // they render in a SEPARATE process — safe for parallel/pre-cache rendering
-    // and off the main thread. Falls back to in-proc PDFium on any failure.
+    // and off the main thread. Falls back to in-proc PDFium on any failure
+    // except a dead worker: that crash must not be repeated in the GUI process.
     if let Some(p) = pool.get() {
         match p
             .render_region(&path, page_index, scale, extra_rot, region_x_pt, region_y_pt, region_w_pt, region_h_pt, spread.unwrap_or(false))
@@ -2015,6 +2013,9 @@ async fn render_pdf_page_region(
                 return Ok(tauri::ipc::Response::new(data));
             }
             Err(e) => {
+                if worker_died(&e) {
+                    return Err(format!("PDFium worker region render failed: {e}"));
+                }
                 eprintln!("[render_pdf_page_region] pool failed: {} — in-proc fallback", e);
             }
         }
@@ -2447,12 +2448,17 @@ fn release_pdf_document(
     if let Ok(mut pc) = page_type_cache.0.lock() {
         pc.retain(|(p, _), _| p != &path);
     }
-    let had_doc = pdfium_cache
+    let removed = pdfium_cache
         .0
         .lock()
         .map_err(|e| format!("Pdfium doc cache lock: {}", e))?
-        .remove(&path)
-        .is_some();
+        .remove(&path);
+    let had_doc = removed.is_some();
+    // Closing a PDFium document waits for the global PDFium lock, which a CAD
+    // export or print can hold for seconds: close it off the UI thread.
+    if let Some(handle) = removed {
+        std::thread::spawn(move || drop(handle));
+    }
     if let Ok(mut guard) = pixmap_cache.0.lock() {
         if let Some(cache) = guard.as_mut() {
             cache.remove_path(&path);
@@ -2476,7 +2482,13 @@ fn clear_pdf_cache(
     handle_cache.0.lock().map_err(|e| format!("Handle cache lock: {}", e))?.clear();
     if let Ok(mut tc) = thumb_cache.0.lock() { tc.clear(); }
     if let Ok(mut ptc) = page_type_cache.0.lock() { ptc.clear(); }
-    if let Ok(mut pc) = pdfium_cache.0.lock() { pc.clear(); }
+    if let Ok(mut pc) = pdfium_cache.0.lock() {
+        // Close the documents off the UI thread (see release_pdf_document).
+        let handles: Vec<_> = pc.drain().map(|(_, handle)| handle).collect();
+        if !handles.is_empty() {
+            std::thread::spawn(move || drop(handles));
+        }
+    }
     if let Ok(mut guard) = pixmap_cache.0.lock() {
         if let Some(cache) = guard.as_mut() {
             cache.clear();
@@ -2755,9 +2767,7 @@ pub fn run(opts: StartupOpts) {
                 Err(e) => eprintln!("[startup] geen logboek: {e}"),
             }
 
-            let diagnostics_path = app
-                .path()
-                .app_log_dir()
+            let diagnostics_path = datamap::tauri_map(app.handle(), datamap::TauriMap::Logs)
                 .map_err(|e| format!("Cannot resolve app log directory: {e}"))?
                 .join("startup-diagnostics.jsonl");
             let diagnostics = startup_diagnostics::StartupDiagnostics::new(diagnostics_path);
@@ -2768,7 +2778,7 @@ pub fn run(opts: StartupOpts) {
             // opruimen; vangnet naast het opruimen door de UI. Ruim genoeg, zodat
             // een tabblad dat in een andere, nog draaiende instantie open staat
             // zijn bestand niet kwijtraakt. Fouten negeren.
-            if let Ok(cachemap) = app.path().app_cache_dir() {
+            if let Ok(cachemap) = datamap::tauri_map(app.handle(), datamap::TauriMap::Cache) {
                 std::thread::spawn(move || {
                     handtekening::verifieer::ruim_ondertekende_versies_op(
                         &handtekening::verifieer::map_ondertekende_versies(&cachemap),
@@ -2908,6 +2918,7 @@ pub fn run(opts: StartupOpts) {
             get_username,
             read_file,
             write_file,
+            write_file_atomic,
             file_exists,
             open_url,
             is_dev_mode,
@@ -3006,6 +3017,7 @@ pub fn run(opts: StartupOpts) {
             window_mgmt::detach_diag,
             startup_diagnostics::startup_diagnostic,
             startup_diagnostics::startup_diagnostics_path,
+            datamap::app_data_dir_effectief,
             read_clipboard_image_png,
             set_prtscn_hotkey,
         ])

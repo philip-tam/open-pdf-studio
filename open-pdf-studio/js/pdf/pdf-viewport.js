@@ -15,6 +15,15 @@ import {
 } from './page-bitmap-cache.js';
 import { tileCoversViewport } from './tile-coverage.js';
 import { bepaalOverlayMaat, pasOverlayMaatToe } from './overlay-canvas-size.js';
+import { maakWielScroller } from './wiel-scroll.js';
+import {
+  normaliseerRotatie,
+  vermenigvuldig,
+  viewportGeometrie,
+  viewportNaarPagina,
+  viewportNaarScherm,
+  viewportZichtbaar,
+} from './weergave-rotatie.js';
 
 // ─── Viewport State (singleton via window to survive HMR/dynamic imports) ───
 if (!window.__pdfViewport) {
@@ -29,6 +38,11 @@ if (!window.__pdfViewport) {
     filePath: null,
     pageNum: 1,
     rotation: 0,    // user-applied rotation (0/90/180/270) — part of cache key
+    // Weergave draaien (#200): rechtsom 0/90/180/270, alleen op het scherm.
+    // Bitmaps, tegels en de tekst-/link-/formulierlagen blijven in de
+    // paginaruimte; _render() draait ze bij het tekenen. Zoom, verschuiving,
+    // pannen en passend maken rekenen in de gedraaide (weergave)ruimte.
+    viewRotation: 0,
     dirty: true,
     active: false,
     // NEW: bitmap + tile state for unified render loop
@@ -262,24 +276,31 @@ async function _applyDprChange() {
   }
 }
 
-// ─── Smooth Scroll: Velocity + Momentum ────────────────────────────────────
-// Wheel-driven pan accumulates into _vx/_vy. The RAF loop then applies and
-// decays the velocity each frame so a single wheel notch glides to a smooth
-// stop instead of jumping in a single instantaneous step. Tuned to feel like
-// macOS / iOS rubber-banding scroll without rubber-band overshoot (we just
-// clamp at edges via clampAndCenter()).
-let _vx = 0;
-let _vy = 0;
-// Per-frame decay. Closer to 1 = longer glide. 0.88 ≈ velocity halves in
-// ~5 frames (~83ms @ 60fps); feels responsive but smooth, no over-floaty.
-const _VELOCITY_FRICTION = 0.88;
-// Hard stop threshold so we don't burn frames on sub-pixel residue.
-const _VELOCITY_MIN = 0.15;
-// How much of a wheel notch becomes velocity. The OS sends ~100 per notch;
-// we want ~25 CSS px/frame at impact, which a single notch of 100 * 0.25
-// produces. Trackpad inertia already smooths fine deltas so this scale
-// works for both.
-const _WHEEL_TO_VELOCITY = 0.25;
+// ─── Wielscrollen: korte, tijdgebonden uitloop (issue #522) ────────────────
+// Dezelfde helper als de scrollende weergaven (wiel-scroll.js). Een
+// muiswielklik schuift precies zijn delta op met een ease-out van ~180 ms die
+// de render-lus hieronder elk frame op TIJD afspeelt; touchpad-delta's gaan
+// direct door. Vroeger kreeg elke klik snelheid mee die per FRAME met 0,88
+// afnam: altijd 41 frames uitloop (0,7 s bij 60 fps, ruim 2 s op een zware
+// vectorpagina die het tempo naar 20 fps drukt) over ~2x de wieldelta.
+const _wielScroll = maakWielScroller({
+  nu: () => performance.now(),
+  verschuif: (dx, dy) => _verschuifDoorWiel(dx, dy),
+});
+
+function _verschuifDoorWiel(dx, dy) {
+  const dpr = _getDpr();
+  const vpW = _canvas ? _canvas.width / dpr : 0;
+  const vpH = _canvas ? _canvas.height / dpr : 0;
+  // Maat op het scherm: na paginarotatie én weergaverotatie.
+  const scherm = schermPaginaMaat();
+  // Alleen schuiven op een as waar de pagina niet in het venster past (zoals
+  // voorheen: anders valt er op die as niets te pannen).
+  if (dx !== 0 && scherm.w * viewport.zoom > vpW + 0.5) viewport.offsetX -= dx;
+  if (dy !== 0 && scherm.h * viewport.zoom > vpH + 0.5) viewport.offsetY -= dy;
+  viewport.dirty = true;
+  _scheduleTileRecheckAfterPan();
+}
 
 // Debounce timer for tile re-renders triggered by pan. ensureTileForCurrentView
 // is cheap when zoom <= cap (early-returns + clears tile state) but the Rust
@@ -372,28 +393,24 @@ function _scheduleTileRecheckAfterPan() {
 }
 
 /**
- * Add wheel deltas to the pan-momentum accumulator. Called from the wheel
- * handler in navigation-events.js on plain (non-ctrl) wheel events when the
- * vector viewport is active. The RAF loop applies velocity over multiple
- * frames with friction-based decay, producing smooth Apple-style scroll.
- *
- * No-op when momentum is suppressed by clamping on both axes (page fits).
+ * Pan de pagina met een wieldelta (CSS-px, zie leesWielDelta). Een
+ * muiswielklik (stap) loopt kort uit via de render-lus; touchpad- en fijne
+ * delta's worden direct toegepast. Aangeroepen vanuit navigation-events.js
+ * bij een gewoon wielevent (zonder Ctrl) als de viewport actief is.
  */
-export function addPanVelocity(dx, dy) {
-  _vx += dx * _WHEEL_TO_VELOCITY;
-  _vy += dy * _WHEEL_TO_VELOCITY;
-  viewport.dirty = true; // wake the RAF loop
+export function wielPanViewport(dx, dy, stap) {
   _anchorActive = true;  // user-positioned, don't auto-center
+  _wielScroll.wiel(dx, dy, stap);
+  viewport.dirty = true; // wake the RAF loop
 }
 
 /**
- * Halt any in-flight pan momentum. Called when a new gesture begins
+ * Halt any in-flight wheel scroll. Called when a new gesture begins
  * (pointer-down for click-pan, ctrl+wheel for zoom, edge-triggered page
- * nav) so the new gesture doesn't fight a still-decaying old one.
+ * nav) so the new gesture doesn't fight a still-running old one.
  */
 export function stopPanMomentum() {
-  _vx = 0;
-  _vy = 0;
+  _wielScroll.stop();
 }
 
 // ─── Render Loop ────────────────────────────────────────────────────────────
@@ -468,50 +485,38 @@ export function kickRedactAnts() {
 function _startLoop() {
   function tick() {
     if (viewport.active) {
-      // Apply pan momentum before the dirty check so a velocity > 0 keeps
-      // the loop alive even when nothing else marked dirty.
-      if (_vx !== 0 || _vy !== 0) {
-        const dpr = _getDpr();
-        const vpW = _canvas ? _canvas.width / dpr : 0;
-        const vpH = _canvas ? _canvas.height / dpr : 0;
-        const pageScreenW = viewport.pageW * viewport.zoom;
-        const pageScreenH = viewport.pageH * viewport.zoom;
-
-        // Skip the velocity update on any axis where the page already fits
-        // (clampAndCenter would just snap it back, producing a buzzy oscillation
-        // for an axis the user can't pan anyway). Also kill that axis's
-        // velocity outright so we don't waste frames decaying it.
-        if (pageScreenW > vpW + 0.5) {
-          viewport.offsetX -= _vx;
-        } else {
-          _vx = 0;
-        }
-        if (pageScreenH > vpH + 0.5) {
-          viewport.offsetY -= _vy;
-        } else {
-          _vy = 0;
-        }
-
-        // Decay
-        _vx *= _VELOCITY_FRICTION;
-        _vy *= _VELOCITY_FRICTION;
-        if (Math.abs(_vx) < _VELOCITY_MIN) _vx = 0;
-        if (Math.abs(_vy) < _VELOCITY_MIN) _vy = 0;
-
-        viewport.dirty = true;
-
-        if (_vx !== 0 || _vy !== 0) {
-          _scheduleTileRecheckAfterPan();
-        }
-      }
+      // Wieluitloop vóór de dirty-check: zolang hij loopt verschuift hij de
+      // pagina (en zet hij dirty) naar rato van de verstreken tijd.
+      if (_wielScroll.actief) _wielScroll.pomp(performance.now());
       if (viewport.dirty) {
         viewport.dirty = false;
         _render();
       }
+    } else if (_wielScroll.actief) {
+      // Doorlopende weergave zet de viewport direct uit (renderer.js). Een
+      // uitloop die blijft staan zou bij terugkomst in één keer het restant
+      // springen: hier gewoon laten vallen.
+      _wielScroll.stop();
     }
     _rafId = requestAnimationFrame(tick);
   }
   _rafId = requestAnimationFrame(tick);
+}
+
+// Maat van de getoonde pagina in punten, zoals hij op het scherm ligt: na de
+// eigen /Rotate (al in pageW/pageH), de paginarotatie van het document
+// (viewport.rotation) en de weergaverotatie (#200). Alles wat met de
+// verschuiving en de zoom rekent (pannen, scrollbalken, passend maken,
+// bladeren met het wiel) hoort deze maat te gebruiken.
+export function schermPaginaMaat() {
+  const g = viewportGeometrie(viewport);
+  return { w: g.schermBreedte, h: g.schermHoogte };
+}
+
+// Maat van de getoonde pagina in de paginaruimte (waar annotaties staan).
+export function paginaRuimteMaat() {
+  const g = viewportGeometrie(viewport);
+  return { w: g.paginaBreedte, h: g.paginaHoogte };
 }
 
 // DISABLED (2026-05-15, free pan/zoom UX request).
@@ -704,11 +709,16 @@ function _render() {
   _ctx.fillStyle = '#e0e0e0';
   _ctx.fillRect(0, 0, _canvas.width, _canvas.height);
 
-  // Display dimensions of the page (post-rotation). PDF page is pageW x pageH
-  // in user-space; after a 90°/270° rotation the on-screen extent is swapped.
-  const isRotated90 = (viewport.rotation === 90 || viewport.rotation === 270);
-  const displayPageW = isRotated90 ? viewport.pageH : viewport.pageW;
-  const displayPageH = isRotated90 ? viewport.pageW : viewport.pageH;
+  // Maten en transform van de pagina. Paginaruimte = na de eigen /Rotate en
+  // de paginarotatie van het document (displayPageW/H): daarin staan de
+  // bitmap, de tegels en de annotaties. Weergaveruimte = daarbovenop de
+  // weergaverotatie (#200): daarin rekenen zoom en verschuiving.
+  const geo = viewportGeometrie(viewport);
+  const displayPageW = geo.paginaBreedte;
+  const displayPageH = geo.paginaHoogte;
+  // Paginaruimte (punten) → CSS-px, en → device-px voor het pdf-canvas.
+  const paginaNaarCss = geo.matrix;
+  const paginaNaarDevice = vermenigvuldig([dpr, 0, 0, dpr, 0, 0], paginaNaarCss);
 
   // Dekt de (laatst gerenderde) tegel het volledige ZICHTBARE deel van de
   // pagina? Dan is de opgeschaalde volle-pagina-bitmap eronder onzichtbaar
@@ -717,15 +727,15 @@ function _render() {
   // gepositioneerd en blijft dus ook bij een NIEUWE zoom correct geschaald
   // staan tot de verse tegel hem vervangt. Buiten de tegel-dekking blijft de
   // bitmap het vangnet (beter een wazige rand dan een gat bij pannen).
+  // Tegels staan in de paginaruimte; het zichtbare deel dus ook daarheen.
   let tileCoversVisible = false;
   if (viewport.currentTile && viewport.currentTileMeta) {
     const m = viewport.currentTileMeta;
-    const cssW = _canvas.width / dpr;
-    const cssH = _canvas.height / dpr;
-    const visX0 = Math.max(0, -viewport.offsetX) / viewport.zoom;
-    const visY0 = Math.max(0, -viewport.offsetY) / viewport.zoom;
-    const visX1 = Math.min(displayPageW * viewport.zoom, cssW - viewport.offsetX) / viewport.zoom;
-    const visY1 = Math.min(displayPageH * viewport.zoom, cssH - viewport.offsetY) / viewport.zoom;
+    const zicht = viewportZichtbaar(viewport, _canvas.width / dpr, _canvas.height / dpr);
+    const visX0 = zicht.x;
+    const visY0 = zicht.y;
+    const visX1 = zicht.x + zicht.width;
+    const visY1 = zicht.y + zicht.height;
     const eps = 0.5; // pt-tolerantie op de randen
     tileCoversVisible =
       visX1 > visX0 && visY1 > visY0 &&
@@ -734,23 +744,33 @@ function _render() {
       m.regionYpt + m.regionHpt >= visY1 - eps;
   }
 
-  // White page background. For RASTER we fill in screen space at the SAME
-  // post-rotation extent as the bitmap (so a 90°/270° page has no uncovered
-  // white band — the old user-space rect used the un-swapped pageW/pageH and
-  // left a white strip after rotation). For VECTOR we keep the PDF user-space
-  // (Y-flipped) transform that matches the vector commands drawn on top.
+  // Bitmap en tegel tekenen in "device-pixels van de paginaruimte": een
+  // transform die de paginaruimte, geschaald met zoom·dpr, op het scherm legt.
+  // Zonder weergaverotatie is dat een zuivere verschuiving, dus dezelfde
+  // pixels als voorheen (destX = offsetX·dpr, destW = breedte·zoom·dpr).
+  const pxPerPt = viewport.zoom * dpr;
+  const zetPaginaPixelTransform = () => {
+    _ctx.setTransform(
+      paginaNaarDevice[0] / pxPerPt, paginaNaarDevice[1] / pxPerPt,
+      paginaNaarDevice[2] / pxPerPt, paginaNaarDevice[3] / pxPerPt,
+      // Whole device pixels: a bitmap drawn at a fractional offset is
+      // bilinearly blended with its neighbours, which softens every glyph
+      // even when the bitmap is already at the exact screen resolution.
+      Math.round(paginaNaarDevice[4]), Math.round(paginaNaarDevice[5]),
+    );
+  };
+
+  // White page background. For RASTER we fill at the SAME post-rotation extent
+  // as the bitmap (so a 90°/270° page has no uncovered white band — the old
+  // user-space rect used the un-swapped pageW/pageH and left a white strip
+  // after rotation). The vector pass below keeps its own transform.
   if (viewport.currentBitmap) {
     _ctx.save();
-    _ctx.setTransform(1, 0, 0, 1, 0, 0); // identity (device-pixel space)
-    // Whole device pixels: a bitmap drawn at a fractional offset is bilinearly
-    // blended with its neighbours, which softens every glyph even when the
-    // bitmap is already at the exact screen resolution.
-    const destX = Math.round(viewport.offsetX * dpr);
-    const destY = Math.round(viewport.offsetY * dpr);
-    const destW = displayPageW * viewport.zoom * dpr;
-    const destH = displayPageH * viewport.zoom * dpr;
+    zetPaginaPixelTransform();
+    const destW = displayPageW * pxPerPt;
+    const destH = displayPageH * pxPerPt;
     _ctx.fillStyle = '#ffffff';
-    _ctx.fillRect(destX, destY, destW, destH);
+    _ctx.fillRect(0, 0, destW, destH);
     if (!tileCoversVisible) {
       // Wanneer de whole-page bitmap GROTER is dan het bestemmingsvlak (bijv.
       // een scale-1.0 raster op "pagina passend"), doet de canvas een
@@ -766,42 +786,36 @@ function _render() {
       const _prevQ = _ctx.imageSmoothingQuality;
       if (_downscale) _ctx.imageSmoothingQuality = 'high';
       const _snap = _snapDrawSize(destW, destH, viewport.currentBitmap);
-      _ctx.drawImage(viewport.currentBitmap, destX, destY, _snap.w, _snap.h);
+      _ctx.drawImage(viewport.currentBitmap, 0, 0, _snap.w, _snap.h);
       if (_downscale) _ctx.imageSmoothingQuality = _prevQ;
     }
     _ctx.restore();
   } else {
     // No whole-page bitmap yet (vector page, or the brief window right after a
-    // rotation cleared the stale raster). Fill the white page background in
-    // SCREEN space at the POST-rotation extent (displayPageW/H) — identical to
-    // the raster branch above. The previous user-space fill used the un-swapped
-    // pageW × pageH with a Y-flip by pageH, so a 90°/270° page got its white
-    // rectangle painted in the OLD orientation while the vector/raster content
-    // drew rotated on top — the leftover white "spookvlak" of issue #262. The
-    // vector command pass below keeps its own PDF user-space transform, so it
-    // still lines up with the page content.
+    // rotation cleared the stale raster). Fill the white page background at
+    // the POST-rotation extent — identical to the raster branch above. The
+    // previous user-space fill used the un-swapped pageW × pageH with a Y-flip
+    // by pageH, so a 90°/270° page got its white rectangle painted in the OLD
+    // orientation while the vector/raster content drew rotated on top — the
+    // leftover white "spookvlak" of issue #262.
     _ctx.save();
-    _ctx.setTransform(1, 0, 0, 1, 0, 0); // identity (device-pixel space)
-    const destX = viewport.offsetX * dpr;
-    const destY = viewport.offsetY * dpr;
-    const destW = displayPageW * viewport.zoom * dpr;
-    const destH = displayPageH * viewport.zoom * dpr;
+    zetPaginaPixelTransform();
     _ctx.fillStyle = '#ffffff';
-    _ctx.fillRect(destX, destY, destW, destH);
+    _ctx.fillRect(0, 0, displayPageW * pxPerPt, displayPageH * pxPerPt);
     _ctx.restore();
   }
 
   // TILE AUGMENT — crisp visible-region overlay when zoom is above the
   // 4096 px-axis cap. The tile is rendered at the requested zoom for the
-  // PDF-point region described by currentTileMeta.
+  // PDF-point region (paginaruimte) described by currentTileMeta.
   if (viewport.currentTile && viewport.currentTileMeta) {
     _ctx.save();
-    _ctx.setTransform(1, 0, 0, 1, 0, 0);
+    zetPaginaPixelTransform();
     const m = viewport.currentTileMeta;
-    const destX = Math.round((viewport.offsetX + m.regionXpt * viewport.zoom) * dpr);
-    const destY = Math.round((viewport.offsetY + m.regionYpt * viewport.zoom) * dpr);
-    const destW = m.regionWpt * viewport.zoom * dpr;
-    const destH = m.regionHpt * viewport.zoom * dpr;
+    const destX = m.regionXpt * pxPerPt;
+    const destY = m.regionYpt * pxPerPt;
+    const destW = m.regionWpt * pxPerPt;
+    const destH = m.regionHpt * pxPerPt;
     const _tileSnap = _snapDrawSize(destW, destH, viewport.currentTile);
     _ctx.drawImage(viewport.currentTile, destX, destY, _tileSnap.w, _tileSnap.h);
     _ctx.restore();
@@ -814,12 +828,12 @@ function _render() {
   if (viewport.pageType !== 'raster') {
     _ctx.save();
     renderVectorPage(_ctx, viewport.filePath, viewport.pageNum, {
-      a: viewport.zoom * dpr,
-      b: 0,
-      c: 0,
-      d: viewport.zoom * dpr,
-      e: viewport.offsetX * dpr,
-      f: viewport.offsetY * dpr,
+      a: paginaNaarDevice[0],
+      b: paginaNaarDevice[1],
+      c: paginaNaarDevice[2],
+      d: paginaNaarDevice[3],
+      e: paginaNaarDevice[4],
+      f: paginaNaarDevice[5],
     }, viewport.rotation);
     _ctx.restore();
   }
@@ -834,25 +848,27 @@ function _render() {
   // continuous-laag van dezelfde pagina pakken, waardoor de echte single-
   // page-laag zijn viewport-transform nooit kreeg en tekst onklikbaar op
   // (0,0) bleef staan na een weergavewissel.
+  const laagDoc = getActiveDocument();
+  const laagGeometrie = resolveTextEditPageGeometry(
+    laagDoc?.pageDims?.[viewport.pageNum],
+    viewport.pageW,
+    viewport.pageH,
+    viewport.rotation,
+  );
+  // De tekst- en formulierlaag liggen in het ONGEDRAAIDE paginakader; de
+  // matrix doet paginarotatie, weergaverotatie (#200), zoom en positie. Een
+  // kwartslag weergave bovenop de paginarotatie is gewoon een grotere hoek:
+  // de weergaverotatie draait de al gedraaide pagina verder.
+  const laagMatrix = getTextLayerCssMatrix(
+    laagGeometrie.pageWidth,
+    laagGeometrie.pageHeight,
+    laagGeometrie.rotation + geo.rotatie,
+    viewport.zoom,
+    viewport.offsetX,
+    viewport.offsetY,
+  );
   const textLayer = document.querySelector('#canvas-container .textLayer');
   if (textLayer) {
-    const tx = viewport.offsetX;
-    const ty = viewport.offsetY;
-    const doc = getActiveDocument();
-    const geometry = resolveTextEditPageGeometry(
-      doc?.pageDims?.[viewport.pageNum],
-      viewport.pageW,
-      viewport.pageH,
-      viewport.rotation,
-    );
-    const matrix = getTextLayerCssMatrix(
-      geometry.pageWidth,
-      geometry.pageHeight,
-      geometry.rotation,
-      viewport.zoom,
-      tx,
-      ty,
-    );
     // The text layer lives in PDF user space (origin top-left after Y flip).
     // We size spans with --font-height in PDF points and let CSS compute
     // font-size = --total-scale-factor * --font-height. Setting the factor
@@ -864,9 +880,9 @@ function _render() {
     textLayer.style.position = 'absolute';
     textLayer.style.left = '0';
     textLayer.style.top = '0';
-    textLayer.style.width = `${geometry.pageWidth}px`;
-    textLayer.style.height = `${geometry.pageHeight}px`;
-    textLayer.style.transform = `matrix(${matrix.join(', ')})`;
+    textLayer.style.width = `${laagGeometrie.pageWidth}px`;
+    textLayer.style.height = `${laagGeometrie.pageHeight}px`;
+    textLayer.style.transform = `matrix(${laagMatrix.join(', ')})`;
     textLayer.style.transformOrigin = '0 0';
     // Text layer: keep pointer-events as set by tool manager (don't override)
     // The tool manager sets pointer-events based on active tool (text select = auto, other = none)
@@ -878,7 +894,7 @@ function _render() {
       const style = document.createElement('style');
       style.textContent = `
         .textLayer span { color: transparent !important; }
-        .textLayer ::selection { background: rgba(0, 100, 255, 0.3) !important; }
+        .textLayer ::selection { background: #b8d8ff !important; color: #171c25 !important; }
       `;
       textLayer.prepend(style);
     }
@@ -886,29 +902,30 @@ function _render() {
 
   // Sync link layer with viewport.
   // De linklaag wordt door PDF.js opgebouwd in de pixelruimte van de
-  // render-viewport (dataset.scale = punten → pixels). De zichtbare pagina
-  // staat echter op viewport.zoom met oorsprong (offsetX, offsetY). Zonder
-  // deze sync bleef de laag op de bouwschaal staan: de klikvlakken lagen dan
-  // ergens anders dan de tekst en hyperlinks (bv. een Word-inhoudsopgave)
-  // leken doodgewoon niet te werken.
+  // render-viewport (dataset.scale = punten → pixels), dus in de
+  // paginaruimte. De zichtbare pagina staat echter op viewport.zoom met
+  // oorsprong (offsetX, offsetY), eventueel gedraaid. Zonder deze sync bleef
+  // de laag op de bouwschaal staan: de klikvlakken lagen dan ergens anders dan
+  // de tekst en hyperlinks (bv. een Word-inhoudsopgave) leken doodgewoon niet
+  // te werken.
   const linkLayer = document.querySelector('#canvas-container .linkLayer');
   if (linkLayer) {
     const buildScale = Number(linkLayer.dataset.scale) || 1;
-    const ratio = viewport.zoom / buildScale;
+    const linkMatrix = vermenigvuldig(paginaNaarCss, [1 / buildScale, 0, 0, 1 / buildScale, 0, 0]);
     linkLayer.style.position = 'absolute';
     linkLayer.style.left = '0';
     linkLayer.style.top = '0';
     linkLayer.style.transformOrigin = '0 0';
-    linkLayer.style.transform =
-      `matrix(${ratio}, 0, 0, ${ratio}, ${viewport.offsetX}, ${viewport.offsetY})`;
+    linkLayer.style.transform = `matrix(${linkMatrix.join(', ')})`;
   }
 
   // Sync formulierlaag met de viewport — zelfde koppeling als de tekstlaag.
   // De laag stond op inset:0 over het HELE venster; pdf.js positioneert de
   // velden als percentages van de laag, dus elk verschil tussen venster en
   // getekende pagina rekte de velden van het blad af (#332): bovenaan te
-  // hoog, onderaan te laag, alleen het midden klopte. Maat = paginapunten
-  // (post-rotatie), de matrix doet zoom + positie.
+  // hoog, onderaan te laag, alleen het midden klopte. pdf.js rekent die
+  // percentages in het ongedraaide paginakader (rawDims); de matrix doet
+  // rotatie, zoom en positie, net als bij de tekstlaag.
   const formLayer = document.querySelector('#canvas-container .formLayer');
   if (formLayer) {
     formLayer.style.setProperty('--total-scale-factor', '1');
@@ -916,11 +933,10 @@ function _render() {
     formLayer.style.inset = '';
     formLayer.style.left = '0';
     formLayer.style.top = '0';
-    formLayer.style.width = `${viewport.pageW}px`;
-    formLayer.style.height = `${viewport.pageH}px`;
+    formLayer.style.width = `${laagGeometrie.pageWidth}px`;
+    formLayer.style.height = `${laagGeometrie.pageHeight}px`;
     formLayer.style.transformOrigin = '0 0';
-    formLayer.style.transform =
-      `matrix(${viewport.zoom}, 0, 0, ${viewport.zoom}, ${viewport.offsetX}, ${viewport.offsetY})`;
+    formLayer.style.transform = `matrix(${laagMatrix.join(', ')})`;
   }
 
   // Annotation overlay — sync with viewport transform.
@@ -958,7 +974,7 @@ function _render() {
 let _suppressNextFit = false;
 export function suppressNextFit() { _suppressNextFit = true; }
 
-export function setPage(filePath, pageNum, pageW, pageH, originX, originY, rotation) {
+export function setPage(filePath, pageNum, pageW, pageH, originX, originY, rotation, viewRotation = 0) {
   // Detect "first time loading this document" vs "navigating to a different
   // page within the same document". The first case should fit-to-viewport
   // (initial load convention); the second must preserve the current zoom
@@ -974,6 +990,11 @@ export function setPage(filePath, pageNum, pageW, pageH, originX, originY, rotat
   // leftover, wrong-orientation raster/white rectangle is the "spookvlak"
   // reported in issue #262. Treat a rotation delta like a page change.
   const isRotationChange = (viewport.rotation || 0) !== ((rotation || 0) % 360);
+  // Weergave draaien (#200): de bitmap staat in de paginaruimte en blijft dus
+  // geldig; alleen de ligging op het scherm verandert. Opnieuw passend maken
+  // net als bij een paginarotatie (de afmeting op het scherm wisselt).
+  const nieuweWeergave = normaliseerRotatie(viewRotation);
+  const isViewRotationChange = normaliseerRotatie(viewport.viewRotation) !== nieuweWeergave;
 
   // Clear stale raster state on page, document OR rotation change so the
   // unified render loop doesn't keep painting the PREVIOUS bitmap (stretched
@@ -995,6 +1016,7 @@ export function setPage(filePath, pageNum, pageW, pageH, originX, originY, rotat
   viewport.originX = originX || 0;
   viewport.originY = originY || 0;
   viewport.rotation = rotation || 0;
+  viewport.viewRotation = nieuweWeergave;
   viewport.active = true;
 
   if (_suppressNextFit) {
@@ -1006,7 +1028,7 @@ export function setPage(filePath, pageNum, pageW, pageH, originX, originY, rotat
     _anchorActive = true;
     _strictAnchor = false;
     viewport.dirty = true;
-  } else if (isNewDocument || isRotationChange) {
+  } else if (isNewDocument || isRotationChange || isViewRotationChange) {
     // First time we're seeing this file → fit to viewport. Rotating the
     // current page swaps its footprint (portrait ⇄ landscape), so re-fit as
     // well: keeping the old zoom/offset would leave the page sized/positioned
@@ -1056,9 +1078,11 @@ export function fitToViewport(mode = 'page') {
   const cssH = _canvas.height / dpr;
   // Fit on the POST-ROTATION extent so a 90°/270° (e.g. landscape) page is
   // sized and centred correctly instead of using the un-swapped dimensions.
-  const _rot90 = (viewport.rotation === 90 || viewport.rotation === 270);
-  const fitW = _rot90 ? viewport.pageH : viewport.pageW;
-  const fitH = _rot90 ? viewport.pageW : viewport.pageH;
+  // "Post-rotation" = paginarotatie én weergaverotatie (#200): zoals de
+  // pagina op het scherm ligt.
+  const _scherm = schermPaginaMaat();
+  const fitW = _scherm.w;
+  const fitH = _scherm.h;
   const newZoom = computeFitZoom(mode, fitW, fitH, cssW, cssH, 0);
   const scaledW = fitW * newZoom;
   const scaledH = fitH * newZoom;
@@ -1150,6 +1174,8 @@ function _anchorAt(screenX, screenY, oldZoom, newZoom, strict = false) {
       {
         pageW: viewport.pageW,
         pageH: viewport.pageH,
+        rotation: viewport.rotation,
+        viewRotation: viewport.viewRotation,
         zoom: newZoom,
         offsetX: nextOffsetX,
         offsetY: nextOffsetY,
@@ -1276,18 +1302,52 @@ export function isPanning() {
 
 // ─── Coordinate Conversion ──────────────────────────────────────────────────
 
+// "World" = de paginaruimte waarin annotaties staan. Met een weergaverotatie
+// (#200) draait de omrekening mee; zonder is het (s − offset) / zoom.
 export function screenToWorld(sx, sy) {
-  return {
-    x: (sx - viewport.offsetX) / viewport.zoom,
-    y: (sy - viewport.offsetY) / viewport.zoom,
-  };
+  return viewportNaarPagina(viewport, sx, sy);
 }
 
 export function worldToScreen(wx, wy) {
-  return {
-    x: wx * viewport.zoom + viewport.offsetX,
-    y: wy * viewport.zoom + viewport.offsetY,
-  };
+  return viewportNaarScherm(viewport, wx, wy);
+}
+
+// ─── Weergave draaien (#200) ────────────────────────────────────────────────
+
+// Draai de weergave naar `rotatie` (0/90/180/270) zonder te renderen: bitmap,
+// tegels en lagen staan in de paginaruimte en blijven geldig, _render() legt
+// ze gedraaid neer. Stond de pagina nog passend (niet gezoomd of verschoven),
+// dan opnieuw passend maken in de nieuwe stand; anders blijven zoom en het
+// punt in het midden van het beeld staan.
+export function stelWeergaveRotatieIn(rotatie) {
+  const nieuw = normaliseerRotatie(rotatie);
+  if (normaliseerRotatie(viewport.viewRotation) === nieuw) return;
+  stopPanMomentum();
+  // Een zoom-snapshot hoort bij de oude stand; niet meer tonen.
+  if (_zoomFreezeTimer) clearTimeout(_zoomFreezeTimer);
+  _zoomFreezeTimer = null;
+  _zoomFreezeBitmap = null;
+  if (!_canvas || !viewport.pageW || !viewport.pageH) {
+    viewport.viewRotation = nieuw;
+    viewport.dirty = true;
+    return;
+  }
+  const dpr = _getDpr();
+  const cx = _canvas.width / dpr / 2;
+  const cy = _canvas.height / dpr / 2;
+  const midden = viewportNaarPagina(viewport, cx, cy);
+  viewport.viewRotation = nieuw;
+  if (!_anchorActive) {
+    fitToViewport();
+  } else {
+    const s = viewportNaarScherm(viewport, midden.x, midden.y);
+    viewport.offsetX += cx - s.x;
+    viewport.offsetY += cy - s.y;
+  }
+  viewport.dirty = true;
+  // Het zichtbare deel van de pagina is een ander stuk geworden: de scherpe
+  // tegel (bij hoge zoom) opnieuw laten bepalen.
+  _kickOrchestratorAfterZoom();
 }
 
 // ─── Wire Events (call once after canvas is ready) ──────────────────────────
@@ -1343,8 +1403,7 @@ export function wireEvents(canvas) {
           // Convert client → app coordinates (inverse of viewport transform)
           const cx = e.clientX - rect.left;
           const cy = e.clientY - rect.top;
-          const appX = (cx - viewport.offsetX) / viewport.zoom;
-          const appY = (cy - viewport.offsetY) / viewport.zoom;
+          const { x: appX, y: appY } = viewportNaarPagina(viewport, cx, cy);
           // Lazy-import findAnnotationAt to avoid static cycle
           const ann = _findAnnotationAt && _findAnnotationAt(appX, appY);
           if (ann) isOnAnnotation = true;

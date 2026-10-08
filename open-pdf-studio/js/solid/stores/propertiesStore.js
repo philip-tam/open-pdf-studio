@@ -1,4 +1,4 @@
-import { createSignal } from 'solid-js';
+import { createSignal, batch } from 'solid-js';
 import { DRAFTING_RULE_TYPES, effectiveDraftingLineWidth } from '../../annotations/drafting-rules.js';
 import { createStore } from 'solid-js/store';
 import { state, getActiveDocument } from '../../core/state.js';
@@ -14,7 +14,8 @@ import { cloneAnnotation } from '../../annotations/factory.js';
 import { ondersteuntKruis, kruisZichtbaarVoorSelectie } from '../../annotations/kruis-geometrie.js';
 import { redrawAnnotations, redrawContinuous } from '../../annotations/rendering.js';
 import { computeTextboxContentHeight } from '../../annotations/rendering/shapes.js';
-import { formatDate, getTypeDisplayName } from '../../utils/helpers.js';
+import { formatDate, getTypeDisplayName, getAnnotationDisplayName } from '../../utils/helpers.js';
+import { isTextAnchored, isFoldedChild } from '../../annotations/corrections/model.js';
 import { getAnnotationType } from '../../plugins/annotation-type-registry.js';
 import { getPropertyPanel } from '../../plugins/property-panel-registry.js';
 import { fireSelectionChange } from '../../plugins/selection-listener-registry.js';
@@ -24,6 +25,7 @@ import { syncDocScale } from '../../annotations/scale-bar.js';
 import { STAVENREEKS_DEFAULTS } from '../../annotations/stavenreeks.js';
 import { BETONBALK_DEFAULTS, BETONBALK_BREEDTE_RANGE, BETONBALK_HOOGTE_RANGE, BETONBALK_LIJNSTIJLEN } from '../../annotations/betonbalk.js';
 import { setBetonbalkLastProfiel } from './betonbalkStore.js';
+import { zetRanddikte } from '../../annotations/rendering/textbox-layout.js';
 import {
   SYSTEEMRASTER_DEFAULTS, SYSTEEMRASTER_PLAAT_RANGE, SYSTEEMRASTER_RANDCONDITIES,
   resolveSysteem, paneelKey, setEdgeProfiel, setPaneelType, setPaneelComponent,
@@ -36,6 +38,9 @@ import {
   getSysteemTypeById, getSysteemTypenData, updateSysteemType,
 } from '../../annotations/systeem-typen-registry.js';
 import { recalculateAllMeasurements, calculateArea, calculatePerimeter, calculateDistance, formatMeasurement, formatDimensionText, getMeasureScale } from '../../annotations/measurement.js';
+import {
+  isRuimteVlak, isRuimteTag, ruimteVanTag, tagWeergaveParams, tagWijziging,
+} from '../../plattegrond/ruimte-koppeling.js';
 import { applyTemplateRealSize } from '../../symbols/real-size.js';
 import { applyStampLineWidth, applyStampColor, stampLineWidthOf } from '../../annotations/stamp-line-width.js';
 import { pendingParams, setPendingParams } from './parametricSymbolStore.js';
@@ -130,6 +135,14 @@ const [annotProps, setAnnotProps] = createStore({
   dimType: '',
   styleType: '',
   dimExtension: true,
+  dimShowUnit: true,
+  measureShowLabel: true,
+  isRuimte: false,
+  opsRuimteNummer: '',
+  ruimteOppervlakte: '',
+  dimLineOvershootMm: '',
+  dimExtGapMm: '',
+  dimExtOvershootMm: '',
   scaleBarUnit: 'mm',
   scaleBarTotalUnits: 5000,
   scaleBarDivisions: 5,
@@ -144,6 +157,8 @@ const [annotProps, setAnnotProps] = createStore({
   srLabelSide: 'end',
   symbolId: '',
   params: {},
+  // Gevelelement: het geselecteerde onderdeel (stijl/paneel) of null.
+  gevelSub: null,
   replies: [],
   multiCount: 0,
 });
@@ -221,12 +236,13 @@ function redraw() {
 function computeSectionVisibility(type) {
   const isTextbox = ['textbox', 'callout'].includes(type);
   const isShape = ['line', 'arrow', 'box', 'circle', 'draw', 'textbox', 'callout'].includes(type);
-  const isTextContent = type === 'text' || type === 'comment';
+  // Een invoegteken (#508) heeft de ingevoegde tekst als inhoud.
+  const isTextContent = type === 'text' || type === 'comment' || type === 'caret';
   const isImage = type === 'image';
   const isArrow = type === 'arrow';
   const isLineOrArrow = type === 'arrow' || type === 'line';
-  const isTextMarkup = ['textHighlight', 'textStrikethrough', 'textUnderline'].includes(type);
-  const hideLineWidth = ['highlight', 'comment', 'image', 'textHighlight'].includes(type);
+  const isTextMarkup = isTextAnchored({ type });
+  const hideLineWidth = ['highlight', 'comment', 'image', 'textHighlight', 'caret'].includes(type);
   const hasFillColor = ['highlight', 'box', 'circle', 'polygon', 'cloud', 'textbox', 'callout', 'arrow', 'line', 'measureArea', 'filledArea'].includes(type);
   const hideColor = ['line', 'arrow', 'box', 'circle', 'draw', 'highlight', 'image', 'textbox', 'callout', 'polygon', 'cloud', 'measureDistance', 'measureArea', 'measurePerimeter', 'filledArea'].includes(type);
   const hasBorderStyle = ['textbox', 'callout', 'arrow', 'line', 'box', 'circle', 'polygon', 'cloud', 'draw', 'polyline', 'splineArrow', 'measureDistance', 'measureArea', 'measurePerimeter', 'filledArea'].includes(type);
@@ -274,6 +290,12 @@ function computeSectionVisibility(type) {
 
 // Show properties for a single annotation
 export function storeShowProperties(annotation) {
+  // De doorhaling van een vervanging (#508) wordt getekend en opgeslagen in de
+  // kleur van haar invoegteken: het paneel bewerkt dus het invoegteken.
+  const _corrDoc = getActiveDocument();
+  if (_corrDoc && isFoldedChild(annotation, _corrDoc.annotations)) {
+    annotation = _corrDoc.annotations.find(a => a.id === annotation.inReplyTo) || annotation;
+  }
   currentAnnotation = annotation;
   // Fire plugin selection-listeners (separate from property-panel-registry):
   // gives plugins a direct channel to react to selection without scraping DOM.
@@ -283,7 +305,7 @@ export function storeShowProperties(annotation) {
   setAnnotProps({
     id: annotation.id || '',
     type: annotation.type,
-    typeDisplay: getTypeDisplayName(annotation.type),
+    typeDisplay: getAnnotationDisplayName(annotation, getActiveDocument()?.annotations),
     subject: annotation.subject || '',
     author: annotation.author || state.defaultAuthor,
     created: formatDate(annotation.createdAt),
@@ -364,6 +386,14 @@ export function storeShowProperties(annotation) {
     dimType: annotation.dimType || '',
     styleType: annotation.styleType || annotation.dimType || '',
     dimExtension: annotation.dimExtension !== false, // default ON
+    // Eenheid achter de maat en het label van een meetvlak: standaard aan;
+    // alleen een expliciete false zet ze uit (maat-label.js).
+    dimShowUnit: annotation.dimShowUnit !== false,
+    measureShowLabel: annotation.measureShowLabel !== false,
+    // Uitloop en hulplijnen in mm op papier; leeg = automatisch (oude beeld).
+    dimLineOvershootMm: annotation.dimLineOvershootMm ?? '',
+    dimExtGapMm: annotation.dimExtGapMm ?? '',
+    dimExtOvershootMm: annotation.dimExtOvershootMm ?? '',
 
     scaleBarUnit: annotation.unit || 'mm',
     scaleBarTotalUnits: annotation.totalUnits || 5000,
@@ -390,9 +420,23 @@ export function storeShowProperties(annotation) {
     srFontSize: annotation.fontSize ?? STAVENREEKS_DEFAULTS.fontSize,
     srLabelSide: annotation.labelSide || 'end',
     symbolId: annotation.symbolId || '',
-    params: annotation.params ? { ...annotation.params } : {},
+    // Een ruimtetag toont naam, nummer en oppervlakte van zijn ruimte.
+    params: annotation.params
+      ? { ...(tagWeergaveParams(annotation, getActiveDocument()?.annotations) || annotation.params) }
+      : {},
+    // Gevelelement (vliesgevel/kozijn): het met Tab of een tweede klik
+    // geselecteerde onderdeel — de GevelelementSection toont dat onderdeel.
+    gevelSub: annotation.type === 'parametricSymbol' && annotation.selectedSub
+      ? { ...annotation.selectedSub } : null,
+    // Ruimte uit de plattegrond: nummer en netto oppervlakte in het paneel.
+    isRuimte: isRuimteVlak(annotation),
+    opsRuimteNummer: annotation.opsRuimteNummer ?? '',
+    ruimteOppervlakte: isRuimteVlak(annotation) ? (annotation.measureText || '') : '',
     dikteMm: annotation.dikteMm ?? 100,
     isolatieType: annotation.isolatieType || 'steenwol',
+    // Wandjoin per uiteinde (#476): true = dat uiteinde joint nooit.
+    noJoinStart: annotation.noJoinStart === true,
+    noJoinEnd: annotation.noJoinEnd === true,
     // Betonbalk
     breedteMm: annotation.breedteMm ?? BETONBALK_DEFAULTS.breedteMm,
     hoogteMm: annotation.hoogteMm ?? BETONBALK_DEFAULTS.hoogteMm,
@@ -646,12 +690,11 @@ export function storeShowMultiSelection(selected) {
   const fillColorTypes = new Set(['highlight', 'box', 'circle', 'polygon', 'cloud', 'textbox', 'callout', 'arrow', 'line']);
   const strokeColorTypes = new Set(['line', 'arrow', 'box', 'circle', 'draw', 'textbox', 'callout', 'polygon', 'cloud']);
   const hideColorTypes = new Set(['line', 'arrow', 'box', 'circle', 'draw', 'highlight', 'image', 'textbox', 'callout', 'polygon', 'cloud']);
-  const hideLineWidthTypes = new Set(['highlight', 'comment', 'image', 'textHighlight']);
+  const hideLineWidthTypes = new Set(['highlight', 'comment', 'image', 'textHighlight', 'caret']);
   const borderStyleTypes = new Set(['textbox', 'callout', 'arrow', 'line', 'box', 'circle', 'polygon', 'cloud', 'draw', 'polyline', 'splineArrow']);
   const hatchPatternTypes = new Set(['box', 'circle', 'polygon', 'cloud', 'measureArea', 'filledArea']);
   const rotationTypes = new Set(['box', 'circle', 'polygon', 'cloud', 'highlight', 'redaction', 'comment', 'stamp', 'signature']);
   const textboxTypes = new Set(['textbox', 'callout']);
-  const textMarkupTypes = new Set(['textHighlight', 'textStrikethrough', 'textUnderline']);
 
   const allSameType = sharedType !== '';
 
@@ -671,7 +714,7 @@ export function storeShowMultiSelection(selected) {
     fillColorGroup: allMatch(t => fillColorTypes.has(t)),
     strokeColorGroup: allMatch(t => strokeColorTypes.has(t)),
     strokeNoneAllowed: allMatch(t => kanZonderRand(t)),
-    colorGroup: allMatch(t => !hideColorTypes.has(t) || textMarkupTypes.has(t)),
+    colorGroup: allMatch(t => !hideColorTypes.has(t) || isTextAnchored({ type: t })),
     lineWidthGroup: allMatch(t => !hideLineWidthTypes.has(t)),
     borderStyleGroup: allMatch(t => borderStyleTypes.has(t)),
     hatchPatternGroup: allMatch(t => hatchPatternTypes.has(t)),
@@ -1020,7 +1063,7 @@ function applyPropToAnnotation(ann, key, value) {
     case 'fillColor': ann.fillColor = value; break;
     case 'strokeColor': ann.strokeColor = value; break;
     case 'lineWidth':
-      ann.lineWidth = parseFloat(value);
+      zetRanddikte(ann, parseFloat(value));
       // Een stempel wordt als raster getekend en kent geen ctx.lineWidth; de
       // dikte moet in de SVG worden gezet. Synchroon, zodat undo de gewijzigde
       // stampSvg meekrijgt.
@@ -1058,7 +1101,10 @@ function applyPropToAnnotation(ann, key, value) {
     case 'measureScale': ann.measureScale = parseFloat(value) || 0; recomputeMeasureText(ann); break;
     case 'measureUnit': ann.measureUnit = value; recomputeMeasureText(ann); break;
     case 'measurePrecision': ann.measurePrecision = parseInt(value); recomputeMeasureText(ann); break;
-    case 'measureName': ann.measureName = value; break;
+    case 'measureName':
+      ann.measureName = value;
+      if (isRuimteVlak(ann)) ann.opsRuimteNaam = value;
+      break;
     case 'scaleBarUnit': ann.unit = value; break;
     case 'scaleBarTotalUnits': ann.totalUnits = parseFloat(value) || 1; break;
     case 'scaleBarDivisions': ann.divisions = Math.max(1, Math.min(20, parseInt(value) || 5)); break;
@@ -1232,7 +1278,14 @@ function zetRunsStijl(ann, veld, waarde) {
   ann.textRuns = ann.textRuns.map(line => (line || []).map(r => ({ ...r, [veld]: !!waarde })));
 }
 
+// One field change is one reactive update: the change writes the field, the
+// modification time and sometimes more, and every write on its own reran
+// everything that watches the annotation (#491).
 export function updateAnnotProp(key, value) {
+  batch(() => applyAnnotProp(key, value));
+}
+
+function applyAnnotProp(key, value) {
   // Multi-selection mode: apply to all selected annotations
   if (annotProps.multiCount > 0) {
     const _doc = getActiveDocument();
@@ -1322,6 +1375,23 @@ export function updateAnnotProp(key, value) {
 
   if (currentAnnotation.locked) return;
 
+  // Ruimtetag: naam en nummer horen bij de RUIMTE (ruimte-koppeling.js). Een
+  // wijziging in de tag gaat naar de ruimte - een ongedaan-stap op de ruimte -
+  // en elke tag van die ruimte toont hem meteen.
+  if (key === 'params' && isRuimteTag(currentAnnotation)) {
+    const doc = getActiveDocument();
+    const ruimte = ruimteVanTag(currentAnnotation, doc?.annotations);
+    const { ruimtePatch } = tagWijziging(currentAnnotation, ruimte, value);
+    if (ruimte && ruimtePatch) {
+      recordPropertyChange(ruimte);
+      Object.assign(ruimte, ruimtePatch);
+      ruimte.modifiedAt = new Date().toISOString();
+      setAnnotProps('params', { ...tagWeergaveParams(currentAnnotation, doc?.annotations) });
+      redraw();
+      return;
+    }
+  }
+
   const scaleDependentKeys = new Set([
     'scaleBarUnit', 'scaleBarTotalUnits', 'scaleBarPixelsPerUnit',
     'viewportScaleRatio', 'viewportUnit',
@@ -1385,7 +1455,7 @@ export function updateAnnotProp(key, value) {
       if (currentAnnotation.type === 'parametricSymbol') currentAnnotation.color = value;
       break;
     case 'lineWidth':
-      currentAnnotation.lineWidth = parseFloat(value);
+      zetRanddikte(currentAnnotation, parseFloat(value));
       // Zie applyPropToAnnotation: bij een stempel moet de dikte de SVG in.
       if (currentAnnotation.type === 'stamp') applyStampLineWidth(currentAnnotation);
       break;
@@ -1485,7 +1555,10 @@ export function updateAnnotProp(key, value) {
     case 'measureScale': currentAnnotation.measureScale = parseFloat(value) || 0; recomputeMeasureText(currentAnnotation); break;
     case 'measureUnit': currentAnnotation.measureUnit = value; recomputeMeasureText(currentAnnotation); break;
     case 'measurePrecision': currentAnnotation.measurePrecision = parseInt(value); recomputeMeasureText(currentAnnotation); break;
-    case 'measureName': currentAnnotation.measureName = value; break;
+    case 'measureName':
+      currentAnnotation.measureName = value;
+      if (isRuimteVlak(currentAnnotation)) currentAnnotation.opsRuimteNaam = value;
+      break;
     case 'scaleBarUnit': {
       // Unit conversion factors relative to mm
       const unitToMm = { mm: 1, cm: 10, m: 1000, in: 25.4, ft: 304.8 };

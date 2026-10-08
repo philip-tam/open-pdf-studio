@@ -9,7 +9,10 @@ import { injectSyntheticTextSpans } from '../text/text-layer.js';
 import { invertPageRotation, resolveTextEditPageGeometry } from '../text/text-edit-appearance.js';
 import { annotationCanvas } from '../ui/dom-elements.js';
 import { viewport as vpState } from '../pdf/pdf-viewport.js';
+import { paginaNaarClient, weergaveRotatie } from '../pdf/weergave-ruimte.js';
 import { hasMixedRuns, textboxLineRuns } from '../annotations/rendering/textbox-layout.js';
+import { editorVakOpmaak } from './text-edit-vak.js';
+import { layerForNewAnnotation } from '../annotations/annotatie-lagen.js';
 import {
   showTextEditOverlay, hideTextEditOverlay,
   getTextEditValue as getTextValue, getTextEditHeightGrowth as getHeightGrowth,
@@ -87,9 +90,16 @@ export function startTextEditing(annotation) {
   const scaledWidth = width * scale;
   const scaledHeight = height * scale;
 
-  // Calculate center position of the annotation
-  const centerX = canvasRect.left + offX + (annotation.x + width / 2) * scale;
-  const centerY = canvasRect.top + offY + (annotation.y + height / 2) * scale;
+  // Calculate center position of the annotation. Via de centrale omrekening
+  // (pdf/weergave-ruimte.js), zodat het midden ook bij een gedraaide weergave
+  // (#200) op het vak valt; de oude formule blijft de terugval.
+  const midden = paginaNaarClient(annotation.page ?? doc?.currentPage ?? 1,
+    annotation.x + width / 2, annotation.y + height / 2, doc);
+  const centerX = midden ? midden.x : canvasRect.left + offX + (annotation.x + width / 2) * scale;
+  const centerY = midden ? midden.y : canvasRect.top + offY + (annotation.y + height / 2) * scale;
+  // Op het scherm staat het vak gedraaid over zijn eigen rotatie plus de
+  // weergaverotatie: de editor draait mee zodat hij het vak exact bedekt.
+  const schermRotatie = (Number(annotation.rotation) || 0) + weergaveRotatie(doc);
 
   // Build a CSS font-family fallback chain matching shapes.js
   // drawTextboxContent — some editors emit "SegoeUI" (no space)
@@ -108,9 +118,10 @@ export function startTextEditing(annotation) {
   _chain.push('sans-serif');
   const cssFontFamily = _chain.join(', ');
 
-  // Match the canvas padding (lineWidth, no minimum) so wrap-points line
-  // up. Was `2 * scale` which added a 2pt margin the canvas no longer has.
-  const editPadding = (annotation.lineWidth ?? 0) * scale;
+  // Rand en opvulling zo dat de editor op dezelfde breedte afbreekt als het
+  // canvas (zie text-edit-vak.js): anders sprong een woord dat op het canvas
+  // paste bij het bewerken naar een tweede regel en groeide het vak mee.
+  const vakOpmaak = editorVakOpmaak(annotation, scale);
 
   // Build style object for the textarea overlay
   const styleObj = {
@@ -123,16 +134,17 @@ export function startTextEditing(annotation) {
     'font-family': cssFontFamily,
     color: annotation.textColor || annotation.color || '#000000',
     'background-color': hasFill(annotation.fillColor) ? annotation.fillColor : '#ffffff',
-    border: `${(annotation.lineWidth ?? 1) * scale}px solid ${annotation.strokeColor || '#000000'}`,
-    padding: `${editPadding}px`,
+    ...vakOpmaak,
     'box-sizing': 'border-box',
     resize: 'none',
     outline: 'none',
     'z-index': '1200',
     overflow: 'hidden',
-    transform: annotation.rotation
-      ? `translate(-50%, -50%) rotate(${annotation.rotation}deg)`
-      : 'translate(-50%, -50%)'
+    transform: schermRotatie % 360
+      ? `translate(-50%, -50%) rotate(${schermRotatie}deg)`
+      : 'translate(-50%, -50%)',
+    // Voor de groei-correctie in TextEditOverlay (bovenrand blijft staan).
+    '--scherm-rotatie': String(schermRotatie),
   };
 
   // Apply text styles
@@ -410,6 +422,9 @@ export function addComment(x, y) {
   };
 
   const doc = getActiveDocument();
+  // Een nieuwe markering landt op de huidige laag (#468), zoals via createAnnotation.
+  const laag = layerForNewAnnotation(doc);
+  if (laag) annotation.layer = laag;
   if (doc) doc.annotations.push(annotation);
   recordAdd(annotation);
 

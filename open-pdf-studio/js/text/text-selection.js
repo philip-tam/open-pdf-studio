@@ -1,6 +1,8 @@
 import { state, getActiveDocument } from '../core/state.js';
 import { showTextSelectionContextMenu } from '../ui/chrome/context-menus.js';
 import { applyBandRestriction, clearBandRestriction } from './selection-guard.js';
+import { weergaveRectNaarPagina } from '../pdf/weergave-ruimte.js';
+import { selectionTextDir } from './leesrichting.js';
 
 /**
  * Text Selection Module
@@ -140,14 +142,36 @@ function beginSelectionDrag(textLayer, e) {
   // omgekeerde sleep niet buiten de begonnen tekst springt.
   const end = textLayer.querySelector('.endOfContent');
   if (end) {
-    const rect = textLayer.getBoundingClientRect();
-    const r = rect.height > 0
-      ? Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height))
-      : 0;
+    const r = hoogteFractieInLaag(textLayer, e.clientX, e.clientY);
     end.style.top = `${(r * 100).toFixed(2)}%`;
     end.classList.add('active');
     _activeEndOfContent = end;
   }
+}
+
+/**
+ * Hoe ver (0..1) ligt een schermpunt van de bovenkant van de tekstlaag, in de
+ * EIGEN stand van de laag? De laag ligt in het ongedraaide paginakader en
+ * wordt met een CSS-transform gedraaid en geschaald (paginarotatie en de
+ * weergaverotatie, #200); op het scherm is "boven" dan niet altijd boven.
+ * Terugrekenen via de inverse van die transform; zonder transform is dit
+ * gewoon (clientY − top) / hoogte.
+ */
+function hoogteFractieInLaag(textLayer, clientX, clientY) {
+  const klem = (v) => Math.max(0, Math.min(1, v));
+  const hoogte = textLayer.offsetHeight;
+  const ouder = textLayer.offsetParent || textLayer.parentElement;
+  const transform = getComputedStyle(textLayer).transform;
+  if (hoogte > 0 && ouder && transform && transform !== 'none' && typeof DOMMatrixReadOnly === 'function') {
+    try {
+      const pr = ouder.getBoundingClientRect();
+      const lokaal = new DOMMatrixReadOnly(transform).inverse().transformPoint(
+        new DOMPoint(clientX - pr.left - textLayer.offsetLeft, clientY - pr.top - textLayer.offsetTop));
+      if (Number.isFinite(lokaal.y)) return klem(lokaal.y / hoogte);
+    } catch { /* terugval hieronder */ }
+  }
+  const rect = textLayer.getBoundingClientRect();
+  return rect.height > 0 ? klem((clientY - rect.top) / rect.height) : 0;
 }
 
 /**
@@ -257,16 +281,40 @@ export function getSelectionRectsForAnnotation() {
   const doc = getActiveDocument();
   const scale = doc?.scale || 1.5;
   for (const rect of rects) {
-    // Convert DOM coordinates to PDF coordinates (relative to text layer, unscaled)
-    const x = (rect.left - textLayerRect.left) / scale;
-    const y = (rect.top - textLayerRect.top) / scale;
-    const width = rect.width / scale;
-    const height = rect.height / scale;
+    // Convert DOM coordinates to PDF coordinates (relative to text layer, unscaled).
+    // De tekstlaag omsluit de pagina zoals hij op het scherm staat; is de
+    // weergave gedraaid (#200), dan de rechthoek terugdraaien naar de pagina.
+    const inWeergave = {
+      x: (rect.left - textLayerRect.left) / scale,
+      y: (rect.top - textLayerRect.top) / scale,
+      width: rect.width / scale,
+      height: rect.height / scale,
+    };
+    const { x, y, width, height } = weergaveRectNaarPagina(pageNum, inWeergave, doc);
 
     result.push({ x, y, width, height, page: pageNum });
   }
 
   return result;
+}
+
+/**
+ * Leesrichting (0/90/180/270) van de geselecteerde tekst in de paginaruimte,
+ * of null als die onbekend is (#527). De rotatie is de eigen /Rotate plus de
+ * paginarotatie in de app, zoals paginaMaat (weergave-ruimte.js) die telt; de
+ * weergaverotatie (#200) hoort er niet bij, want annotaties staan in de
+ * paginaruimte.
+ * @returns {number|null}
+ */
+export function getSelectionTextDir() {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return null;
+  const textLayer = findParentTextLayer(selection.anchorNode);
+  if (!textLayer) return null;
+  const doc = getActiveDocument();
+  const pageNum = parseInt(textLayer.dataset.page) || (doc?.currentPage || 1);
+  const pageRot = (Number(doc?.pageDims?.[pageNum]?.rotation) || 0) + (Number(doc?.pageRotations?.[pageNum]) || 0);
+  return selectionTextDir(selection, pageRot);
 }
 
 /**

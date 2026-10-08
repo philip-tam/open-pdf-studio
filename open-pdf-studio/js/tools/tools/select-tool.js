@@ -1,12 +1,38 @@
 import { getActiveDocument } from '../../core/state.js';
+import { paginaVectorNaarWeergave } from '../../pdf/weergave-ruimte.js';
+
+// Sleeprichting op het SCHERM: bij een gedraaide weergave (#200) is naar links
+// slepen op het scherm niet naar links op de pagina.
+function kruisSelectie(state, x, y) {
+  const opScherm = paginaVectorNaarWeergave(x - state.rubberBandStartX, y - state.rubberBandStartY);
+  return opScherm.x < 0 ? 'crossing' : 'window';
+}
 import { applyToolTransform, getEffectiveScale } from '../tool-context.js';
 import { HANDLE_TYPES } from '../../core/constants.js';
 import { recordModify } from '../../core/undo-manager.js';
 import { tryStartInlineNumberEdit } from '../inline-number-editing.js';
 import { buildSysteemraster, subElementAt } from '../../annotations/systeemraster.js';
-import { isAnnotationHiddenInView } from '../../annotations/view-filters.js';
+import { isAnnotationPickableInView } from '../../annotations/view-filters.js';
 import { systeemrasterBuildOpts } from '../../annotations/systeemraster-scale.js';
 import { updateStatusMessage } from '../../ui/chrome/status-bar.js';
+import { gevelPreset } from '../../gevelelement/herkenning.js';
+import { onderdeelOnderPunt } from '../../gevelelement/element.js';
+import i18next from '../../i18n/config.js';
+
+// Speling (schermpixels) om een dunne stijl van een gevelelement te raken.
+const GEVEL_RAAK_PX = 6;
+import { inSelectieVak } from '../../plattegrond/ruimte-koppeling.js';
+import { verwerkSlotKlik, slotTooltip } from '../../annotations/stramien-slot.js';
+import {
+  isTextAnchored, correctionKind, expandCorrectionGroups, replaceParentOf,
+} from '../../annotations/corrections/model.js';
+
+// Een proefleescorrectie (#508) zit aan haar tekst vast: een Ctrl-sleepkopie
+// zou een los teken naast de tekst opleveren, met koppelingen naar het
+// origineel. Daarom geen Ctrl-sleepkopie zodra de selectie er een bevat.
+function bevatCorrectie(lijst) {
+  return (lijst || []).some(a => correctionKind(a) !== null);
+}
 
 /**
  * Select tool — click-select, rubber band, drag, resize, Ctrl+drag copy
@@ -89,6 +115,12 @@ export const selectTool = {
             }
           }
         }
+        // Stramienslotje (stramien_slot_begin / _einde): koppeling van dat
+        // uiteinde omzetten — één klik, één ongedaan-stap, geen sleep.
+        if (verwerkSlotKlik(selAnn, handleType)) {
+          ctx.redraw();
+          return;
+        }
         // Textbox leader: + add button — append a new leader and commit undo
         if (selAnn.type === 'textbox' && handleType === HANDLE_TYPES.LEADER_ADD) {
           const before = ctx.cloneAnnotation(selAnn);
@@ -161,7 +193,7 @@ export const selectTool = {
           // Ctrl+click on already selected: initiate Ctrl+drag copy. Blijft
           // de muis staan (klik zonder sleep), dan maakt de dispatcher bij
           // het loslaten alsnog een nieuwe instantie op dezelfde plek.
-          if (!pdfaLocked) {
+          if (!pdfaLocked && !bevatCorrectie(selAnns2())) {
             state.isDragging = true;
             state._ctrlDragCopy = true;
             state._ctrlCopiesCreated = false;
@@ -175,7 +207,7 @@ export const selectTool = {
         } else {
           // Ctrl+click on unselected: add and allow drag
           ctx.addToSelection(clickedAnnotation);
-          if (!pdfaLocked) {
+          if (!pdfaLocked && !bevatCorrectie(selAnns2())) {
             state.isDragging = true;
             state._ctrlDragCopy = true;
             state._ctrlCopiesCreated = false;
@@ -248,8 +280,25 @@ export const selectTool = {
               console.error('[select] sub-element-selectie', err);
             }
           }
+          // Gevelelement (vliesgevel/kozijn): idem — de tweede klik pakt de
+          // stijl of het paneel onder de cursor (Tab loopt ze af).
+          const _gvPreset = gevelPreset(clickedAnnotation);
+          if (_gvPreset) {
+            try {
+              const sub = onderdeelOnderPunt(clickedAnnotation, _gvPreset, { x, y },
+                GEVEL_RAAK_PX / (ctx.scale || 1));
+              const prev = clickedAnnotation.selectedSub || null;
+              if (JSON.stringify(sub) !== JSON.stringify(prev)) {
+                clickedAnnotation.selectedSub = sub;
+                clickedAnnotation._hoverSub = null;
+                ctx.showProperties(clickedAnnotation);
+              }
+            } catch (err) {
+              console.error('[select] gevelelement-onderdeel', err);
+            }
+          }
         }
-        const isTextMarkup = ['textHighlight', 'textStrikethrough', 'textUnderline'].includes(clickedAnnotation.type);
+        const isTextMarkup = isTextAnchored(clickedAnnotation);
         if (ctx.isSelected(clickedAnnotation) && selAnns.length > 1) {
           if (!pdfaLocked && !isTextMarkup) {
             state.isDragging = true;
@@ -275,13 +324,26 @@ export const selectTool = {
               updateStatusMessage('Klik nogmaals om een onderdeel te selecteren (paneel, rand of rasterlijn)');
             } catch (_) { /* statusbalk optioneel */ }
           }
+          if (gevelPreset(clickedAnnotation) && !ctx.isSelected(clickedAnnotation)) {
+            clickedAnnotation.selectedSub = null;
+            clickedAnnotation._hoverSub = null;
+            try {
+              updateStatusMessage(i18next.t('gevelelement.statusHint', { ns: 'properties' }));
+            } catch (_) { /* statusbalk optioneel */ }
+          }
           let toSelect = [clickedAnnotation];
           if (clickedAnnotation.groupId && doc) {
             const members = doc.annotations.filter(a => a.groupId === clickedAnnotation.groupId);
             if (members.length > 1) toSelect = members;
           }
-          if (doc) { doc.selectedAnnotations = toSelect; doc.selectedAnnotation = clickedAnnotation; }
-          if (toSelect.length > 1) ctx.showMultiSelectionProperties();
+          // Een vervanging (#508) is één correctie: beide helften, ook zonder
+          // gedeeld groupId, en het paneel toont het invoegteken in plaats
+          // van een meervoudige selectie.
+          if (doc) toSelect = expandCorrectionGroups(doc.annotations, toSelect);
+          const correctieOuder = doc && toSelect.length > 1 ? replaceParentOf(toSelect, doc.annotations) : null;
+          if (doc) { doc.selectedAnnotations = toSelect; doc.selectedAnnotation = correctieOuder || clickedAnnotation; }
+          if (correctieOuder) ctx.showProperties(correctieOuder);
+          else if (toSelect.length > 1) ctx.showMultiSelectionProperties();
           else ctx.showProperties(clickedAnnotation);
           if (!pdfaLocked && !isTextMarkup) {
             state.isDragging = true;
@@ -334,7 +396,7 @@ export const selectTool = {
     if (state.isRubberBanding) {
       // AutoCAD-style: drag right → window (blue, solid),
       // drag left → crossing (green, dashed).
-      state.rubberBandMode = x < state.rubberBandStartX ? 'crossing' : 'window';
+      state.rubberBandMode = kruisSelectie(state, x, y);
       state.rubberBandEndX = x;
       state.rubberBandEndY = y;
       ctx.redraw();
@@ -351,7 +413,14 @@ export const selectTool = {
     if (hoverAnn) {
       hoverHandle = ctx.findHandleAt(x, y, hoverAnn);
     }
+    const vorigeHoverHandle = state.hoverHandle;
     state.hoverHandle = hoverHandle;
+    // Het stramienslotje kleurt op bij hover: alleen bij binnenkomen of
+    // verlaten hertekenen.
+    if (vorigeHoverHandle !== hoverHandle
+        && (slotTooltip(hoverAnn, vorigeHoverHandle) || slotTooltip(hoverAnn, hoverHandle))) {
+      ctx.redraw();
+    }
     // Sub-element-hover op een geselecteerd systeemraster: licht oplichten
     // van het onderdeel dat een tweede klik zou pakken (ontdekbaarheid).
     const setHoverSub = (ann, sub) => {
@@ -363,9 +432,9 @@ export const selectTool = {
     };
     if (hoverHandle) {
       // Hovering a resize handle — clear annotation hover so the handle wins.
-      if (hoverAnn?.type === 'systeemraster') setHoverSub(hoverAnn, null);
+      if (hoverAnn?.type === 'systeemraster' || gevelPreset(hoverAnn)) setHoverSub(hoverAnn, null);
       state.hoverAnnotation = null;
-      canvas.title = '';
+      canvas.title = slotTooltip(hoverAnn, hoverHandle) || '';
       return;
     }
     const hoverAnnotation = ctx.findAnnotationAt(x, y);
@@ -375,6 +444,23 @@ export const selectTool = {
         try {
           const geom = buildSysteemraster(hoverAnn, systeemrasterBuildOpts(hoverAnn));
           sub = geom ? subElementAt(geom, x, y, 6 / (ctx.scale || 1)) : null;
+        } catch (_) { sub = null; }
+      }
+      setHoverSub(hoverAnn, sub);
+    }
+    // Gevelelement: onthoud waar de aanwijzer staat (Tab begint bij het
+    // onderdeel eronder) en licht bij een geselecteerd element het onderdeel
+    // op dat een tweede klik zou pakken.
+    const _gvHover = gevelPreset(hoverAnnotation);
+    state._gevelAanwijzer = _gvHover
+      ? { id: hoverAnnotation.id, x, y, margePt: GEVEL_RAAK_PX / (ctx.scale || 1) }
+      : null;
+    const _gvSel = gevelPreset(hoverAnn);
+    if (_gvSel) {
+      let sub = null;
+      if (hoverAnnotation === hoverAnn) {
+        try {
+          sub = onderdeelOnderPunt(hoverAnn, _gvSel, { x, y }, GEVEL_RAAK_PX / (ctx.scale || 1));
         } catch (_) { sub = null; }
       }
       setHoverSub(hoverAnn, sub);
@@ -391,7 +477,7 @@ export const selectTool = {
     const doc = getActiveDocument();
     const selAnns = doc ? doc.selectedAnnotations : [];
     const ann = selAnns.length === 1 ? selAnns[0] : null;
-    if (ann && ann.type === 'systeemraster' && ann.selectedSub) {
+    if (ann && (ann.type === 'systeemraster' || gevelPreset(ann)) && ann.selectedSub) {
       ann.selectedSub = null;
       ann._hoverSub = null;
       ctx.showProperties(ann);
@@ -407,7 +493,7 @@ export const selectTool = {
     // Rubber band selection end
     if (state.isRubberBanding) {
       state.isRubberBanding = false;
-      const mode = state.rubberBandMode || (x < state.rubberBandStartX ? 'crossing' : 'window');
+      const mode = state.rubberBandMode || kruisSelectie(state, x, y);
       const modifier = state.rubberBandModifier || 'replace';
 
       const rbX = Math.min(state.rubberBandStartX, x);
@@ -424,17 +510,15 @@ export const selectTool = {
         for (const ann of (doc?.annotations || [])) {
           if (ann.page !== ctx.pageNum) continue;
           // Onzichtbaar door een weergavefilter (hidden-vlag, Zichtbaarheid
-          // Elementen, statusfilter #333) = ook niet marquee-selecteerbaar.
-          if (isAnnotationHiddenInView(ann)) continue;
+          // Elementen, statusfilter #333, uitgezette laag #468) of op een
+          // vergrendelde laag = ook niet marquee-selecteerbaar.
+          if (!isAnnotationPickableInView(ann)) continue;
           const bounds = ctx.getAnnotationBounds(ann);
           if (!bounds) continue;
-          const fullyInside =
-            bounds.x >= rbX && bounds.x + bounds.width <= rbX + rbW &&
-            bounds.y >= rbY && bounds.y + bounds.height <= rbY + rbH;
-          const intersects =
-            bounds.x < rbX + rbW && bounds.x + bounds.width > rbX &&
-            bounds.y < rbY + rbH && bounds.y + bounds.height > rbY;
-          const hit = mode === 'window' ? fullyInside : intersects;
+          // Window: helemaal erin; crossing: raakt. Een ruimte uit de
+          // plattegrond alleen als ze er helemaal in ligt, anders pakt elk
+          // vak om een paar wanden haar mee (ruimte-koppeling.js).
+          const hit = inSelectieVak(ann, bounds, { x: rbX, y: rbY, width: rbW, height: rbH }, mode);
           if (hit) selected.push(ann);
         }
         if (doc) {

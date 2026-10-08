@@ -27,6 +27,8 @@ import { getRegionScaleFactor } from '../../annotations/scale-region.js';
 import { viewport } from '../../pdf/pdf-viewport.js';
 import { handlePointerMove } from '../tool-dispatcher.js';
 import { vlakOmhullende } from '../../annotations/vlak-ringen.js';
+import { randkleurenUitVoorkeur } from '../../annotations/fill-utils.js';
+import { zetRechtopRond } from '../../pdf/weergave-ruimte.js';
 import {
   enterTypeLengthMode,
   exitTypeLengthMode,
@@ -73,7 +75,7 @@ const _faDirLock = { x: null, y: null };
 //   - everything else (legacy single-page, continuous): a real DOM
 //     scrollLeft/scrollTop on #pdf-container (pan-handler.js).
 // Auto-pan drives whichever one is actually active directly (not via the
-// wheel handler's momentum/friction accumulator — a coasting pan would
+// wheel handler's eased scroll animation (wiel-scroll.js) — a coasting pan would
 // fight the precision a sketch needs), so it stays consistent with manual
 // panning in both modes with no new pan mechanism of its own.
 const AUTOPAN_MARGIN = 32; // px from the viewport edge that starts panning
@@ -303,7 +305,7 @@ export const filledAreaTool = {
     canvasCtx.save();
     applyToolTransform(canvasCtx);
 
-    const strokeColor = prefs.filledAreaStrokeColor || '#000000';
+    const strokeColor = randkleurenUitVoorkeur(prefs, 'filledArea', 'filledArea').color;
     const fillColor = prefs.filledAreaFillNone ? null : (prefs.filledAreaFillColor || '#cccccc');
     const lineWidth = prefs.filledAreaLineWidth || 1;
     const borderStyle = prefs.filledAreaBorderStyle || 'solid';
@@ -373,10 +375,14 @@ export const filledAreaTool = {
     }
 
     if (arcState.active) {
+      canvasCtx.save();
+      // Rechtop op het scherm, ook in een gedraaide weergave (#200).
+      zetRechtopRond(canvasCtx, snapX, snapY);
       canvasCtx.font = '10px Arial';
       canvasCtx.fillStyle = strokeColor;
       canvasCtx.globalAlpha = 0.7;
       canvasCtx.fillText(`Arc (bulge: ${arcState.bulge.toFixed(2)})`, snapX + 12, snapY - 8);
+      canvasCtx.restore();
       canvasCtx.globalAlpha = opacity;
     }
 
@@ -650,8 +656,7 @@ function _createFilledAreaAnnotation(ctx, points, holes) {
     type: 'filledArea',
     page: getActiveDocument()?.currentPage || 1,
     points,
-    color: prefs.filledAreaStrokeColor || '#000000',
-    strokeColor: prefs.filledAreaStrokeColor || '#000000',
+    ...randkleurenUitVoorkeur(prefs, 'filledArea', 'filledArea'),
     fillColor: prefs.filledAreaFillNone ? null : (prefs.filledAreaFillColor || '#cccccc'),
     lineWidth: prefs.filledAreaLineWidth ?? 1,
     borderStyle: prefs.filledAreaBorderStyle || 'solid',
@@ -684,7 +689,7 @@ function _drawHolesPhasePreview(ctx, cursorX, cursorY) {
   const completed = state.filledAreaHoles || [];
   if (outer.length < 3) return;
 
-  const strokeColor = prefs.filledAreaStrokeColor || '#000000';
+  const strokeColor = randkleurenUitVoorkeur(prefs, 'filledArea', 'filledArea').color;
   const fillColor = prefs.filledAreaFillNone ? null : (prefs.filledAreaFillColor || '#cccccc');
   const lineWidth = prefs.filledAreaLineWidth || 1;
   const borderStyle = prefs.filledAreaBorderStyle || 'solid';
@@ -708,10 +713,14 @@ function _drawHolesPhasePreview(ctx, cursorX, cursorY) {
 
   ctx.drawMeasureAreaShape(canvasCtx, outer, strokeColor, lineWidth, fillColor, borderStyle, completed.length > 0 ? completed : undefined, hatchOpts, SKETCH_FILL_PREVIEW_ALPHA);
 
+  // Rechtop op het scherm, ook in een gedraaide weergave (#200).
+  canvasCtx.save();
+  zetRechtopRond(canvasCtx, cursorX, cursorY);
   canvasCtx.font = '10px Arial';
   canvasCtx.fillStyle = strokeColor;
   canvasCtx.globalAlpha = 0.7;
   canvasCtx.fillText(i18next.t('statusbar:filledAreaSketch.holesPhaseHint'), cursorX + 12 / scale, cursorY - 4 / scale);
+  canvasCtx.restore();
   canvasCtx.globalAlpha = 1;
   canvasCtx.restore();
 }

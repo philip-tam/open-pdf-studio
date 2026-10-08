@@ -19,6 +19,9 @@ import { betonbalkLastProfiel } from '../solid/stores/betonbalkStore.js';
 import { labelFontSizeAt } from '../annotations/drafting-rules.js';
 import { isKlikSleep, klemMaat, schermPxNaarPt, KLIK_DREMPEL_PX } from '../annotations/minimummaat.js';
 import { getEffectiveScale } from './effective-scale.js';
+import { randkleurenUitVoorkeur } from '../annotations/fill-utils.js';
+import { rechtopRotatie } from '../pdf/weergave-ruimte.js';
+import { rechtopVak, nieuweMaatHoekVast } from '../pdf/weergave-rotatie.js';
 
 /**
  * Build raw annotation properties from tool + coordinates.
@@ -190,8 +193,7 @@ export function buildAnnotationProps(tool, startX, startY, endX, endY, e) {
         type: 'circle',
         page: getActiveDocument()?.currentPage || 1,
         ...b,
-        color: prefs.circleStrokeColor,
-        strokeColor: prefs.circleStrokeColor,
+        ...randkleurenUitVoorkeur(prefs, 'circle', 'circle'),
         fillColor: prefs.circleFillNone ? null : prefs.circleFillColor,
         lineWidth: prefs.circleBorderWidth,
         borderStyle: prefs.circleBorderStyle,
@@ -209,8 +211,7 @@ export function buildAnnotationProps(tool, startX, startY, endX, endY, e) {
         type: 'circle',
         page: getActiveDocument()?.currentPage || 1,
         ...b,
-        color: prefs.circleStrokeColor,
-        strokeColor: prefs.circleStrokeColor,
+        ...randkleurenUitVoorkeur(prefs, 'circle', 'circle'),
         fillColor: prefs.circleFillNone ? null : prefs.circleFillColor,
         lineWidth: prefs.circleBorderWidth,
         borderStyle: prefs.circleBorderStyle,
@@ -225,8 +226,7 @@ export function buildAnnotationProps(tool, startX, startY, endX, endY, e) {
         type: 'box',
         page: getActiveDocument()?.currentPage || 1,
         ...b,
-        color: prefs.rectStrokeColor,
-        strokeColor: prefs.rectStrokeColor,
+        ...randkleurenUitVoorkeur(prefs, 'rect', 'box'),
         fillColor: prefs.rectFillNone ? null : prefs.rectFillColor,
         lineWidth: prefs.rectBorderWidth,
         borderStyle: prefs.rectBorderStyle,
@@ -262,8 +262,7 @@ export function buildAnnotationProps(tool, startX, startY, endX, endY, e) {
         // daar kunnen raaktest, ruimtelijke index en opslaan niet mee overweg.
         ...bbox(startX, startY, endX, endY),
         sides: 6,
-        color: prefs.polygonStrokeColor || getColorPickerValue(),
-        strokeColor: prefs.polygonStrokeColor || getColorPickerValue(),
+        ...randkleurenUitVoorkeur(prefs, 'polygon', 'polygon', getColorPickerValue()),
         lineWidth: prefs.polygonLineWidth || getLineWidthValue(),
         opacity: (prefs.polygonOpacity || 100) / 100
       };
@@ -292,8 +291,7 @@ export function buildAnnotationProps(tool, startX, startY, endX, endY, e) {
         page: getActiveDocument()?.currentPage || 1,
         points: pts,
         x: x0, y: y0, width: b.width, height: b.height,
-        color: prefs.polygonStrokeColor || getColorPickerValue(),
-        strokeColor: prefs.polygonStrokeColor || getColorPickerValue(),
+        ...randkleurenUitVoorkeur(prefs, 'polygon', 'polyline', getColorPickerValue()),
         lineWidth: prefs.polygonLineWidth || getLineWidthValue(),
         borderStyle: 'solid',
         opacity: (prefs.polygonOpacity || 100) / 100,
@@ -307,8 +305,7 @@ export function buildAnnotationProps(tool, startX, startY, endX, endY, e) {
         type: 'cloud',
         page: getActiveDocument()?.currentPage || 1,
         ...b,
-        color: prefs.cloudStrokeColor || getColorPickerValue(),
-        strokeColor: prefs.cloudStrokeColor || getColorPickerValue(),
+        ...randkleurenUitVoorkeur(prefs, 'cloud', 'cloud', getColorPickerValue()),
         lineWidth: prefs.cloudLineWidth || getLineWidthValue(),
         opacity: (prefs.cloudOpacity || 100) / 100
       };
@@ -321,8 +318,7 @@ export function buildAnnotationProps(tool, startX, startY, endX, endY, e) {
         page: getActiveDocument()?.currentPage || 1,
         ...b,
         text: '',
-        color: prefs.textboxStrokeColor,
-        strokeColor: prefs.textboxStrokeColor,
+        ...randkleurenUitVoorkeur(prefs, 'textbox', 'textbox'),
         fillColor: prefs.textboxFillNone ? 'none' : prefs.textboxFillColor,
         textColor: '#000000',
         fontSize: prefs.textboxFontSize,
@@ -354,8 +350,7 @@ export function buildAnnotationProps(tool, startX, startY, endX, endY, e) {
         kneeX, kneeY,
         armOriginX, armOriginY,
         text: '',
-        color: prefs.calloutStrokeColor,
-        strokeColor: prefs.calloutStrokeColor,
+        ...randkleurenUitVoorkeur(prefs, 'callout', 'callout'),
         fillColor: prefs.calloutFillNone ? 'none' : prefs.calloutFillColor,
         textColor: '#000000',
         fontSize: prefs.calloutFontSize,
@@ -594,8 +589,18 @@ function finalizeAnnotation(tool, props) {
   // grens volgt de schermpixel-klikdrempel, niet een vast aantal punten.
   if (tool === 'textbox') {
     const grens = schermPxNaarPt(KLIK_DREMPEL_PX, getEffectiveScale());
-    if (props.width < grens) props.width = 100;
-    if (props.height < grens) props.height = 20;
+    const breedte = props.width < grens ? 100 : props.width;
+    const hoogte = props.height < grens ? 20 : props.height;
+    if (props.rotation && (breedte !== props.width || hoogte !== props.height)) {
+      // Rechtop gezet in een gedraaide weergave (#200): net als zonder
+      // draaiing blijft de linkerbovenhoek zoals de gebruiker hem op het
+      // scherm ziet (bij een klik: het klikpunt) op zijn plaats, en groeit het
+      // vak op het scherm naar rechts en omlaag.
+      Object.assign(props, nieuweMaatHoekVast(props, breedte, hoogte));
+    } else {
+      props.width = breedte;
+      props.height = hoogte;
+    }
   }
 
   if (tool === 'draw') {
@@ -611,12 +616,24 @@ function finalizeAnnotation(tool, props) {
   return createAnnotation(props);
 }
 
+// Weergave draaien (#200): een tekstvak dat de gebruiker tekent, staat rechtop
+// op het scherm. Het gesleepte vak is in de paginaruimte de omhullende; het
+// vak zelf krijgt de maat zoals op het scherm (bij een kwartslag wisselen
+// breedte en hoogte) en de tegengestelde rotatie, om hetzelfde midden. Alleen
+// bij tekenen: buildAnnotationProps blijft in paginamaten, zodat een vak via
+// MCP of een plug-in precies de opgegeven maten houdt.
+function rechtopOpScherm(tool, props) {
+  if (!props || tool !== 'textbox') return props;
+  const rechtop = rechtopRotatie();
+  return rechtop ? { ...props, ...rechtopVak(props, rechtop) } : props;
+}
+
 export function createAnnotationFromTool(tool, startX, startY, endX, endY, e) {
-  return finalizeAnnotation(tool, buildAnnotationProps(tool, startX, startY, endX, endY, e));
+  return finalizeAnnotation(tool, rechtopOpScherm(tool, buildAnnotationProps(tool, startX, startY, endX, endY, e)));
 }
 
 export function createContinuousAnnotation(tool, pageNum, startX, startY, endX, endY) {
-  const props = buildAnnotationProps(tool, startX, startY, endX, endY, null);
+  const props = rechtopOpScherm(tool, buildAnnotationProps(tool, startX, startY, endX, endY, null));
   if (props) props.page = pageNum;
   return finalizeAnnotation(tool, props);
 }
@@ -627,8 +644,7 @@ export function createMeasureAreaAnnotation(points, holes) {
     type: 'measureArea',
     page: getActiveDocument()?.currentPage || 1,
     points,
-    color: mPrefs.measureAreaStrokeColor,
-    strokeColor: mPrefs.measureAreaStrokeColor,
+    ...randkleurenUitVoorkeur(mPrefs, 'measureArea', 'measureArea'),
     lineWidth: mPrefs.measureAreaLineWidth,
     opacity: (mPrefs.measureAreaOpacity || 100) / 100,
     fillColor: mPrefs.measureAreaFillNone ? null : (mPrefs.measureAreaFillColor || null),

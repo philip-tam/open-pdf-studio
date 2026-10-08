@@ -3,6 +3,8 @@ import { cloneAnnotation } from '../../annotations/factory.js';
 import { recordModify } from '../../core/undo-manager.js';
 import { calculateArea, formatMeasurement, formatDimensionText, arcControlPoint, expandArcPoints } from '../../annotations/measurement.js';
 import { applyToolTransform } from '../tool-context.js';
+import { randkleurenUitVoorkeur } from '../../annotations/fill-utils.js';
+import { zetRechtopRond } from '../../pdf/weergave-ruimte.js';
 import {
   enterTypeLengthMode,
   exitTypeLengthMode,
@@ -602,7 +604,9 @@ function _measureMultiClickMove(ctx, e, toolType) {
   }
 
   const prefs = state.preferences;
-  const mColor = (isArea ? prefs.measureAreaStrokeColor : prefs.measurePerimStrokeColor) || '#FF0000';
+  const mColor = isArea
+    ? randkleurenUitVoorkeur(prefs, 'measureArea', 'measureArea', '#FF0000').color
+    : (prefs.measurePerimStrokeColor || '#FF0000');
   const mBorderStyle = (isArea ? prefs.measureAreaBorderStyle : prefs.measurePerimBorderStyle) || 'solid';
   const mFillColor = isArea ? (prefs.measureAreaFillNone ? 'none' : (prefs.measureAreaFillColor || null)) : null;
 
@@ -722,10 +726,14 @@ function _measureMultiClickMove(ctx, e, toolType) {
 
     // Arc mode indicator near cursor
     if (arcState.active && isArea) {
+      canvasCtx.save();
+      // Rechtop op het scherm, ook in een gedraaide weergave (#200).
+      zetRechtopRond(canvasCtx, snapX, snapY);
       canvasCtx.font = '10px Arial';
       canvasCtx.fillStyle = mColor;
       canvasCtx.globalAlpha = 0.7;
       canvasCtx.fillText(`Arc (bulge: ${arcState.bulge.toFixed(2)})`, snapX + 12, snapY - 8);
+      canvasCtx.restore();
       canvasCtx.globalAlpha = ((isArea ? prefs.measureAreaOpacity : prefs.measurePerimOpacity) || 100) / 100;
     }
 
@@ -737,9 +745,13 @@ function _measureMultiClickMove(ctx, e, toolType) {
       ctx.drawCentroidLabel(canvasCtx, previewPoints, ctx.formatMeasurement(area), mColor);
     } else if (!isArea && previewPoints.length >= 2) {
       const perim = ctx.calculatePerimeter(previewPoints, currentPage);
+      canvasCtx.save();
+      // Rechtop op het scherm, ook in een gedraaide weergave (#200).
+      zetRechtopRond(canvasCtx, snapX, snapY);
       canvasCtx.font = '11px Arial';
       canvasCtx.fillStyle = mColor;
       canvasCtx.fillText(ctx.formatMeasurement(perim), snapX + 8, snapY - 4);
+      canvasCtx.restore();
     }
   }
 
@@ -765,7 +777,7 @@ function _measureMultiClickMove(ctx, e, toolType) {
 function _drawHolesPhasePreview(ctx, cursorX, cursorY) {
   const { state, canvasCtx, scale } = ctx;
   const prefs = state.preferences;
-  const mColor = prefs.measureAreaStrokeColor || '#FF0000';
+  const mColor = randkleurenUitVoorkeur(prefs, 'measureArea', 'measureArea', '#FF0000').color;
   const mBorderStyle = prefs.measureAreaBorderStyle || 'solid';
   const mFillColor = prefs.measureAreaFillNone ? 'none' : (prefs.measureAreaFillColor || null);
   const outerPoints = state.measureOuterPoints || [];
@@ -788,11 +800,14 @@ function _drawHolesPhasePreview(ctx, cursorX, cursorY) {
   const area = ctx.calculateArea(outerPoints, completedHoles.length > 0 ? completedHoles : undefined, currentPage);
   ctx.drawCentroidLabel(canvasCtx, outerPoints, ctx.formatMeasurement(area), mColor);
 
-  // Draw hint text near cursor
+  // Draw hint text near cursor (rechtop op het scherm, ook gedraaid, #200)
+  canvasCtx.save();
+  zetRechtopRond(canvasCtx, cursorX / scale, cursorY / scale);
   canvasCtx.font = '10px Arial';
   canvasCtx.fillStyle = mColor;
   canvasCtx.globalAlpha = 0.7;
   canvasCtx.fillText('Click to add hole, right-click to finish', cursorX / scale + 12, cursorY / scale - 4);
+  canvasCtx.restore();
 
   canvasCtx.globalAlpha = 1;
   canvasCtx.restore();
@@ -855,7 +870,9 @@ function _drawMeasureInProgress(ctx, toolType) {
   const { state, canvasCtx, scale } = ctx;
   const prefs = state.preferences;
   const isArea = toolType === 'measureArea';
-  const mColor = (isArea ? prefs.measureAreaStrokeColor : prefs.measurePerimStrokeColor) || '#FF0000';
+  const mColor = isArea
+    ? randkleurenUitVoorkeur(prefs, 'measureArea', 'measureArea', '#FF0000').color
+    : (prefs.measurePerimStrokeColor || '#FF0000');
   const mBorderStyle = (isArea ? prefs.measureAreaBorderStyle : prefs.measurePerimBorderStyle) || 'solid';
   const mFillColor = isArea ? (prefs.measureAreaFillNone ? 'none' : (prefs.measureAreaFillColor || null)) : null;
 
@@ -1091,10 +1108,14 @@ export const addHoleTool = {
 
     // Arc-mode hint near cursor
     if (addHoleArcState.active) {
+      canvasCtx.save();
+      // Rechtop op het scherm, ook in een gedraaide weergave (#200).
+      zetRechtopRond(canvasCtx, snapX, snapY);
       canvasCtx.font = '10px Arial';
       canvasCtx.fillStyle = mColor;
       canvasCtx.globalAlpha = 0.7;
       canvasCtx.fillText(`Arc (bulge: ${addHoleArcState.bulge.toFixed(2)})`, snapX + 12 / scale, snapY - 8 / scale);
+      canvasCtx.restore();
       canvasCtx.globalAlpha = 1;
     }
 
@@ -1196,11 +1217,14 @@ function _drawAddHolePreview(ctx, cursorX, cursorY) {
     ctx.drawCentroidLabel(canvasCtx, ann.points, ctx.formatMeasurement(area), mColor);
   }
 
-  // Draw hint text near cursor
+  // Draw hint text near cursor (rechtop op het scherm, ook gedraaid, #200)
+  canvasCtx.save();
+  zetRechtopRond(canvasCtx, cursorX, cursorY);
   canvasCtx.font = '10px Arial';
   canvasCtx.fillStyle = mColor;
   canvasCtx.globalAlpha = 0.7;
   canvasCtx.fillText('Click to draw hole, right-click to cancel', cursorX + 12 / scale, cursorY - 4 / scale);
+  canvasCtx.restore();
 
   canvasCtx.globalAlpha = 1;
   canvasCtx.restore();

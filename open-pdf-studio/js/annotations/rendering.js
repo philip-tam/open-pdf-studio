@@ -6,10 +6,14 @@ import { renderWatermarksBehind, renderWatermarksInFront } from '../watermark/wa
 
 // Import from sub-modules
 import { drawPolygonShape, drawCloudShape, buildPolygonPath, buildPolygonPointsPath, buildCloudPath, buildCloudPolylinePath, drawTextboxContent, isRTLText } from './rendering/shapes.js';
+import { tekstvakKnipvlak } from './rendering/textbox-layout.js';
 import { drawArrowheadOnCanvas, applyBorderStyle, drawDimensionLineEnding } from './rendering/decorations.js';
 import { catmullRomSpline } from '../tools/tools/spline-tool.js';
 import { catmullRomToBezier, splineArrowEndTangent } from './spline-arrow-geometry.js';
 import { drawDimension, drawMeasureAreaShape, drawCentroidLabel, drawMeasurePerimeterShape } from './rendering/measurements.js';
+import { maatlijnTekst } from './maat-label.js';
+import { maatlijnVelden } from './maatlijn-geometrie.js';
+import { tagWeergaveParams } from '../plattegrond/ruimte-koppeling.js';
 import { applyHatchFill, applyHatchFillPolygon } from './rendering/hatch-patterns.js';
 import { drawWall } from './rendering/walls.js';
 import { buildStavenreeks } from './stavenreeks.js';
@@ -25,14 +29,17 @@ import { getSysteemSymbolImage, registerSysteemSymbolRedraw } from './rendering/
 import { getAnnotationType } from '../plugins/annotation-type-registry.js';
 import { drawSelectionHandles } from './rendering/selection.js';
 import { weergaveLagen } from './rendering/uitvoer-lagen.js';
+import { weergaveLijndikte, symboolOpdrachtLijndikte } from './rendering/lijndikte.js';
 import { drawImageCropOverlay, activeCropAnnotation } from './image-crop-overlay.js';
 import { fracties as cropFracties, volledigVak as cropVolledigVak } from './crop-geometrie.js';
 import { drawEmbeddedImageOverlay } from '../tools/tools/remove-image-tool.js';
 import { updateQuickAccessButtons, updateContextualTabs, drawGrid, snapToGrid } from './rendering/ui-state.js';
 import { drawCommentIcon } from './rendering/comment-icons.js';
+import { drawCaret, strikeLine, replaceStrikeColor } from './rendering/caret.js';
 import { spatialIndex, annotationBounds } from './spatial-index.js';
 import { bitmapVoor, bijNieuweTegel } from './vector-snippet-preview.js';
 import { invalidateScaleRegionCache, pixelsPerUnitFor, getRegionScaleFactor } from './scale-region.js';
+import { metSchaalBronnen } from './schaal-bronnen.js';
 import { drawSnapIndicator } from '../tools/snap-engine.js';
 import { drawImageAlignGuides } from '../tools/image-align-snap.js';
 import { getTemplate } from '../symbols/registry.js';
@@ -42,7 +49,7 @@ import { EDITABLE_NUMBER_COLOR, shouldHighlightNumbers } from './editable-number
 // (stavenreeks, betonbalk, parametricSymbol).
 import { labelHasNumericField } from './editable-numbers-providers.js';
 import { halftoneTypes as evHalftoneTypes } from '../solid/stores/elementVisibilityStore.js';
-import { isAnnotationHiddenInView } from './view-filters.js';
+import { isAnnotationHiddenInView, isAnnotationHiddenInOutput } from './view-filters.js';
 import { kruisEindpuntenEllips } from './kruis-geometrie.js';
 import { klemMaat, symboolRasterPxPerPt } from './minimummaat.js';
 import {
@@ -50,6 +57,8 @@ import {
   resolveTextEditLineStyle,
   textEditLineAnchor,
 } from '../text/text-edit-appearance.js';
+import { viewportGeometrie, rectNaarPagina } from '../pdf/weergave-rotatie.js';
+import { paginaMaat, paginaNaarWeergave, weergaveTransform, weergaveRectNaarPagina, zetRechtopRond } from '../pdf/weergave-ruimte.js';
 
 // Re-export everything that external code needs
 export { drawPolygonShape, drawCloudShape, buildPolygonPath, buildCloudPath } from './rendering/shapes.js';
@@ -145,6 +154,8 @@ function _drawPolarOverlay(ctx, snapResult, scale) {
   } catch (_) { /* ignore */ }
   const angleDeg = (angle * 180 / Math.PI + 360) % 360;
   const text = `Polar: ${angleDeg.toFixed(2)}° < ${lenInUnits.toFixed(2)} ${unit}`;
+  // Rechtop op het scherm, ook in een gedraaide weergave (#200).
+  zetRechtopRond(ctx, snapResult.x, snapResult.y);
   const fontSize = 11 / scale;
   ctx.font = `${fontSize}px Arial`;
   const padX = 4 / scale;
@@ -180,7 +191,7 @@ function _drawPolarOverlay(ctx, snapResult, scale) {
 // untouched (they resolve below the cap) and only pathologically thick
 // strokes — the ones that made dragging lag — are bounded while the gesture
 // is in flight. Full weight is restored on the post-gesture repaint.
-const DRAG_LOD_MAX_SCREEN_PX = 6;
+// (SLEEP_MAX_SCHERM_PX in rendering/lijndikte.js.)
 
 // Lagen van de rendering die nu loopt: null = het scherm, anders de lagen van
 // een afdruk, export of voorbeeld (zie rendering/uitvoer-lagen.js). Wordt
@@ -203,31 +214,23 @@ function inlineNumberHighlight(annotation) {
   return shouldHighlightNumbers(annotation, doc ? doc.selectedAnnotations : null);
 }
 
+// The rule itself lives in rendering/lijndikte.js (pure, unit-tested); this
+// wrapper only supplies the app state it depends on.
 function thinLw(width) {
-  if (width === 0) return 0;
-  if (state.preferences?.thinLines && laag('schermlijndikte')) {
-    // Lineweight display OFF ('TL'): EVERYTHING renders as a true hairline —
-    // exactly 1 screen pixel at any zoom (CAD LWDISPLAY off).
-    const vp0 = window.__pdfViewport;
-    const _d0 = state.documents[state.activeDocumentIndex];
-    const s0 = (vp0 && vp0.active && _d0?.filePath) ? vp0.zoom : (_d0?.scale || 1);
-    return s0 > 0 ? 1 / s0 : 1;
-  }
-  let lw = Math.max(width, 0.25);
-  // Uitvoer (afdruk, export, voorbeeld): de echte lijndikte. De regels
-  // hieronder rekenen naar SCHERMpixels en maakten een lijn van 0,5 pt bij
-  // 17 % zoom 6 pt dik op papier.
-  if (!laag('schermlijndikte')) return lw;
+  // Uitvoer (afdruk, export, voorbeeld, opgeslagen appearance): de echte
+  // lijndikte. De schermregels rekenen naar SCHERMpixels en maakten een lijn
+  // van 0,5 pt bij 17 % zoom 6 pt dik op papier.
+  const scherm = laag('schermlijndikte');
+  if (width === 0 || !scherm) return weergaveLijndikte(width, { scherm: false });
   const vp = window.__pdfViewport;
   const _doc = state.documents[state.activeDocumentIndex];
   // Blank docs (no filePath) bypass the viewport singleton and use doc.scale.
   const scale = (vp && vp.active && _doc?.filePath)
     ? vp.zoom
     : (_doc?.scale || 1);
-  if (scale > 0 && scale < 1) {
-    const minAppPx = 1 / scale;          // 1 screen pixel in app-coords
-    if (lw < minAppPx) lw = minAppPx;
-  }
+  // Lineweight display OFF ('TL'): EVERYTHING renders as a true hairline —
+  // exactly 1 screen pixel at any zoom (CAD LWDISPLAY off). Below 100 % zoom
+  // a stroke gets at least one screen pixel.
   // Interaction LOD (level-of-detail): while an annotation is being dragged,
   // resized or G-transformed, redrawAnnotations() re-strokes the whole overlay
   // on EVERY pointermove. The ONLY per-frame cost that grows with line weight
@@ -235,16 +238,17 @@ function thinLw(width) {
   // (length × width × scale²) device pixels, so a thick stroke at high zoom
   // makes each frame progressively more expensive (thin lines stay smooth,
   // thick ones visibly lag). During the interaction we therefore cap the
-  // ON-SCREEN stroke to DRAG_LOD_MAX_SCREEN_PX device pixels: the geometry and
+  // ON-SCREEN stroke to SLEEP_MAX_SCHERM_PX device pixels: the geometry and
   // hit-testing are unchanged, only the drawn width is bounded so the fill
   // stays cheap. The very last repaint of the gesture runs with the drag flags
   // already cleared (see _finishDragResize in tool-dispatcher.js), so the final
   // on-screen result is the full, un-capped weight — the end view never changes.
-  if (scale > 0 && (state.isDragging || state.isResizing || state.gMoveMode || state.gRotateMode)) {
-    const maxAppPx = DRAG_LOD_MAX_SCREEN_PX / scale;   // cap expressed in app-coords
-    if (lw > maxAppPx) lw = maxAppPx;
-  }
-  return lw;
+  return weergaveLijndikte(width, {
+    scherm: true,
+    zoom: scale,
+    dunneLijnen: !!state.preferences?.thinLines,
+    slepen: !!(state.isDragging || state.isResizing || state.gMoveMode || state.gRotateMode),
+  });
 }
 
 // Pick the textbox edge whose midpoint is closest to (kx, ky).
@@ -337,7 +341,16 @@ export function renderParametricSymbolToPng(annotation, pxPerUnit = 4) {
     // `_ignoreViewFilters`: dit is de SAVER-route (AP schrijven) — weergave-
     // filters zoals het statusfilter of "Zichtbaarheid Elementen" mogen hier
     // nooit een lege appearance opleveren.
-    drawAnnotation(ctx, { ...annotation, opacity: 1, hidden: false, _ignoreViewFilters: true });
+    // Uitvoerlagen: een opgeslagen appearance is geen scherm. Echte
+    // lijndiktes (niet de minimum-schermpixel van de huidige zoomstand) en
+    // geen selectie- of bewerkingstoestand.
+    const vorigeLagen = _lagen;
+    _lagen = weergaveLagen({ uitvoer: true });
+    try {
+      drawAnnotation(ctx, { ...annotation, opacity: 1, hidden: false, _ignoreViewFilters: true });
+    } finally {
+      _lagen = vorigeLagen;
+    }
     return { dataUrl: canvas.toDataURL('image/png') };
   } catch (e) {
     console.warn('[render] renderParametricSymbolToPng failed:', e);
@@ -416,7 +429,7 @@ function withFillAlpha(color, fillOpacity, baseOpacity) {
   return `rgba(${r}, ${g}, ${b}, ${ratio})`;
 }
 
-export function drawAnnotation(ctx, annotation) {
+export function drawAnnotation(ctx, annotation, snippetBitmaps = null) {
   // ── Weergavefilters ────────────────────────────────────────────────────
   // Eén centraal predicaat (annotations/view-filters.js) bundelt de
   // per-annotatie `hidden`-vlag, het "Zichtbaarheid Elementen"-paneel
@@ -425,7 +438,10 @@ export function drawAnnotation(ctx, annotation) {
   // wat niet getekend wordt ook niet aanklikbaar is.
   // `_ignoreViewFilters` is voor de saver/AP-raster-route: opslaan is geen
   // weergave, een verborgen annotatie moet zijn appearance gewoon krijgen.
-  if (!annotation._ignoreViewFilters && isAnnotationHiddenInView(annotation)) return;
+  // In een afdruk, export of printvoorbeeld (`_lagen` gezet door
+  // renderAnnotationsForPage) blijft ook een niet-afdrukbare laag weg (#468).
+  if (!annotation._ignoreViewFilters
+      && (_lagen ? isAnnotationHiddenInOutput(annotation) : isAnnotationHiddenInView(annotation))) return;
   const _evHalftone = evHalftoneTypes().get(annotation.type) || null;
 
   // Use annotation's opacity property
@@ -569,7 +585,9 @@ export function drawAnnotation(ctx, annotation) {
       //     V. Use a tiny shortening (just enough to keep the line tip from
       //     poking past the V tip with thick strokes).
       const FILLED_HEADS = new Set(['closed', 'closedReversed', 'diamond', 'square', 'circle']);
-      const isHeadFilled = (s) => FILLED_HEADS.has(s);
+      // A closed head without /IC from another program is hollow: the line
+      // runs into it like into an open head.
+      const isHeadFilled = (s) => FILLED_HEADS.has(s) && annotation.headFill !== false;
       const aDx = annotation.endX - annotation.startX;
       const aDy = annotation.endY - annotation.startY;
       const aLen = Math.sqrt(aDx * aDx + aDy * aDy);
@@ -598,12 +616,12 @@ export function drawAnnotation(ctx, annotation) {
 
       if (endHead !== 'none') {
         const endAngle = Math.atan2(aDy, aDx);
-        drawArrowheadOnCanvas(offCtx, annotation.endX, annotation.endY, endAngle, headSize, endHead);
+        drawArrowheadOnCanvas(offCtx, annotation.endX, annotation.endY, endAngle, headSize, endHead, { hol: annotation.headFill === false });
       }
 
       if (startHead !== 'none') {
         const startAngle = Math.atan2(-aDy, -aDx);
-        drawArrowheadOnCanvas(offCtx, annotation.startX, annotation.startY, startAngle, headSize, startHead);
+        drawArrowheadOnCanvas(offCtx, annotation.startX, annotation.startY, startAngle, headSize, startHead, { hol: annotation.headFill === false });
       }
 
       // Composite the offscreen arrow onto the main canvas with opacity
@@ -928,12 +946,20 @@ export function drawAnnotation(ctx, annotation) {
 
         const doc = state.documents[state.activeDocumentIndex];
         const scl = (doc ? doc.scale : 1) || 1;
-        const popW = 230 / scl;
-        const popH = 150 / scl;
+        // De popup is een rechtop staand schermvenster met zijn linkerbovenhoek
+        // op (popupX, popupY). Bij een gedraaide weergave (#200) ligt dat vak in
+        // de paginaruimte anders: via de weergave terugrekenen.
+        let popBox = { x: popX, y: popY, width: 230 / scl, height: 150 / scl };
+        if (doc?.viewRotation) {
+          const hoek = paginaNaarWeergave(annotation.page, popX, popY, doc);
+          popBox = weergaveRectNaarPagina(annotation.page, { x: hoek.x, y: hoek.y, width: popBox.width, height: popBox.height }, doc);
+        }
+        const popW = popBox.width;
+        const popH = popBox.height;
 
         // Popup center
-        const cx = popX + popW / 2;
-        const cy = popY + popH / 2;
+        const cx = popBox.x + popW / 2;
+        const cy = popBox.y + popH / 2;
 
         // Direction from popup center to icon
         const dx = iconCX - cx;
@@ -1114,10 +1140,14 @@ export function drawAnnotation(ctx, annotation) {
       }
 
       // Allow text to overflow slightly beyond textbox bounds
-      // (other PDF viewers show overflow text; hard clipping hides words at edges)
-      ctx.beginPath();
-      ctx.rect(annotation.x - 2, annotation.y - 2, tbWidth + 4, tbHeight + 4);
-      ctx.clip();
+      // (other PDF viewers show overflow text; hard clipping hides words at edges).
+      // Een typemachine-tekst knipt niet: zie tekstvakKnipvlak.
+      const tbKnip = tekstvakKnipvlak(annotation, tbWidth, tbHeight);
+      if (tbKnip) {
+        ctx.beginPath();
+        ctx.rect(tbKnip.x, tbKnip.y, tbKnip.width, tbKnip.height);
+        ctx.clip();
+      }
 
       // Draw text content
       drawTextboxContent(ctx, annotation);
@@ -1247,7 +1277,8 @@ export function drawAnnotation(ctx, annotation) {
       const zoom = (vpz && vpz.active)
         ? vpz.zoom
         : (state.documents[state.activeDocumentIndex]?.scale || 1);
-      const bmp = bitmapVoor(annotation, zoom);
+      const bmp = snippetBitmaps ? snippetBitmaps.get(annotation) : bitmapVoor(annotation, zoom);
+      if (snippetBitmaps && !bmp) throw new Error('Vectorknipsel ontbreekt in uitvoer');
       ctx.save();
       const kcx = annotation.x + annotation.width / 2;
       const kcy = annotation.y + annotation.height / 2;
@@ -1389,26 +1420,37 @@ export function drawAnnotation(ctx, annotation) {
       }
       break;
 
-    case 'textStrikethrough':
-      // Draw strikethrough line through the middle of each text rect
-      ctx.strokeStyle = strokeColor;
+    case 'textStrikethrough': {
+      // Doorhaallijn door het midden van elk tekstvak; bij verticale tekst
+      // (textDir 90/270) langs de tekst. De doorhaling van een vervanging
+      // (#508) krijgt de kleur van haar invoegteken, zoals ze ook opgeslagen
+      // wordt; een weergavetint gaat voor.
+      const ouderKleur = _evHalftone?.color ? null
+        : replaceStrikeColor(annotation, state.documents[state.activeDocumentIndex]?.annotations);
+      ctx.strokeStyle = ouderKleur || strokeColor;
       ctx.lineWidth = thinLw(annotation.lineWidth ?? 1);
       ctx.lineCap = 'round';
       if (annotation.rects && annotation.rects.length > 0) {
         annotation.rects.forEach(rect => {
-          const midY = rect.y + rect.height / 2;
+          const [van, tot] = strikeLine(rect, annotation.textDir);
           ctx.beginPath();
-          ctx.moveTo(rect.x, midY);
-          ctx.lineTo(rect.x + rect.width, midY);
+          ctx.moveTo(van.x, van.y);
+          ctx.lineTo(tot.x, tot.y);
           ctx.stroke();
         });
       } else {
-        const midY = annotation.y + annotation.height / 2;
+        const [van, tot] = strikeLine(annotation, annotation.textDir);
         ctx.beginPath();
-        ctx.moveTo(annotation.x, midY);
-        ctx.lineTo(annotation.x + annotation.width, midY);
+        ctx.moveTo(van.x, van.y);
+        ctx.lineTo(tot.x, tot.y);
         ctx.stroke();
       }
+      break;
+    }
+
+    case 'caret':
+      // Invoegteken (#508): dezelfde vorm als zijn appearance in de PDF.
+      drawCaret(ctx, annotation, fillColor);
       break;
 
     case 'textUnderline':
@@ -1573,7 +1615,9 @@ export function drawAnnotation(ctx, annotation) {
         ctx.restore();
         break;
       }
-      const cmds = template.render(annotation.params || {}, {
+      // Een ruimtetag toont naam, nummer en oppervlakte van zijn ruimte
+      // (ruimte-koppeling.js); andere symbolen hun eigen params.
+      const cmds = template.render(tagWeergaveParams(annotation, getActiveDocument()?.annotations) || {}, {
         x: annotation.x, y: annotation.y, width: annotation.width, height: annotation.height
       }) || [];
       ctx.save();
@@ -1587,7 +1631,15 @@ export function drawAnnotation(ctx, annotation) {
         ctx.translate(-cx, -cy);
       }
       // Lijndikte: eigen waarde of geërfd uit het tekeningtype (regelset).
-      const lw = thinLw(effectiveDraftingLineWidth(annotation));
+      const basisLw = effectiveDraftingLineWidth(annotation);
+      const lw = thinLw(basisLw);
+      // Per opdracht: een vaste `lineWidth`, of `lineWidthFactor` als fractie
+      // van de symbooldikte (kozijn: doorsnede vol, glas en draaicirkel dun).
+      const cmdLw = (c) => {
+        if (c.lineWidth != null) return c.lineWidth;          // vaste dikte, zoals altijd
+        if (!(c.lineWidthFactor > 0)) return lw;
+        return thinLw(symboolOpdrachtLijndikte(c, basisLw));
+      };
       ctx.lineWidth = lw;
       ctx.strokeStyle = strokeColor;
       ctx.fillStyle = strokeColor;
@@ -1611,7 +1663,7 @@ export function drawAnnotation(ctx, annotation) {
         switch (c.kind) {
           case 'line': {
             ctx.save();
-            ctx.lineWidth = c.lineWidth ?? lw;
+            ctx.lineWidth = cmdLw(c);
             if (Array.isArray(c.dash)) ctx.setLineDash(c.dash);
             ctx.beginPath();
             ctx.moveTo(c.x1, c.y1);
@@ -1621,16 +1673,20 @@ export function drawAnnotation(ctx, annotation) {
             break;
           }
           case 'arc': {
+            ctx.save();
+            ctx.lineWidth = cmdLw(c);
+            if (Array.isArray(c.dash)) ctx.setLineDash(c.dash);
             ctx.beginPath();
             ctx.arc(c.cx, c.cy, c.r, c.a0, c.a1, !!c.ccw);
             ctx.stroke();
+            ctx.restore();
             break;
           }
           case 'circle': {
             ctx.save();
             // Per-cmd dikte (fijnwerk zoals het diameterteken van de
             // wapeningskorf); zonder eigen waarde geldt de annotatie-dikte.
-            ctx.lineWidth = c.lineWidth ?? lw;
+            ctx.lineWidth = cmdLw(c);
             ctx.beginPath();
             ctx.arc(c.cx, c.cy, c.r, 0, Math.PI * 2);
             ctx.stroke();
@@ -1640,7 +1696,7 @@ export function drawAnnotation(ctx, annotation) {
           case 'polyline': {
             if (!Array.isArray(c.points) || c.points.length < 2) break;
             ctx.save();
-            ctx.lineWidth = c.lineWidth ?? lw;
+            ctx.lineWidth = cmdLw(c);
             if (Array.isArray(c.dash)) ctx.setLineDash(c.dash);
             ctx.beginPath();
             ctx.moveTo(c.points[0].x, c.points[0].y);
@@ -1930,14 +1986,26 @@ export function drawAnnotation(ctx, annotation) {
         endHead: annotation.endHead || 'openCircle',
         headSize: annotation.headSize || 12,
         color: strokeColor,
-        measureText: annotation.measureText,
+        // dimShowUnit === false: alleen het getal (maat-label.js).
+        measureText: maatlijnTekst(annotation.measureText, annotation.dimShowUnit),
         fontSize: annotation.fontSize,
         // User-dragged text position (offset from dimension-line midpoint)
         textOffsetX: annotation.textOffsetX || 0,
         textOffsetY: annotation.textOffsetY || 0,
         // Extension is the DEFAULT (NL drafting style): only explicitly
         // disabling it (dimExtension === false) turns it off.
-        extension: annotation.dimExtension !== false
+        extension: annotation.dimExtension !== false,
+        // Uitloop en hulplijnen in papiermillimeters (maatlijn-geometrie.js).
+        dimLineOvershootMm: maatlijnVelden(annotation).dimLineOvershootMm,
+        dimOvershootEnds: annotation.dimOvershootEnds,
+        dimExtGapMm: annotation.dimExtGapMm,
+        dimExtOvershootMm: annotation.dimExtOvershootMm,
+        // Opmaak van een maat uit een ander programma (loader/maatlijn-uit-
+        // bestand.js): holle punten, bijschrift in de lijn, eigen tekstkleur.
+        headFill: annotation.headFill,
+        textPosition: annotation.dimTextPosition,
+        labelColor: _evHalftone?.color ? strokeColor : annotation.labelColor,
+        lineWidth: annotation.lineWidth ?? 1,
       });
       break;
     }
@@ -1961,7 +2029,9 @@ export function drawAnnotation(ctx, annotation) {
       // bij de andere vormen. Met de kale hex kwam zo'n vlak dekkend over de
       // tekening en over het eigen maatlabel heen.
       drawMeasureAreaShape(ctx, annotation.points, annotation.color || '#ff0000', annotation.lineWidth, annFill, annotation.borderStyle, annotation.holes, maHatch, undefined, annHasStroke);
-      if (annotation.measureText) {
+      // measureShowLabel === false: de oppervlakte staat elders (bijvoorbeeld
+      // in de ruimtetag van een plattegrond) en het vlak toont geen eigen label.
+      if (annotation.measureText && annotation.measureShowLabel !== false) {
         drawCentroidLabel(ctx, annotation.points, annotation.measureText, strokeColor, annotation);
       }
       break;
@@ -2058,14 +2128,14 @@ export function drawAnnotation(ctx, annotation) {
       if (mpStartHead !== 'none' && mpPts.length >= 2) {
         const startAngle = Math.atan2(mpPts[0].y - mpPts[1].y, mpPts[0].x - mpPts[1].x);
         ctx.fillStyle = strokeColor;
-        drawDimensionLineEnding(ctx, mpPts[0].x, mpPts[0].y, startAngle, mpHeadSize, mpStartHead);
+        drawDimensionLineEnding(ctx, mpPts[0].x, mpPts[0].y, startAngle, mpHeadSize, mpStartHead, { hol: annotation.headFill === false });
       }
       if (mpEndHead !== 'none' && mpPts.length >= 2) {
         const last = mpPts[mpPts.length - 1];
         const prev = mpPts[mpPts.length - 2];
         const endAngle = Math.atan2(last.y - prev.y, last.x - prev.x);
         ctx.fillStyle = strokeColor;
-        drawDimensionLineEnding(ctx, last.x, last.y, endAngle, mpHeadSize, mpEndHead);
+        drawDimensionLineEnding(ctx, last.x, last.y, endAngle, mpHeadSize, mpEndHead, { hol: annotation.headFill === false });
       }
 
       if (annotation.measureText && mpPts.length > 0) {
@@ -2764,26 +2834,6 @@ export function redrawAnnotations(lightweight = false) {
   const _activeDoc = state.documents[state.activeDocumentIndex];
   const useViewport = vp && vp.active && _activeDoc?.filePath;
   const effectiveScale = useViewport ? vp.zoom : scale * dpr;
-  annotationCtx.save();
-  if (textHighlightCtx) textHighlightCtx.save();
-  if (useViewport) {
-    // Viewport mode: annotations are in app-space (top-left origin, Y-down, scale=1).
-    // Page top-left on screen = (offsetX, offsetY).
-    // App coord (ax, ay) → screen (ax*zoom + offsetX, ay*zoom + offsetY).
-    // This is a simple scale + translate — no Y-flip needed for annotations.
-    annotationCtx.setTransform(vp.zoom, 0, 0, vp.zoom, vp.offsetX, vp.offsetY);
-    if (textHighlightCtx) textHighlightCtx.setTransform(vp.zoom, 0, 0, vp.zoom, vp.offsetX, vp.offsetY);
-  } else {
-    // Legacy mode: simple scale from origin
-    annotationCtx.scale(effectiveScale, effectiveScale);
-    if (textHighlightCtx) textHighlightCtx.scale(effectiveScale, effectiveScale);
-  }
-
-  // Draw grid overlay if enabled (BEFORE annotations, as a background pass).
-  // Pass effectiveScale so the dot grid hides when too zoomed-out.
-  if (state.preferences.showGrid) {
-    drawGrid(annotationCtx, annotationCanvas.width / effectiveScale, annotationCanvas.height / effectiveScale, effectiveScale);
-  }
 
   // CRITICAL: in vector viewport mode, key the annotation page off
   // viewport.pageNum (what's currently drawn on #pdf-canvas) NOT
@@ -2797,8 +2847,55 @@ export function redrawAnnotations(lightweight = false) {
     ? (vp.pageNum || (doc ? doc.currentPage : 1))
     : (doc ? doc.currentPage : 1);
 
+  // Weergave draaien (#200): annotaties staan in de paginaruimte; de
+  // transform legt ze gedraaid op het scherm, net als de pagina zelf.
+  const vpGeo = useViewport ? viewportGeometrie(vp) : null;
+  const legacyWeergave = useViewport ? null : weergaveTransform(curPage, doc);
+  annotationCtx.save();
+  if (textHighlightCtx) textHighlightCtx.save();
+  if (useViewport) {
+    // Viewport mode: annotations are in app-space (top-left origin, Y-down, scale=1).
+    // Page top-left on screen = (offsetX, offsetY) without view rotation.
+    // App coord → screen = offset + zoom · (view rotation of the app coord).
+    // No Y-flip needed for annotations.
+    annotationCtx.setTransform(...vpGeo.matrix);
+    if (textHighlightCtx) textHighlightCtx.setTransform(...vpGeo.matrix);
+  } else {
+    // Legacy mode: simple scale from origin
+    annotationCtx.scale(effectiveScale, effectiveScale);
+    if (textHighlightCtx) textHighlightCtx.scale(effectiveScale, effectiveScale);
+    if (legacyWeergave) {
+      annotationCtx.transform(...legacyWeergave);
+      if (textHighlightCtx) textHighlightCtx.transform(...legacyWeergave);
+    }
+  }
+
+  // Het canvas in paginaruimte: bij een gedraaide weergave liggen breedte en
+  // hoogte anders dan op het scherm (raster en watermerken rekenen erin).
+  let canvasInPagina = { x: 0, y: 0, width: annotationCanvas.width / effectiveScale, height: annotationCanvas.height / effectiveScale };
+  if (vpGeo && vpGeo.rotatie) {
+    canvasInPagina = rectNaarPagina(
+      { x: -vp.offsetX / vp.zoom, y: -vp.offsetY / vp.zoom, width: annotationCanvas.width / vp.zoom, height: annotationCanvas.height / vp.zoom },
+      vpGeo.paginaBreedte, vpGeo.paginaHoogte, vpGeo.rotatie,
+    );
+  } else if (legacyWeergave) {
+    canvasInPagina = weergaveRectNaarPagina(curPage, canvasInPagina, doc);
+  }
+
+  // Draw grid overlay if enabled (BEFORE annotations, as a background pass).
+  // Pass effectiveScale so the dot grid hides when too zoomed-out.
+  if (state.preferences.showGrid) {
+    drawGrid(annotationCtx, canvasInPagina.x + canvasInPagina.width, canvasInPagina.y + canvasInPagina.height, effectiveScale);
+  }
+
+  // Watermerken rekenen hun plek op de pagina uit de paginamaat. De viewport
+  // kent die maat; zonder viewport is het canvas de pagina.
+  const wmMaat = vpGeo
+    ? { w: vpGeo.paginaBreedte, h: vpGeo.paginaHoogte }
+    : { w: canvasInPagina.width, h: canvasInPagina.height };
+
   // Draw watermarks behind content
-  renderWatermarksBehind(annotationCtx, curPage, annotationCanvas.width / effectiveScale, annotationCanvas.height / effectiveScale);
+  renderWatermarksBehind(annotationCtx, curPage, wmMaat.w, wmMaat.h);
 
   // Draw text edits (cover-and-replace) before annotations
   drawTextEdits(annotationCtx, curPage);
@@ -2809,6 +2906,7 @@ export function redrawAnnotations(lightweight = false) {
     // Vector mode: visible area in app-coords = screen area mapped through inverse transform
     // Screen (0,0) → app (-offsetX/zoom, -offsetY/zoom)
     // Screen (canvasW, canvasH) → app ((canvasW-offsetX)/zoom, (canvasH-offsetY)/zoom)
+    // (in de weergaveruimte; bij een weergaverotatie daarna terug naar de pagina).
     vpX = -vp.offsetX / vp.zoom;
     vpY = -vp.offsetY / vp.zoom;
     vpW = annotationCanvas.width / vp.zoom;
@@ -2816,6 +2914,10 @@ export function redrawAnnotations(lightweight = false) {
     // Generous margin
     const margin = 200 / vp.zoom;
     vpX -= margin; vpY -= margin; vpW += margin * 2; vpH += margin * 2;
+    if (vpGeo.rotatie) {
+      const r = rectNaarPagina({ x: vpX, y: vpY, width: vpW, height: vpH }, vpGeo.paginaBreedte, vpGeo.paginaHoogte, vpGeo.rotatie);
+      vpX = r.x; vpY = r.y; vpW = r.width; vpH = r.height;
+    }
   } else {
     const canvasW = annotationCanvas.width / effectiveScale;
     const canvasH = annotationCanvas.height / effectiveScale;
@@ -2830,12 +2932,18 @@ export function redrawAnnotations(lightweight = false) {
       const margin = 200 / scale;
       vpX -= margin; vpY -= margin; vpW += margin * 2; vpH += margin * 2;
     }
+    if (legacyWeergave) {
+      const r = weergaveRectNaarPagina(curPage, { x: vpX, y: vpY, width: vpW, height: vpH }, doc);
+      vpX = r.x; vpY = r.y; vpW = r.width; vpH = r.height;
+    }
   }
 
   // Draw all annotations for current page (with viewport culling).
   // Text highlights go to the dedicated #text-highlight-canvas (CSS multiply
   // blend with #pdf-canvas below); everything else goes to #annotation-canvas.
-  annotations.forEach(annotation => {
+  // One scale pass: annotations that look up their scale while drawing (walls,
+  // bar series, hatches) share the scale sources collected once (#491).
+  metSchaalBronnen(() => annotations.forEach(annotation => {
     if (annotation.page !== curPage) return;
     if (_buitenBeeld(annotation, vpX, vpY, vpW, vpH)) return;
     const targetCtx = (annotation.type === 'textHighlight' && textHighlightCtx)
@@ -2845,7 +2953,7 @@ export function redrawAnnotations(lightweight = false) {
     targetCtx.save();
     drawAnnotation(targetCtx, annotation);
     targetCtx.restore();
-  });
+  }));
 
   annotationCtx.globalAlpha = 1;
   annotationCtx.globalCompositeOperation = 'source-over';
@@ -2855,7 +2963,7 @@ export function redrawAnnotations(lightweight = false) {
   }
 
   // Draw watermarks in front of content
-  renderWatermarksInFront(annotationCtx, curPage, annotationCanvas.width / effectiveScale, annotationCanvas.height / effectiveScale);
+  renderWatermarksInFront(annotationCtx, curPage, wmMaat.w, wmMaat.h);
 
   // Draw polar ray + tooltip when an active polar snap is engaged
   if (state.lastSnapResult && state.lastSnapResult.type === 'polar') {
@@ -2975,19 +3083,23 @@ function drawRubberBand(ctx, effectiveScale) {
 // voorbeeld — dan geen selectiekader, grepen of andere bewerkingstoestand, en
 // echte lijndiktes; `{ markeringen: false }` laat de annotatielaag weg
 // ("Afdrukken: Document"). Zie rendering/uitvoer-lagen.js.
-export function renderAnnotationsForPage(ctx, pageNum, width, height, overrideDpr, renderOffset, pageDims, opties) {
+// `weergave` (optioneel, alleen op het scherm): matrix paginaruimte →
+// weergaveruimte van een gedraaide weergave (#200, weergaveTransform()).
+// Dan zijn `renderOffset`, `pageDims` en de canvasmaat weergavematen; de
+// annotaties zelf blijven in de paginaruimte en draaien via deze matrix mee.
+export function renderAnnotationsForPage(ctx, pageNum, width, height, overrideDpr, renderOffset, pageDims, opties, weergave) {
   const lagen = weergaveLagen(opties);
   // Alleen tijdens deze (synchrone) rendering, zodat drawAnnotation weet dat
   // er geen bewerkingstoestand in de uitvoer hoort.
   _lagen = opties ? lagen : null;
   try {
-    tekenPaginaLagen(ctx, pageNum, width, height, overrideDpr, renderOffset, pageDims, lagen);
+    tekenPaginaLagen(ctx, pageNum, width, height, overrideDpr, renderOffset, pageDims, lagen, weergave, opties?.snippetBitmaps);
   } finally {
     _lagen = null;
   }
 }
 
-function tekenPaginaLagen(ctx, pageNum, width, height, overrideDpr, renderOffset, pageDims, lagen) {
+function tekenPaginaLagen(ctx, pageNum, width, height, overrideDpr, renderOffset, pageDims, lagen, weergave, snippetBitmaps) {
   ctx.clearRect(0, 0, width, height);
 
   // Read scale and annotations from the active document directly
@@ -3001,10 +3113,16 @@ function tekenPaginaLagen(ctx, pageNum, width, height, overrideDpr, renderOffset
   ctx.save();
   ctx.scale(effectiveScale, effectiveScale);
   if (renderOffset) ctx.translate(-renderOffset.x, -renderOffset.y);
+  if (weergave) ctx.transform(...weergave);
 
-  // Draw watermarks behind content
-  const wmW = pageDims ? pageDims.w : width / effectiveScale;
-  const wmH = pageDims ? pageDims.h : height / effectiveScale;
+  // Draw watermarks behind content. Gedraaide weergave: de watermerken
+  // staan in de paginaruimte en rekenen dus met de paginamaat.
+  let wmW = pageDims ? pageDims.w : width / effectiveScale;
+  let wmH = pageDims ? pageDims.h : height / effectiveScale;
+  if (weergave) {
+    const m = paginaMaat(pageNum, doc);
+    if (m) { wmW = m.breedte; wmH = m.hoogte; }
+  }
   renderWatermarksBehind(ctx, pageNum, wmW, wmH);
 
   // Draw text edits (cover-and-replace)
@@ -3014,16 +3132,21 @@ function tekenPaginaLagen(ctx, pageNum, width, height, overrideDpr, renderOffset
   // pagina (zie setupContinuousAnnotationCanvas); alles daarbuiten kostte tot
   // nu toe wél een volledige drawAnnotation.
   const cullMarge = 200 / (effectiveScale || 1);
-  const cvX = (renderOffset ? renderOffset.x : 0) - cullMarge;
-  const cvY = (renderOffset ? renderOffset.y : 0) - cullMarge;
-  const cvW = width / effectiveScale + cullMarge * 2;
-  const cvH = height / effectiveScale + cullMarge * 2;
+  let cvX = (renderOffset ? renderOffset.x : 0) - cullMarge;
+  let cvY = (renderOffset ? renderOffset.y : 0) - cullMarge;
+  let cvW = width / effectiveScale + cullMarge * 2;
+  let cvH = height / effectiveScale + cullMarge * 2;
+  if (weergave) {
+    // De uitsnede is een stuk van de gedraaide pagina: terug naar de pagina.
+    const r = weergaveRectNaarPagina(pageNum, { x: cvX, y: cvY, width: cvW, height: cvH }, doc);
+    cvX = r.x; cvY = r.y; cvW = r.width; cvH = r.height;
+  }
 
-  annotations.forEach(annotation => {
+  metSchaalBronnen(() => annotations.forEach(annotation => {
     if (annotation.page !== pageNum) return;
     if (_buitenBeeld(annotation, cvX, cvY, cvW, cvH)) return;
-    drawAnnotation(ctx, annotation);
-  });
+    drawAnnotation(ctx, annotation, snippetBitmaps);
+  }));
 
   // Draw watermarks in front of content
   renderWatermarksInFront(ctx, pageNum, wmW, wmH);
@@ -3142,6 +3265,7 @@ export function updateContinuousSharpOverlay(wrapper, pageNum) {
   renderAnnotationsForPage(
     sharp.getContext('2d'), pageNum, sharp.width, sharp.height, dpr,
     { x: visLinks / scale, y: visBoven / scale },
+    undefined, undefined, weergaveTransform(pageNum, doc),
   );
   // Basis leegmaken: de overlay dekt het zichtbare deel al scherp af.
   const bctx = baseCanvas.getContext('2d');
@@ -3208,7 +3332,8 @@ export function redrawContinuous(lightweight = false) {
       renderAnnotationsForPage(ctx, pageNum, canvas.width, canvas.height,
         Number.isFinite(backingScale) ? backingScale : undefined,
         { x: (parseFloat(canvas.dataset.clipX) || 0) / schaal, y: (parseFloat(canvas.dataset.clipY) || 0) / schaal },
-        ccW > 0 && ccH > 0 ? { w: ccW / schaal, h: ccH / schaal } : undefined);
+        ccW > 0 && ccH > 0 ? { w: ccW / schaal, h: ccH / schaal } : undefined,
+        undefined, weergaveTransform(pageNum, doc));
     }
   });
   updateAllContinuousSharpOverlays();

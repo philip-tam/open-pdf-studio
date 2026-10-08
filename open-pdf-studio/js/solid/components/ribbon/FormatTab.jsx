@@ -16,10 +16,12 @@ import { openSymbolTypeEditor } from '../../stores/symbolEditStore.js';
 import { state, getActiveDocument } from '../../../core/state.js';
 import { showProperties, showMultiSelectionProperties, closePropertiesPanel } from '../../../ui/panels/properties-panel.js';
 import { setPanelVisible } from '../../stores/propertiesStore.js';
+import { zetRanddikte } from '../../../annotations/rendering/textbox-layout.js';
 import {
   styleToolsIcon, resetLocationIcon, openPropertiesIcon, hideAnnotationIcon, editTypeIcon
 } from '../../data/ribbonIcons.js';
 import { useTranslation } from '../../../i18n/useTranslation.js';
+import { paginaMaat } from '../../../pdf/weergave-ruimte.js';
 
 const STYLE_GALLERY = [
   { name: 'red', labelKey: 'format.styleRed', color: '#ff0000', cloudy: false },
@@ -238,7 +240,7 @@ export default function FormatTab() {
                 onInput={(e) => {
                   const v = parseFloat(e.currentTarget.value);
                   if (!Number.isFinite(v) || v <= 0) return;
-                  applyToSelected(ann => { ann.lineWidth = v; });
+                  applyToSelected(ann => { zetRanddikte(ann, v); });
                   syncFormatStore(getActiveDocument()?.selectedAnnotations || []);
                 }} />
             </div>
@@ -381,8 +383,12 @@ export default function FormatTab() {
                       const resetDoc = getActiveDocument();
                       const resetScale = resetDoc?.scale || 1.5;
                       const resetDpr = window.devicePixelRatio || 1;
-                      const cx = (canvas.width / (resetScale * resetDpr)) / 2;
-                      const cy = (canvas.height / (resetScale * resetDpr)) / 2;
+                      // Midden van de pagina in de paginaruimte: uit de
+                      // paginamaat, niet uit het canvas (dat is in de viewport-
+                      // weergave het venster en kan gedraaid zijn, #200).
+                      const maat = paginaMaat(ann.page ?? resetDoc?.currentPage ?? 1, resetDoc);
+                      const cx = maat ? maat.breedte / 2 : (canvas.width / (resetScale * resetDpr)) / 2;
+                      const cy = maat ? maat.hoogte / 2 : (canvas.height / (resetScale * resetDpr)) / 2;
                       const w = ann.width || 100;
                       const h = ann.height || 50;
                       ann.x = cx - w / 2;

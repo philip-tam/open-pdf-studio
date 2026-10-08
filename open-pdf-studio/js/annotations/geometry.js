@@ -5,7 +5,7 @@ import { getAnnotationType } from '../plugins/annotation-type-registry.js';
 import { catmullRomSpline } from '../tools/tools/spline-tool.js';
 import { wallHalfWidthPx as isPointOnWallHalfWidth } from './rendering/walls.js';
 import { buildStavenreeks } from './stavenreeks.js';
-import { isAnnotationHiddenInView } from './view-filters.js';
+import { isAnnotationPickableInView } from './view-filters.js';
 import { stavenreeksPxPerMm } from './stavenreeks-scale.js';
 import { betonbalkHalfWidthPx } from './betonbalk-scale.js';
 import {
@@ -16,6 +16,8 @@ import { systeemrasterFlatContour } from './systeemraster.js';
 import { getEffectiveScale } from '../tools/effective-scale.js';
 import { raakMarge, wolkUitstulping, schermPxNaarPt } from './minimummaat.js';
 import { puntInVlak } from './vlak-ringen.js';
+import { raakbaarBijKlik } from '../plattegrond/ruimte-koppeling.js';
+import { caretHit } from './corrections/geometry.js';
 
 // Binnen-test voor vormen die overal in hun vak raakbaar zijn. Een vorm die op
 // het scherm kleiner is dan het minimale raakvlak krijgt een marge in
@@ -208,12 +210,17 @@ export function findAnnotationAt(x, y, pageNum = null) {
     const ann = annotations[i];
     if (ann.page !== targetPage) continue;
     // Wat de weergavefilters niet tekenen (hidden-vlag, Zichtbaarheid
-    // Elementen, statusfilter #333) is ook niet raakbaar — anders selecteer
-    // of versleep je onzichtbare annotaties.
-    if (isAnnotationHiddenInView(ann)) continue;
+    // Elementen, statusfilter #333, uitgezette laag #468) is ook niet
+    // raakbaar — anders selecteer of versleep je onzichtbare annotaties. Een
+    // vergrendelde laag is zichtbaar, maar evenmin raakbaar.
+    if (!isAnnotationPickableInView(ann)) continue;
     // Een vastgezet vectorknipsel is geen object meer maar pagina-inhoud in
     // wording: zichtbaar, niet aanklikbaar.
     if (ann.type === 'vectorSnippet' && (ann.flattened || ann.gebakkenIn)) continue;
+    // Een ruimte uit de plattegrond: haar rand ligt op de wandvlakken en haar
+    // binnenkant is waar je een selectierechthoek begint. Een klik pakt haar
+    // dus nooit; je bereikt haar via haar ruimtetag (ruimte-koppeling.js).
+    if (raakbaarBijKlik(ann) === false) continue;
 
     switch (ann.type) {
       case 'draw':
@@ -648,6 +655,11 @@ export function findAnnotationAt(x, y, pageNum = null) {
           if (x >= ann.x && x <= ann.x + ann.width && y >= ann.y && y <= ann.y + ann.height) return ann;
         }
         break;
+      case 'caret':
+        // Invoegteken (#508): een klein teken, dus het vak groeit met de
+        // raaktolerantie.
+        if (caretHit(ann, x, y, tol)) return ann;
+        break;
       default: {
         const typeHandler = getAnnotationType(ann.type);
         if (typeHandler && typeHandler.hitTest) {
@@ -860,6 +872,10 @@ export function isPointInsideAnnotation(x, y, annotation) {
       // Fallback to bounding box
       return x >= annotation.x && x <= annotation.x + annotation.width &&
              y >= annotation.y && y <= annotation.y + annotation.height;
+
+    case 'caret':
+      // Invoegteken (#508): zelfde raakvak als in findAnnotationAt.
+      return caretHit(annotation, x, y, schermPxNaarPt(10, getEffectiveScale()));
 
     default:
       return false;

@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { PDFDocument, PDFName, PDFDict, decodePDFRawStream } from 'pdf-lib';
 
-import { attachVectorAP } from './attach-vector-ap.js';
+import { attachVectorAP } from './vector-ap.js';
 import { buildFilledAreaAP } from './appearance-vectors.js';
 
 const RECT = [100, 100, 200, 200];

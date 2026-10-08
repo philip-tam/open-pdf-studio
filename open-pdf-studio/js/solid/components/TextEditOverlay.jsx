@@ -4,6 +4,7 @@ import {
   hideTextEditOverlay, heightGrowth, setHeightGrowth, setEditorFormatHandler,
 } from '../stores/textEditOverlayStore.js';
 import { state } from '../../core/state.js';
+import { editorGroei } from '../../annotations/rendering/textbox-layout.js';
 import { redrawAnnotations, redrawContinuous } from '../../annotations/rendering.js';
 import { parseEditorDom } from '../../text/editor-dom-parse.js';
 import { runsPlainText } from '../../text/text-edit-appearance.js';
@@ -51,7 +52,10 @@ export default function TextEditOverlay() {
   function autoGrow() {
     if (!editorRef) return;
     const overflow = editorRef.scrollHeight - editorRef.clientHeight;
-    if (overflow > 0) setHeightGrowth(g => g + overflow);
+    // Zelfde groeiregel als de loader voor vakken met een /DS-inzet.
+    const onderinzet = parseFloat(getComputedStyle(editorRef).paddingBottom) || 0;
+    const groei = editorGroei(overflow, state.editingAnnotation, onderinzet);
+    if (groei > 0) setHeightGrowth(g => g + groei);
   }
 
   // Vet/cursief op de selectie; zonder selectie op het woord onder de caret.
@@ -146,10 +150,16 @@ export default function TextEditOverlay() {
     const growth = heightGrowth();
     const baseH = parseFloat(s.height) || 0;
     const baseTop = parseFloat(s.top) || 0;
+    const baseLeft = parseFloat(s.left) || 0;
+    // De wrapper staat met zijn midden op (left, top). Groeit het vak, dan
+    // blijft de bovenrand staan: het midden schuift een halve groei langs de
+    // "omlaag"-richting van het vak zoals het op het scherm gedraaid staat
+    // (annotatierotatie plus weergaverotatie, #200).
+    const hoek = (parseFloat(s['--scherm-rotatie']) || 0) * Math.PI / 180;
     return {
       position: s.position,
-      left: s.left,
-      top: `${baseTop + growth / 2}px`,
+      left: `${baseLeft - Math.sin(hoek) * growth / 2}px`,
+      top: `${baseTop + Math.cos(hoek) * growth / 2}px`,
       width: s.width,
       height: `${baseH + growth}px`,
       transform: s.transform,
@@ -168,6 +178,7 @@ export default function TextEditOverlay() {
     delete ts.transform;
     delete ts['z-index'];
     delete ts['--text-offset'];
+    delete ts['--scherm-rotatie'];
     // De basisstijl van het vlak is via de runs in de DOM zichtbaar; het
     // element zelf blijft 'normal' zodat <b>/<i> het verschil maken.
     ts['font-weight'] = 'normal';
@@ -192,8 +203,9 @@ export default function TextEditOverlay() {
     ts.top = '0';
     ts.width = '100%';
     ts.height = '100%';
-    ts['white-space'] = 'pre-wrap';
-    ts['overflow-wrap'] = 'break-word';
+    // Een typemachine-tekst (noWrap) breekt niet af, zie editorVakOpmaak.
+    ts['white-space'] = s['white-space'] === 'pre' ? 'pre' : 'pre-wrap';
+    ts['overflow-wrap'] = ts['white-space'] === 'pre' ? 'normal' : 'break-word';
     ts['overflow-y'] = 'hidden';
     return ts;
   });

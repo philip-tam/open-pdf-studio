@@ -1,6 +1,7 @@
 import { state, getActiveDocument, imageCache } from '../core/state.js';
 import { cloneAnnotation } from './factory.js';
 import { cloneAnnotationsInPlace } from './paste-in-place.js';
+import { relinkPastedCorrections } from './corrections/model.js';
 import { generateImageId } from '../utils/helpers.js';
 import { updateStatusMessage } from '../ui/chrome/status-bar.js';
 import { showProperties, showMultiSelectionProperties } from '../ui/panels/properties-panel.js';
@@ -9,6 +10,7 @@ import { annotationCanvas, pdfContainer } from '../ui/dom-elements.js';
 import { recordAdd, recordBulkAdd } from '../core/undo-manager.js';
 import { getEffectiveScale } from '../tools/effective-scale.js';
 import { plakVerschuivingPt } from './minimummaat.js';
+import { paginaMaat, paginaRectNaarClient, clientNaarPagina, rechtopRotatie } from '../pdf/weergave-ruimte.js';
 
 // Copy annotation to internal clipboard
 export function copyAnnotation(annotation) {
@@ -77,6 +79,27 @@ export function pasteFromClipboard() {
 // op en houdt het plakken per pagina correct.
 export function visibleCenterOnPage(pageNum) {
   const doc = getActiveDocument();
+  // Via de centrale scherm↔pagina-omrekening: klopt ook met de verschuiving
+  // van de enkelpagina-viewport en met een gedraaide weergave (#200).
+  const maat = paginaMaat(pageNum, doc);
+  const paginaOpScherm = maat
+    ? paginaRectNaarClient(pageNum, { x: 0, y: 0, width: maat.breedte, height: maat.hoogte }, doc)
+    : null;
+  if (paginaOpScherm && pdfContainer?.getBoundingClientRect) {
+    const vr = pdfContainer.getBoundingClientRect();
+    const cr = {
+      left: paginaOpScherm.left, top: paginaOpScherm.top,
+      right: paginaOpScherm.left + paginaOpScherm.width, bottom: paginaOpScherm.top + paginaOpScherm.height,
+    };
+    const left = Math.max(cr.left, vr.left);
+    const right = Math.min(cr.right, vr.right);
+    const top = Math.max(cr.top, vr.top);
+    const bottom = Math.min(cr.bottom, vr.bottom);
+    const cx = right > left ? (left + right) / 2 : (cr.left + cr.right) / 2;
+    const cy = bottom > top ? (top + bottom) / 2 : (cr.top + cr.bottom) / 2;
+    const p = clientNaarPagina(pageNum, cx, cy, doc);
+    if (p) return p;
+  }
   const scale = doc?.scale || 1;
   let canvas = annotationCanvas;
   if (doc?.viewMode === 'continuous') {
@@ -154,7 +177,8 @@ export async function pasteImageFromBlob(blob) {
     y: Math.max(10, y),
     width: width,
     height: height,
-    rotation: 0,
+    // Rechtop op het scherm, ook in een gedraaide weergave (#200).
+    rotation: rechtopRotatie(),
     imageId: imageId,
     imageData: dataUrl, // data:image/... URL for PDF embedding
     originalWidth: img.naturalWidth,
@@ -216,6 +240,9 @@ export function pasteAnnotation() {
   newAnnotation.page = getActiveDocument()?.currentPage || 1;
   newAnnotation.createdAt = new Date().toISOString();
   newAnnotation.modifiedAt = new Date().toISOString();
+  // Een losse helft van een vervanging (#508) hoort niet bij het origineel;
+  // de kopie krijgt bij opslaan een eigen /NM.
+  relinkPastedCorrections([state.clipboardAnnotation], [newAnnotation]);
 
   // For images/signatures, need to copy the cached image
   if (newAnnotation.type === 'image' || newAnnotation.type === 'signature') {
@@ -305,10 +332,12 @@ export function pasteAnnotations() {
       newAnn.imageId = newImageId;
     }
 
-    const _pasteDoc3 = getActiveDocument();
-    if (_pasteDoc3) _pasteDoc3.annotations.push(newAnn);
     newAnnotations.push(newAnn);
   }
+  // Vervangingen (#508) koppelen aan hun eigen kopie, niet aan het origineel.
+  relinkPastedCorrections(state.clipboardAnnotations, newAnnotations);
+  const _pasteDocAdd = getActiveDocument();
+  if (_pasteDocAdd) _pasteDocAdd.annotations.push(...newAnnotations);
 
   recordBulkAdd(newAnnotations);
   const _pasteDoc3 = getActiveDocument();

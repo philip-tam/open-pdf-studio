@@ -6,6 +6,7 @@ import DocumentTabs from './components/DocumentTabs.jsx';
 import CanvasScrollbars from './components/CanvasScrollbars.jsx';
 import LeftPanel from './components/left-panel/LeftPanel.jsx';
 import ElementVisibilityPanel from './components/left-panel/ElementVisibilityPanel.jsx';
+import AnnotationLayersPanel from './components/left-panel/AnnotationLayersPanel.jsx';
 import FindBar from './components/FindBar.jsx';
 import FormFieldsBar from './components/FormFieldsBar.jsx';
 import PdfABar from './components/PdfABar.jsx';
@@ -31,7 +32,9 @@ import MiniLog from './components/MiniLog.jsx';
 import { getRegisteredPalettes } from '../plugins/palette-registry.js';
 import { leftOrder, rightOrder } from './stores/paletteOrder.js';
 import { useTranslation } from '../i18n/useTranslation.js';
-import { For, ErrorBoundary } from 'solid-js';
+import { isTauri } from '../core/platform.js';
+import { meldLegeStart, WEB_SESSIE_SLEUTEL } from '../core/sessie-herstel.js';
+import { For, ErrorBoundary, Show } from 'solid-js';
 
 function OrderedDockedPalettes(props) {
   const order = () => props.side === 'left' ? leftOrder() : rightOrder();
@@ -82,6 +85,7 @@ function DesktopApp() {
       <div class="content">
         <LeftPanel />
         <ElementVisibilityPanel />
+        <AnnotationLayersPanel />
         <OrderedDockedPalettes side="left" />
 
         <div class="main-view">
@@ -97,6 +101,11 @@ function DesktopApp() {
             </svg>
             <h2>{t('noDocuments')}</h2>
             <p>{t('noDocumentsHint')}</p>
+            {/* De webversie bewaart geen sessie. Dat zeggen is eerlijker dan
+                een voorkeur die daar nooit iets doet (#456). */}
+            <Show when={meldLegeStart({ inTauri: isTauri() })}>
+              <p class="placeholder-note">{t(WEB_SESSIE_SLEUTEL)}</p>
+            </Show>
           </div>
 
           <FormFieldsBar />

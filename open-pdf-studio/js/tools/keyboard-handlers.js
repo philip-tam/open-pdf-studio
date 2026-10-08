@@ -1,5 +1,5 @@
-import { state, getActiveDocument, getPageRotation, selectAllOnPage, clearSelection } from '../core/state.js';
-import { undo, redo, recordAdd, recordBulkDelete, recordDelete, recordModify, recordBulkModify, recordClearPage, recordPageRotation } from '../core/undo-manager.js';
+import { state, getActiveDocument, selectAllOnPage, clearSelection } from '../core/state.js';
+import { undo, redo, recordAdd, recordModify, recordBulkModify, recordClearPage } from '../core/undo-manager.js';
 import { setTool } from './manager.js';
 import { showPreferencesDialog, setAsDefaultStyle } from '../core/preferences.js';
 import { getAnnotationType } from '../plugins/annotation-type-registry.js';
@@ -11,7 +11,9 @@ import { applyMove } from '../annotations/transforms.js';
 import { cloneAnnotation } from '../annotations/factory.js';
 import { createMeasureAreaAnnotation, createMeasurePerimeterAnnotation } from './annotation-creators.js';
 import { openPDFFile, isPdfAReadOnly } from '../pdf/loader.js';
-import { actualSize, fitWidth, fitPage, goToPage, rotatePage } from '../pdf/renderer.js';
+import { actualSize, fitWidth, fitPage, goToPage } from '../pdf/renderer.js';
+import { draaiVanafKnop } from '../pdf/pagina-draaien.js';
+import { weergaveVectorNaarPagina } from '../pdf/weergave-ruimte.js';
 import { activeTab } from '../solid/stores/leftPanelStore.js';
 import { savePDF, savePDFAs } from '../pdf/saver.js';
 import { toggleAnnotationsListPanel } from '../ui/panels/annotations-list.js';
@@ -20,6 +22,7 @@ import { switchRibbonTab as switchToTab } from '../bridge.js';
 import { openFindBar, closeFindBar, onFindNext } from '../search/find-bar.js';
 import { closeActiveTab } from '../ui/chrome/tabs.js';
 import { hideProperties, showProperties, showMultiSelectionProperties, togglePropertiesPanel } from '../ui/panels/properties-panel.js';
+import { wisselTagEnRuimte } from '../plattegrond/ruimte-selectie.js';
 import { openDialog, getDialogs } from '../bridge.js';
 import { getTool } from './tool-registry.js';
 import { resolvePointerCoords, buildToolContext, isModalOpen } from './tool-context.js';
@@ -27,7 +30,11 @@ import { tryStartGMove, isGMoveModeActive } from './g-move-mode.js';
 import { tryStartGRotate, isGRotateModeActive } from './g-rotate-mode.js';
 import { toggleFullscreen, exitFullscreen, getFullscreenState } from '../ui/chrome/fullscreen.js';
 import { typeLengthActive, consumeKey as typeLengthConsumeKey, typeLengthCursor } from './type-length-input.js';
-import { startGripLengteInvoer, stopGripLengteInvoer } from './tool-dispatcher.js';
+import { startGripLengteInvoer, stopGripLengteInvoer, herstelStramienMeeslepen } from './tool-dispatcher.js';
+import { tabDoorOnderdelen, verwijderOnderdeel } from '../gevelelement/app-bewerking.js';
+import { gevelPreset } from '../gevelelement/herkenning.js';
+import { isTextAnchored, expandCorrectionGroups, replaceParentOf } from '../annotations/corrections/model.js';
+import { deleteAnnotationsWithUndo } from '../annotations/mutations.js';
 
 function redraw() {
   if (getActiveDocument()?.viewMode === 'continuous') redrawContinuous();
@@ -35,19 +42,8 @@ function redraw() {
 }
 
 // Paginarotatie via sneltoets. Zelfde undo-bare pad als de draaiknoppen op de
-// tabbladen Beeld en Organiseren: rotatie toepassen en de oude/nieuwe stand
-// vastleggen zodat Ctrl+Z hem terugdraait.
-// rotatePage() is async en zet de nieuwe stand pas NA een await, dus de
-// nieuwe waarde moet awaited uitgelezen worden — anders legt de undo-stap
-// oud==nieuw vast en doet Ctrl+Z niets.
-async function rotateCurrentPageBy(delta) {
-  const doc = getActiveDocument();
-  if (!doc) return;
-  const pg = doc.currentPage || 1;
-  const oldRot = getPageRotation(pg);
-  await rotatePage(delta);
-  recordPageRotation(pg, oldRot, getPageRotation(pg));
-}
+// tabbladen Beeld en Organiseren (pagina-draaien.js, #464).
+const rotateCurrentPageBy = (delta) => draaiVanafKnop(delta);
 
 // Live preview while TYPING a measurement: re-fire the normal pointermove
 // pipeline at the last known cursor position so the active tool re-renders
@@ -350,6 +346,13 @@ export async function handleKeydown(e) {
     return;
   }
 
+  // Tab op een ruimtetag of ruimte (plattegrond): wissel tussen de tag en
+  // zijn ruimte - een ruimte is met een klik niet te pakken.
+  if (e.key === 'Tab' && !ctrl && !e.altKey && !shift && wisselTagEnRuimte()) {
+    e.preventDefault();
+    return;
+  }
+
   // Tab — toggle "edit contour" mode for a single selected filledArea annotation
   if (e.key === 'Tab' && !ctrl && !e.altKey) {
     const _doc = getActiveDocument();
@@ -363,6 +366,13 @@ export async function handleKeydown(e) {
         state.editingContour = _sel[0].id;
       }
       redraw();
+      return;
+    }
+    // Gevelelement (vliesgevel/kozijn): Tab loopt door de onderdelen —
+    // stijlen, dan panelen, dan weer het geheel; Shift+Tab terug. Zonder
+    // selectie geldt het element onder de aanwijzer.
+    if (tabDoorOnderdelen(shift ? -1 : 1)) {
+      e.preventDefault();
       return;
     }
   }
@@ -470,7 +480,16 @@ export async function handleKeydown(e) {
     e.preventDefault();
     if (isPdfAReadOnly()) { /* block */ }
     else if ((getActiveDocument()?.selectedAnnotations || []).length > 0) {
-      const selected = [...getActiveDocument().selectedAnnotations];
+      // Een vervanging (#508) telt met beide helften, ook in de vraag.
+      const selected = expandCorrectionGroups(getActiveDocument().annotations,
+        [...getActiveDocument().selectedAnnotations]);
+      // Gevelelement met een geselecteerd onderdeel: Delete verwijdert de
+      // STIJL (velden samengevoegd) of zet het standaardpaneel terug — nooit
+      // per ongeluk het hele element.
+      if (selected.length === 1 && gevelPreset(selected[0]) && selected[0].selectedSub) {
+        if (!selected[0].locked && verwijderOnderdeel(selected[0])) return;
+        if (selected[0].locked) return;
+      }
       // Systeem-sub-element geselecteerd: Delete reset het ONDERDEEL naar
       // het type-default (paneel-override weg = tegel/typedefault; rand-
       // override weg = profiel van het type) en verwijdert NOOIT per
@@ -498,8 +517,9 @@ export async function handleKeydown(e) {
         }
         return;
       }
-      // Single locked check
-      if (selected.length === 1 && selected[0].locked) return;
+      // Single locked check. Een vervanging (#508) telt als één annotatie:
+      // vergrendeld als een van beide helften vergrendeld is.
+      if ((selected.length === 1 || replaceParentOf(selected, getActiveDocument().annotations)) && selected.some(a => a.locked)) return;
 
       // Confirmation dialog
       {
@@ -512,14 +532,8 @@ export async function handleKeydown(e) {
         if (!confirmed) return;
       }
 
-      const doc = getActiveDocument();
-      if (selected.length > 1) {
-        recordBulkDelete(selected);
-      } else {
-        recordDelete(selected[0], (doc?.annotations || []).indexOf(selected[0]));
-      }
-      const toDelete = new Set(selected);
-      if (doc) doc.annotations = doc.annotations.filter(a => !toDelete.has(a));
+      // Een vervanging (#508) gaat in haar geheel, met één ongedaan-stap.
+      deleteAnnotationsWithUndo(getActiveDocument(), selected);
       clearSelection();
       hideProperties();
       redraw();
@@ -529,9 +543,8 @@ export async function handleKeydown(e) {
   else if (!ctrl && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
     if (isPdfAReadOnly()) { /* block nudge */ }
     else if ((getActiveDocument()?.selectedAnnotations || []).length > 0 && getActiveDocument()?.pdfDoc) {
-      // Text markup annotations are anchored to text — skip nudge
-      const movable = getActiveDocument().selectedAnnotations.filter(a =>
-        !['textHighlight', 'textStrikethrough', 'textUnderline'].includes(a.type));
+      // Text markup annotations (and carets, #508) are anchored to text — skip nudge
+      const movable = getActiveDocument().selectedAnnotations.filter(a => !isTextAnchored(a));
       if (movable.length === 0) return;
 
       e.preventDefault();
@@ -542,6 +555,9 @@ export async function handleKeydown(e) {
       else if (e.key === 'ArrowRight') dx = step;
       else if (e.key === 'ArrowUp') dy = -step;
       else if (e.key === 'ArrowDown') dy = step;
+      // De pijl wijst een richting op het SCHERM aan; bij een gedraaide
+      // weergave (#200) is dat op de pagina een andere richting.
+      ({ x: dx, y: dy } = weergaveVectorNaarPagina(dx, dy, nudgeDoc));
 
       if (movable.length > 1) {
         const originals = movable.map(a => ({ ...a }));
@@ -594,20 +610,15 @@ export async function handleKeydown(e) {
     // Geen bevestigingsdialoog: het geknipte zit op het klembord en de
     // verwijdering loopt via het gewone undo-pad.
     const cutDoc = getActiveDocument();
-    const cutSel = cutDoc ? [...(cutDoc.selectedAnnotations || [])] : [];
+    // Een vervanging (#508) wordt in haar geheel geknipt.
+    const cutSel = cutDoc ? expandCorrectionGroups(cutDoc.annotations, [...(cutDoc.selectedAnnotations || [])]) : [];
     if (cutSel.length > 0) {
       e.preventDefault();
       if (isPdfAReadOnly()) return;
       if (cutSel.some(a => a.locked)) return;
       if (cutSel.length > 1) copyAnnotations(cutSel);
       else copyAnnotation(cutSel[0]);
-      if (cutSel.length > 1) {
-        recordBulkDelete(cutSel);
-      } else {
-        recordDelete(cutSel[0], (cutDoc?.annotations || []).indexOf(cutSel[0]));
-      }
-      const cutSet = new Set(cutSel);
-      if (cutDoc) cutDoc.annotations = cutDoc.annotations.filter(a => !cutSet.has(a));
+      deleteAnnotationsWithUndo(cutDoc, cutSel);
       clearSelection();
       hideProperties();
       redraw();
@@ -736,6 +747,8 @@ export async function handleKeydown(e) {
         // Restore annotation to its pre-stretch state
         Object.assign(ann, state.originalAnnotation);
       }
+      // Meegeschoven stramienuiteinden gaan ook terug.
+      herstelStramienMeeslepen();
       state.isResizing = false;
       state.isDragging = false;
       state.activeHandle = null;
@@ -770,7 +783,7 @@ export async function handleKeydown(e) {
     {
       const escSel = getActiveDocument()?.selectedAnnotations || [];
       const escAnn = escSel.length === 1 ? escSel[0] : null;
-      if (escAnn && escAnn.type === 'systeemraster' && escAnn.selectedSub) {
+      if (escAnn && (escAnn.type === 'systeemraster' || gevelPreset(escAnn)) && escAnn.selectedSub) {
         escAnn.selectedSub = null;
         escAnn._hoverSub = null;
         showProperties(escAnn);

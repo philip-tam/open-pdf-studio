@@ -3,7 +3,7 @@ import AdaptiveGroups from './AdaptiveGroups.jsx';
 import RibbonButton from './RibbonButton.jsx';
 import RibbonButtonStack from './RibbonButtonStack.jsx';
 import ThemePicker from './ThemePicker.jsx';
-import { singlePageIcon, continuousIcon, bookViewIcon, facingPagesIcon, navigationIcon, propertiesIcon, annotationsListIcon, toolPaletteIcon, fullscreenIcon, fullscreenExitIcon, elementVisibilityIcon, rotateLeftIcon, rotateRightIcon } from '../../data/ribbonIcons.js';
+import { singlePageIcon, continuousIcon, bookViewIcon, facingPagesIcon, navigationIcon, propertiesIcon, annotationsListIcon, toolPaletteIcon, fullscreenIcon, fullscreenExitIcon, elementVisibilityIcon, annotationLayersIcon, rotateLeftIcon, rotateRightIcon } from '../../data/ribbonIcons.js';
 import { isFullscreen } from '../../stores/ribbonStore.js';
 import { toggleFullscreen } from '../../../ui/chrome/fullscreen.js';
 import { toggleSymbolPalette } from '../SymbolPalette.jsx';
@@ -16,11 +16,10 @@ import { toggleAnnotationsListPanel } from '../../../ui/panels/annotations-list.
 import { togglePropertiesPanel } from '../../../ui/panels/properties-panel.js';
 import { panelVisible, panelCollapsed } from '../../stores/propertiesStore.js';
 import { panelVisible as elementVisibilityPanelVisible, toggleElementVisibilityPanel } from '../../stores/elementVisibilityStore.js';
+import { panelVisible as annotationLayersPanelVisible, toggleAnnotationLayersPanel } from '../../stores/annotationLayersStore.js';
 import { collapsed as leftPanelCollapsed } from '../../stores/leftPanelStore.js';
-import { state, noPdf, getActiveDocument, getPageRotation } from '../../../core/state.js';
-import { isPdfAReadOnly } from '../../../pdf/loader.js';
-import { rotatePage } from '../../../pdf/renderer.js';
-import { recordPageRotation } from '../../../core/undo-manager.js';
+import { state, noPdf, getActiveDocument } from '../../../core/state.js';
+import { draaiWeergave } from '../../../pdf/weergave-draaien.js';
 import { useTranslation } from '../../../i18n/useTranslation.js';
 import { openDialog, showMessage } from '../../stores/dialogStore.js';
 import { readerTrackingPath } from '../../../core/reader-mode-tracking.js';
@@ -30,17 +29,11 @@ import { compareActive, exitCompare } from '../../../compare/compare-store.js';
 export default function ViewTab() {
   const { t } = useTranslation('ribbon');
 
-  // Zelfde undo-bare paginarotatie als op de Organiseren-tab; hier ook
-  // aangeboden omdat draaien tijdens het bekijken een veelgebruikte actie is.
-  // rotatePage() is async en zet de nieuwe stand pas NA een await; zonder
-  // await legt de undo-stap oud==nieuw vast en doet Ctrl+Z niets.
-  async function rotateCurrentPage(delta) {
-    const doc = getActiveDocument();
-    const pg = doc ? doc.currentPage : 1;
-    const oldRot = getPageRotation(pg);
-    await rotatePage(delta);
-    recordPageRotation(pg, oldRot, getPageRotation(pg));
-  }
+  // Weergave draaien (#200): alleen het beeld draait, het document niet.
+  // Geen bewerking, dus ook bij een alleen-lezen (PDF/A-)document beschikbaar
+  // en niet ongedaan te maken. Pagina's echt draaien (opgeslagen, ongedaan
+  // te maken) staat op het tabblad Bewerken & combineren.
+  const rotateView = (delta) => draaiWeergave(delta);
 
   return (
     <div class="ribbon-content active" id="tab-view">
@@ -69,10 +62,10 @@ export default function ViewTab() {
               && !!state.documents[state.activeDocumentIndex]?.facingSpread}
             disabled={noPdf()} onClick={() => setViewMode('facing')} />
           <RibbonButtonStack>
-            <RibbonButton size="small" id="view-rotate-left" title={t('home.rotateLeft')} icon={rotateLeftIcon} label={t('home.rotateLeft')}
-              disabled={noPdf() || isPdfAReadOnly()} onClick={() => rotateCurrentPage(-90)} />
-            <RibbonButton size="small" id="view-rotate-right" title={t('home.rotateRight')} icon={rotateRightIcon} label={t('home.rotateRight')}
-              disabled={noPdf() || isPdfAReadOnly()} onClick={() => rotateCurrentPage(90)} />
+            <RibbonButton size="small" id="view-rotate-left" title={t('view.rotateViewLeftTitle')} icon={rotateLeftIcon} label={t('view.rotateViewLeft')}
+              disabled={noPdf()} onClick={() => rotateView(-90)} />
+            <RibbonButton size="small" id="view-rotate-right" title={t('view.rotateViewRightTitle')} icon={rotateRightIcon} label={t('view.rotateViewRight')}
+              disabled={noPdf()} onClick={() => rotateView(90)} />
           </RibbonButtonStack>
         </RibbonGroup>
 
@@ -126,6 +119,8 @@ export default function ViewTab() {
             disabled={noPdf()} onClick={() => toggleAnnotationsListPanel()} />
           <RibbonButton id="ribbon-element-visibility" title={t('elementVisibility.buttonTitle')} icon={elementVisibilityIcon} label={t('elementVisibility.buttonLabel')}
             disabled={noPdf()} active={elementVisibilityPanelVisible()} onClick={toggleElementVisibilityPanel} />
+          <RibbonButton id="ribbon-annotation-layers" title={t('annotationLayers.buttonTitle')} icon={annotationLayersIcon} label={t('annotationLayers.buttonLabel')}
+            disabled={noPdf()} active={annotationLayersPanelVisible()} onClick={toggleAnnotationLayersPanel} />
           {/* The symbol library IS the tool palette for the user — single
               button, named accordingly. The old generic Tool Palette button
               and the plugin extension-palette buttons were removed from this

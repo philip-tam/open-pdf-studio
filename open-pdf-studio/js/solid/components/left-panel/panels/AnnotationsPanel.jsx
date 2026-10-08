@@ -1,9 +1,10 @@
-import { For, Show, createSignal, onCleanup } from 'solid-js';
-import { activeTab } from '../../../stores/leftPanelStore.js';
+import { For, Show, createSignal, createEffect, onCleanup } from 'solid-js';
+import { activeTab, collapsed } from '../../../stores/leftPanelStore.js';
 import { items, countText, emptyMessage, sortMode, setSortMode, filterMode, setFilterMode, hiddenStatuses, toggleHiddenStatus, collapsedGroups, toggleGroup, expandAllGroups, collapseAllGroups } from '../../../stores/panels/annotationsStore.js';
 import { useTranslation } from '../../../../i18n/useTranslation.js';
 import { state, clearSelection, getActiveDocument } from '../../../../core/state.js';
-import { commitAnnotationMutation } from '../../../../annotations/mutations.js';
+import { commitAnnotationMutation, deleteAnnotationsWithUndo } from '../../../../annotations/mutations.js';
+import { expandCorrectionGroups } from '../../../../annotations/corrections/model.js';
 import {
   cutIcon, copyIcon, deleteIcon, flattenIcon, exportIcon, deselectIcon, propertiesIcon
 } from '../../../data/contextMenuIcons.js';
@@ -45,6 +46,15 @@ export default function AnnotationsPanel() {
   const { t } = useTranslation('properties');
   const { t: tCommon } = useTranslation('common');
   const { t: tContext } = useTranslation('context');
+
+  // The list is not built while it is hidden (annotations-list.js, #491):
+  // bring it up to date the moment it is shown, whichever way that happens
+  // (tab switch, expanding the panel, the ribbon).
+  createEffect(() => {
+    if (activeTab() === 'annotations' && !collapsed()) {
+      import('../../../../ui/panels/annotations-list.js').then(m => m.refreshAnnotationsListIfStale());
+    }
+  });
 
   const [menuOpen, setMenuOpen] = createSignal(false);
   const [menuPos, setMenuPos] = createSignal({ top: 0, left: 0 });
@@ -97,16 +107,17 @@ export default function AnnotationsPanel() {
     const doc = getActiveDocument();
     const ann = doc?.selectedAnnotation;
     if (!ann) return;
-    import('../../../../annotations/clipboard.js').then(({ copyAnnotation }) => {
-      import('../../../../core/undo-manager.js').then(({ recordDelete }) => {
-        copyAnnotation(ann);
-        const idx = doc.annotations.indexOf(ann);
-        recordDelete(ann, idx);
-        doc.annotations = doc.annotations.filter(x => x !== ann);
-        if (doc) { doc.selectedAnnotation = null; doc.selectedAnnotations = []; }
-        import('../../../../annotations/rendering.js').then(({ redrawAnnotations }) => redrawAnnotations());
-        import('../../../../ui/panels/annotations-list.js').then(m => m.updateAnnotationsList());
-      });
+    import('../../../../annotations/clipboard.js').then(({ copyAnnotation, copyAnnotations }) => {
+      // Een vervanging (#508) wordt in haar geheel geknipt.
+      const weg = expandCorrectionGroups(doc.annotations, [ann]);
+      // Een vergrendelde andere helft gaat niet ongevraagd mee.
+      if (weg.some(a => a.locked && a !== ann)) return;
+      if (weg.length > 1) copyAnnotations(weg);
+      else copyAnnotation(ann);
+      deleteAnnotationsWithUndo(doc, weg);
+      if (doc) { doc.selectedAnnotation = null; doc.selectedAnnotations = []; }
+      import('../../../../annotations/rendering.js').then(({ redrawAnnotations }) => redrawAnnotations());
+      import('../../../../ui/panels/annotations-list.js').then(m => m.updateAnnotationsList());
     });
   };
 
@@ -128,14 +139,11 @@ export default function AnnotationsPanel() {
       preferenceKey: 'confirmBeforeDelete'
     });
     if (confirmed) {
-      import('../../../../core/undo-manager.js').then(({ recordDelete }) => {
-        const idx = doc.annotations.indexOf(ann);
-        recordDelete(ann, idx);
-        doc.annotations = doc.annotations.filter(x => x !== ann);
-        if (doc) { doc.selectedAnnotation = null; doc.selectedAnnotations = []; }
-        import('../../../../annotations/rendering.js').then(({ redrawAnnotations }) => redrawAnnotations());
-        import('../../../../ui/panels/annotations-list.js').then(m => m.updateAnnotationsList());
-      });
+      // Een vervanging (#508) gaat in haar geheel, met één ongedaan-stap.
+      deleteAnnotationsWithUndo(doc, [ann]);
+      if (doc) { doc.selectedAnnotation = null; doc.selectedAnnotations = []; }
+      import('../../../../annotations/rendering.js').then(({ redrawAnnotations }) => redrawAnnotations());
+      import('../../../../ui/panels/annotations-list.js').then(m => m.updateAnnotationsList());
     }
   };
 

@@ -13,7 +13,7 @@ import { addRecentFile, getRecentFiles } from '../mobile/recent-files.js';
 import { resumeReaderTracking } from './reader-mode-view.js';
 import { extractFileName } from '../core/platform.js';
 import i18next from '../i18n/config.js';
-import { showMessage } from '../bridge.js';
+import { showMessage, refreshAnnotationLayers } from '../bridge.js';
 import { verifieerHandtekeningen } from './handtekeningen/verificatie.js';
 
 // Sub-module imports
@@ -21,7 +21,10 @@ import { extractAnnotationColors } from './loader/color-extraction.js';
 import { extractStampImagesHybrid } from './loader/image-extraction.js';
 import { convertPdfAnnotation } from './loader/annotation-converter.js';
 import { statusReplyFromPdfAnnotation, applyStatusReplies } from './loader/status-replies.js';
+import { resolveGroupLinks } from './loader/correction-load.js';
 import { loadIfNeeded } from './queued-load.js';
+import { leesAnnotatieLagen, pasGelezenLagenToe } from './saver/annotatie-lagen.js';
+import { voegAnnotatiesToe } from './loader/annotaties-toevoegen.js';
 
 
 // Convert one batch of pdf.js annotations and push them to doc.annotations,
@@ -29,12 +32,18 @@ import { loadIfNeeded } from './queued-load.js';
 // to their parent textbox instead of pushing a standalone annotation.
 // Review-status replies (Text + /IRT + /State, issue #308) worden hier ook
 // herkend: die worden NIET als losse sticky note gepusht maar als status
-// op de doel-annotatie gezet.
+// op de doel-annotatie gezet. Een vervanging (invoegteken en doorhaling met
+// /RT /Group, #508) wordt na de lus gekoppeld.
+// De hele reeks gaat pas aan het eind, in één keer, in doc.annotations (zie
+// annotaties-toevoegen.js): losse pushes lieten per annotatie alles opnieuw
+// rekenen wat de lijst leest.
 async function _convertAndPushAnnotations(annots, pageNum, viewport, stampImageMap, annotColorMap, doc) {
   const textboxByRect = new Map();
   const byPdfId = new Map();
   const pendingLeaders = [];
   const pendingStatuses = [];
+  const groepen = []; // /RT /Group-kinderen, zie resolveGroupLinks
+  const nieuw = [];
   for (const annot of annots) {
     const statusReply = statusReplyFromPdfAnnotation(annot);
     if (statusReply) {
@@ -51,12 +60,15 @@ async function _convertAndPushAnnotations(annots, pageNum, viewport, stampImageM
       textboxByRect.set(converted._pdfRectKey, converted);
     }
     if (annot.id) byPdfId.set(annot.id, converted);
-    doc.annotations.push(converted);
+    if (annot.replyType === 'Group' && annot.inReplyTo) {
+      groepen.push({ converted, inReplyTo: annot.inReplyTo, replyType: annot.replyType });
+    }
+    nieuw.push(converted);
     // Sommige converters leveren EXTRA annotaties naast de hoofdannotatie
     // (bv. een legacy meerpunts-betonbalk die in losse tweepunts-balken
     // gesplitst wordt). Die worden hier mee-gepusht.
     if (Array.isArray(converted.__extraAnnotations)) {
-      for (const extra of converted.__extraAnnotations) doc.annotations.push(extra);
+      for (const extra of converted.__extraAnnotations) nieuw.push(extra);
       delete converted.__extraAnnotations;
     }
   }
@@ -69,6 +81,9 @@ async function _convertAndPushAnnotations(annots, pageNum, viewport, stampImageM
   }
   for (const tb of textboxByRect.values()) delete tb._pdfRectKey;
   applyStatusReplies(pendingStatuses, byPdfId);
+  // Vervangingen (#508): invoegteken + doorhaling, in beide richtingen.
+  resolveGroupLinks(groepen, byPdfId);
+  voegAnnotatiesToe(doc, nieuw);
 }
 
 // Cache for original PDF bytes (used by saver to avoid re-reading)
@@ -98,6 +113,7 @@ export async function reloadDocumentFromBytes(doc, bytes) {
     cMapUrl: '/pdfjs/web/cmaps/',
     cMapPacked: true,
     standardFontDataUrl: '/pdfjs/web/standard_fonts/',
+    wasmUrl: '/pdfjs/web/wasm/',
     isEvalSupported: false,
     verbosity: 0,
   }).promise;
@@ -122,8 +138,8 @@ export function clearCachedPdfBytes(filePath) {
 // worker wordt door rollup als asset geëmit — zie assetFileNames in
 // vite.config.js).
 pdfjsLib.GlobalWorkerOptions.workerSrc = import.meta.env?.DEV
-  ? '/node_modules/pdfjs-dist/build/pdf.worker.mjs'
-  : new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).href;
+  ? '/node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs'
+  : new URL('pdfjs-dist/legacy/build/pdf.worker.mjs', import.meta.url).href;
 
 /**
  * Wrap doc.pdfDoc.getPage with a recovery layer that re-loads the doc when
@@ -151,6 +167,7 @@ function _attachPdfDocGetPageRecovery(doc, filePath) {
           cMapUrl: '/pdfjs/web/cmaps/',
           cMapPacked: true,
           standardFontDataUrl: '/pdfjs/web/standard_fonts/',
+    wasmUrl: '/pdfjs/web/wasm/',
           isEvalSupported: false,
           verbosity: 0,
         }).promise;
@@ -352,6 +369,7 @@ export async function loadPDF(filePath, docIndex, preloadedData = null) {
       cMapUrl: '/pdfjs/web/cmaps/',
       cMapPacked: true,
       standardFontDataUrl: '/pdfjs/web/standard_fonts/',
+    wasmUrl: '/pdfjs/web/wasm/',
       isEvalSupported: false,
       verbosity: 0,
     }).promise;
@@ -414,6 +432,11 @@ export async function loadPDF(filePath, docIndex, preloadedData = null) {
 
     // Reset annotation state (per-document)
     doc.annotations = [];
+    // Annotatielagen (#468): opnieuw uit dit bestand te lezen.
+    doc.annotationLayers = [];
+    doc.currentLayerId = null;
+    doc._annotatieLagenGelezen = false;
+    doc._annotatieLaagOcgIds = null;
     doc._loadedAnnotationPages.clear();
     if (doc._annotationPagesReady) doc._annotationPagesReady.clear();
     doc._pagesNeedingColorUpdate.clear();
@@ -909,6 +932,7 @@ export async function createBlankPDF(widthPt, heightPt, numPages) {
       cMapUrl: '/pdfjs/web/cmaps/',
       cMapPacked: true,
       standardFontDataUrl: '/pdfjs/web/standard_fonts/',
+    wasmUrl: '/pdfjs/web/wasm/',
       isEvalSupported: false,
       verbosity: 0,
     }).promise;
@@ -999,6 +1023,17 @@ async function getSharedPdfLibDoc(doc) {
     console.log(`[PERF] PDFDocument.load DONE: ${(performance.now() - _pll0).toFixed(0)}ms`);
     doc._sharedPdfLibDoc = pdfLibDoc;
     doc._sharedPdfLibDocPromise = null;
+    // Annotatielagen (#468): de lijst lezen zodra het document er is — vóór
+    // de annotaties die dit document nodig hebben hun laag opzoeken. Eén keer
+    // per geopend bestand; daarna is het model de waarheid.
+    if (pasGelezenLagenToe(doc, leesAnnotatieLagen(pdfLibDoc))) {
+      refreshAnnotationLayers();
+      if (state.documents[state.activeDocumentIndex] === doc) {
+        import('../annotations/rendering.js').then((m) => {
+          if (doc.viewMode === 'continuous') m.redrawContinuous(); else m.redrawAnnotations();
+        }).catch(() => {});
+      }
+    }
     return pdfLibDoc;
   });
   return doc._sharedPdfLibDocPromise;
@@ -1021,7 +1056,7 @@ async function loadAnnotationsForSinglePage(doc, pageNum, waitForColors = false)
 
   const stampAnnots = annotations.filter(a => a.subtype === 'Stamp');
   const hasSquareAnnotations = annotations.some(a => a.subtype === 'Square');
-  const needsExtraData = annotations.some(a => ['FreeText', 'Square', 'Circle', 'Line', 'PolyLine', 'Polygon', 'Ink', 'Text', 'Highlight', 'Underline', 'StrikeOut', 'Squiggly', 'Stamp'].includes(a.subtype));
+  const needsExtraData = annotations.some(a => ['FreeText', 'Square', 'Circle', 'Line', 'PolyLine', 'Polygon', 'Ink', 'Text', 'Highlight', 'Underline', 'StrikeOut', 'Squiggly', 'Stamp', 'Caret'].includes(a.subtype));
 
   let stampImageMap = null;
   let annotColorMap = null;
@@ -1156,7 +1191,7 @@ export async function loadExistingAnnotations(doc) {
 
       const stampAnnots = annotations.filter(a => a.subtype === 'Stamp');
       const hasSquareAnnotations = annotations.some(a => a.subtype === 'Square');
-      const needsExtraData = annotations.some(a => ['FreeText', 'Square', 'Circle', 'Line', 'PolyLine', 'Polygon', 'Ink', 'Text', 'Highlight', 'Underline', 'StrikeOut', 'Squiggly', 'Stamp'].includes(a.subtype));
+      const needsExtraData = annotations.some(a => ['FreeText', 'Square', 'Circle', 'Line', 'PolyLine', 'Polygon', 'Ink', 'Text', 'Highlight', 'Underline', 'StrikeOut', 'Squiggly', 'Stamp', 'Caret'].includes(a.subtype));
 
       let stampImageMap = null;
       let annotColorMap = null;
@@ -1207,7 +1242,7 @@ export async function loadExistingAnnotations(doc) {
 
         const stampAnnots = annotations.filter(a => a.subtype === 'Stamp');
         const hasSquareAnnotations = annotations.some(a => a.subtype === 'Square');
-        const needsExtraData = annotations.some(a => ['FreeText', 'Square', 'Circle', 'Line', 'PolyLine', 'Polygon', 'Ink', 'Text', 'Highlight', 'Underline', 'StrikeOut', 'Squiggly', 'Stamp'].includes(a.subtype));
+        const needsExtraData = annotations.some(a => ['FreeText', 'Square', 'Circle', 'Line', 'PolyLine', 'Polygon', 'Ink', 'Text', 'Highlight', 'Underline', 'StrikeOut', 'Squiggly', 'Stamp', 'Caret'].includes(a.subtype));
 
         let stampImageMap = null;
         let annotColorMap = null;

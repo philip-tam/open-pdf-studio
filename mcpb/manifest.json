@@ -121,7 +121,7 @@
     },
     {
       "name": "app_list_annotations",
-      "description": "List the active document's annotations as compact JSON (id, type, page, core geometry, colors, text/measureText)."
+      "description": "List the active document's annotations as compact JSON (id, type, page, core geometry, colors, text/measureText, and the markup layer when it is not the default layer)."
     },
     {
       "name": "app_get_annotation",
@@ -188,6 +188,14 @@
       "description": "Return the active document's page count and current page."
     },
     {
+      "name": "app_get_page_text",
+      "description": "Read existing PDF page text without mouse automation."
+    },
+    {
+      "name": "app_replace_text",
+      "description": "Replace one existing PDF text span returned by app_get_page_text."
+    },
+    {
       "name": "app_set_measure_scale",
       "description": "Set the active document's measurement scale calibration (pixels per unit + unit, e.g."
     },
@@ -198,6 +206,10 @@
     {
       "name": "app_place_schedule",
       "description": "Build a quantities schedule (Staat) from the annotations in the open document and place it on the page as a table annotation."
+    },
+    {
+      "name": "app_structural_layout",
+      "description": "Set out a structural floor plan in one undoable step: the grid (lettered and numbered grid lines with bubbles), columns on the grid intersections, beams along the grid lines, a span-direction arrow per floor bay carrying the real span, spot elevations, position tags (position number / section / level) and - unless switched off - a quantity schedule grouped by IFC category."
     },
     {
       "name": "app_list_commands",
@@ -236,6 +248,18 @@
       "description": "List the printers the app knows, with the system default printer and, per printer, the driver, the port and whether it writes to a file instead of to paper."
     },
     {
+      "name": "app_list_layers",
+      "description": "List the markup layers of the active document in panel order: id, name, colour, visible, printable, locked, the number of markups on it, whether it is the current layer (where new markups land) and whether it is the default layer."
+    },
+    {
+      "name": "app_create_layer",
+      "description": "Create a markup layer in the active document, at the end of the layer list."
+    },
+    {
+      "name": "app_set_layer",
+      "description": "Change a markup layer of the active document: switch it on or off, make it printable or not, lock or unlock it, rename it, set its colour, or make it the current layer."
+    },
+    {
       "name": "app_snippet_flatten",
       "description": "Mark a pasted vector snippet as flattened: it stays visible but is no longer selectable, and on the next save it is drawn into the page content instead of being stored as an annotation."
     },
@@ -246,6 +270,14 @@
     {
       "name": "app_titleblock",
       "description": "Read or fill the title block fields by NAME (projectnaam, adres, opdrachtgever, status, projectnr, fase, auteur, schaal, datum_eerste, wijziging, documenttype, kenmerk — whatever the title block defines)."
+    },
+    {
+      "name": "app_floorplan",
+      "description": "Draw a building floor plan with the parts related to each other, instead of loose shapes stacked on top of one another."
+    },
+    {
+      "name": "app_facade_element",
+      "description": "Draw and edit a facade element in a floor plan: a curtain wall or a window frame, as ONE object along a line with an outer frame, mullions on the field boundaries and a panel in every field."
     }
   ],
   "keywords": [

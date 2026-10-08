@@ -19,11 +19,13 @@ import {
 
 import { state, getActiveDocument, clearSelection, isSelected } from '../../core/state.js';
 import { showProperties, hideProperties } from '../../ui/panels/properties-panel.js';
+import { selecteerRuimteVanTag } from '../../plattegrond/ruimte-selectie.js';
 import { redrawAnnotations, redrawContinuous } from '../../annotations/rendering.js';
 import { copyAnnotation, copyAnnotations, pasteFromClipboard, pasteAnnotationsInPlace, duplicateAnnotation } from '../../annotations/clipboard.js';
 import { cloneAnnotation } from '../../annotations/factory.js';
-import { commitAnnotationMutation } from '../../annotations/mutations.js';
-import { recordDelete, recordBulkDelete, recordModify } from '../../core/undo-manager.js';
+import { commitAnnotationMutation, deleteAnnotationsWithUndo } from '../../annotations/mutations.js';
+import { expandCorrectionGroups } from '../../annotations/corrections/model.js';
+import { recordModify, recordBulkModify } from '../../core/undo-manager.js';
 import { bringToFront, sendToBack, bringForward, sendBackward, rotateAnnotation, flipHorizontal, flipVertical } from '../../annotations/z-order.js';
 import { startTextEditing } from '../../tools/text-editing.js';
 import { openStickyPopup, closeStickyPopup } from '../stores/stickyNotePopupStore.js';
@@ -36,6 +38,10 @@ import {
   buildSysteemraster,
 } from '../../annotations/systeemraster.js';
 import { systeemrasterBuildOpts } from '../../annotations/systeemraster-scale.js';
+import { joinToegestaan, zetJoin, dichtstbijzijndEind, hoekTrimPlan, pasTrimToe } from '../../annotations/wand-join.js';
+import { wallHalfWidthPx } from '../../annotations/rendering/walls.js';
+import { dichtstbijzijndUiteinde } from '../../annotations/stramien-koppeling.js';
+import { stramienSlotStatus, schakelStramienSlot, slotLabelSleutel } from '../../annotations/stramien-slot.js';
 import { createDefaultPaneelTypen } from '../../annotations/systeem-typen.js';
 import { getSysteemTypeById } from '../../annotations/systeem-typen-registry.js';
 import { getSelectedText, clearTextSelection } from '../../text/text-selection.js';
@@ -43,7 +49,15 @@ import { showCalibrationDialog } from '../../annotations/measurement.js';
 import { openDialog } from '../stores/dialogStore.js';
 import { getSelectedPagesArray, formatPageRangeString, selectAllPages, clearPageSelection } from '../stores/panels/thumbnailStore.js';
 import { hiddenStatuses, toggleHiddenStatus } from '../stores/panels/annotationsStore.js';
+import { layersVersion, moveAnnotationsToAnnotationLayer } from '../stores/annotationLayersStore.js';
+import { layerRows, layerOf } from '../../annotations/annotatie-lagen.js';
 import { useTranslation } from '../../i18n/useTranslation.js';
+import i18next from '../../i18n/config.js';
+import { gevelPreset } from '../../gevelelement/herkenning.js';
+import { paneelTypenVoor, typeNaam } from '../../gevelelement/catalogus.js';
+import { indeling, veldBij, voegStijlToe, verwijderStijl, wisselPaneel } from '../../gevelelement/indeling.js';
+import { pasToe, zetInWand } from '../../gevelelement/app-bewerking.js';
+import { updateStatusMessage } from '../../ui/chrome/status-bar.js';
 import {
   revealInFileManager,
   revealInFileManagerLabelKey,
@@ -100,6 +114,36 @@ function Submenu(props) {
   );
 }
 
+// "Laag:" met de lagen van het document (#468). Het vinkje staat bij de laag
+// van de markering(en); een klik verplaatst ze daarheen (één undo-stap). Bij
+// markeringen op verschillende lagen staat er geen waarde en geen vinkje.
+function LayerSubmenu(props) {
+  const { t } = useTranslation('context');
+  const { t: tRibbon } = useTranslation('ribbon');
+  const anns = () => (props.annotations() || []).filter(Boolean);
+  const rijen = () => {
+    layersVersion();
+    return layerRows(getActiveDocument(), tRibbon('annotationLayers.defaultName'));
+  };
+  const gedeeldeLaag = () => {
+    const doc = getActiveDocument();
+    const ids = new Set(anns().map((a) => layerOf(doc, a).id));
+    return ids.size === 1 ? [...ids][0] : null;
+  };
+  const waarde = () => rijen().find((r) => r.id === gedeeldeLaag())?.name || '';
+  return (
+    <Submenu icon={layerIcon} label={<>{t('annotation.layer')} <span class="context-menu-value">{waarde()}</span></>}
+      disabled={anns().length === 0}>
+      <For each={rijen()}>
+        {(r) => (
+          <MenuItem label={r.name} checkbox={true} checked={r.id === gedeeldeLaag()}
+            onClick={() => moveAnnotationsToAnnotationLayer(anns(), r.id)} />
+        )}
+      </For>
+    </Submenu>
+  );
+}
+
 function ArrangeButton(props) {
   const handleClick = (e) => {
     e.stopPropagation();
@@ -118,9 +162,21 @@ function AnnotationMenuContent() {
   const { t: tCommon } = useTranslation('common');
   const ann = () => targetAnnotation();
   const isLocked = () => ann()?.locked || false;
+  // Knippen, verwijderen en platmaken nemen bij een vervanging (#508) de andere
+  // helft mee: vergrendeld als een van beide helften vergrendeld is.
+  const isPaarVergrendeld = () => { const a = ann(); return !!a && expandCorrectionGroups(getActiveDocument()?.annotations, [a]).some(x => x.locked); };
   const isLineType = () => ['line', 'arrow'].includes(ann()?.type);
   const isMeasureDistance = () => ann()?.type === 'measureDistance';
   const isMeasureArea = () => ann()?.type === 'measureArea' || ann()?.type === 'filledArea';
+  // Wand (#476): het uiteinde bij de rechtsklik. Zonder klikpunt (menu via
+  // een ander pad geopend) geen join-schakelaar — dan is niet duidelijk welk
+  // uiteinde bedoeld is.
+  const wandEind = () => {
+    const a = ann();
+    const v = vertexContext();
+    if (a?.type !== 'wall' || v?.kind !== 'wand' || v.annotationId !== a.id) return null;
+    return dichtstbijzijndEind(a, { x: v.appX, y: v.appY });
+  };
 
   const statusItems = [
     { key: 'None', label: () => t('annotation.statusNone') },
@@ -136,6 +192,8 @@ function AnnotationMenuContent() {
     const v = vertexContext();
     const a = ann();
     if (!v || !a || a.id !== v.annotationId) return null;
+    // Wand-context draagt alleen het klikpunt (zie wandEind hieronder).
+    if (v.kind === 'wand') return null;
     // Systeem-paneel (rechtsklik op een cel van een systeemraster/-plafond):
     // paneeltype direct wisselen — het ASSORTIMENT komt als data van het
     // systeemtype (typeDef.paneelTypen) — of het paneel vervangen door een
@@ -170,6 +228,82 @@ function AnnotationMenuContent() {
         } catch (err) { console.error('[contextmenu] sparing toevoegen', err); }
         hideMenu();
       } : null;
+    // Gevelelement (vliesgevel/kozijn): stijl hier toevoegen, dichtstbijzijnde
+    // stijl verwijderen, paneel van het aangeklikte veld wisselen, en een los
+    // getekend element in de wand eronder zetten. Elke keuze is één
+    // ongedaan-stap (app-bewerking.js).
+    if (v.kind === 'gevelelement') {
+      const presetId = gevelPreset(a);
+      if (!presetId) return null;
+      const lay = indeling(a.params, presetId);
+      const u = Number.isFinite(v.uMm) ? v.uMm : null;
+      const sub = v.onderdeel;
+      const laatste = lay.stijlen.length - 1;
+      const veldIndex = sub?.soort === 'paneel' ? sub.index : (u !== null ? veldBij(lay, u) : -1);
+      let stijlIndex = sub?.soort === 'stijl' && sub.index > 0 && sub.index < laatste ? sub.index : -1;
+      if (stijlIndex < 0 && u !== null) {
+        let beste = Infinity;
+        for (const st of lay.stijlen.slice(1, laatste)) {
+          const d = Math.abs(st.posMm - u);
+          if (d < beste) { beste = d; stijlIndex = st.index; }
+        }
+      }
+      const huidig = lay.velden[veldIndex]?.paneel?.type;
+      const meld = (r) => {
+        if (r && !r.ok) {
+          try { updateStatusMessage(`${t('gevelelement.editRefused')}: ${r.error}`); } catch (_) { /* optioneel */ }
+        }
+        hideMenu();
+      };
+      return (
+        <>
+          <MenuItem label={t('gevelelement.addMullionHere')} disabled={isLocked() || u === null}
+            onClick={() => meld(pasToe(a, (p, id) => voegStijlToe(p, id, u),
+              { onderdeel: (r) => ({ soort: 'stijl', index: r.index }) }))} />
+          <MenuItem label={t('gevelelement.removeMullion')} disabled={isLocked() || stijlIndex < 0}
+            onClick={() => meld(pasToe(a, (p, id) => verwijderStijl(p, id, stijlIndex),
+              { onderdeel: { soort: 'paneel', index: stijlIndex - 1 } }))} />
+          <Show when={veldIndex >= 0}>
+            <For each={paneelTypenVoor(presetId)}>{(pt) => (
+              <MenuItem label={t('gevelelement.panelItem', { name: typeNaam(pt, i18next.language) })}
+                checkbox checked={huidig === pt.id} disabled={isLocked()}
+                onClick={() => meld(pasToe(a, (p, id) => wisselPaneel(p, id, veldIndex, pt.id),
+                  { onderdeel: { soort: 'paneel', index: veldIndex } }))} />
+            )}</For>
+          </Show>
+          <Show when={!a.params?.host}>
+            <MenuItem label={t('gevelelement.placeInWall')} disabled={isLocked()}
+              onClick={() => {
+                const r = zetInWand(a);
+                if (!r.ok && r.error === 'no wall under the element') {
+                  try { updateStatusMessage(t('gevelelement.noHostWall')); } catch (_) { /* optioneel */ }
+                  hideMenu();
+                  return;
+                }
+                meld(r);
+              }} />
+          </Show>
+          <Separator />
+        </>
+      );
+    }
+    // Stramienlijn: koppeling van het uiteinde het dichtst bij de klik los
+    // zetten of weer vastzetten (zelfde schakelaar als het slotje).
+    if (v.kind === 'stramien') {
+      if (!Number.isFinite(v.appX)) return null;
+      const eind = dichtstbijzijndUiteinde(a, { x: v.appX, y: v.appY });
+      const status = stramienSlotStatus(a, eind);
+      if (!status) return null;
+      return (
+        <>
+          <MenuItem icon={status === 'dicht' ? unlockedIcon : lockedIcon}
+            label={t(slotLabelSleutel(status))}
+            disabled={isLocked()}
+            onClick={() => schakelStramienSlot(a, eind, status !== 'dicht')} />
+          <Separator />
+        </>
+      );
+    }
     if (v.kind === 'systeem') {
       return (
         <>
@@ -333,13 +467,37 @@ function AnnotationMenuContent() {
         <Separator />
       </Show>
 
-      <MenuItem icon={cutIcon} label={tCommon('cut')} shortcut="Ctrl+X" disabled={isLocked()} onClick={() => {
+      <Show when={wandEind()}>
+        {/* wandEind() leest het klikpunt (vertexContext, bij elke
+            rechtsklik nieuw), zodat het label na een wissel klopt. */}
+        <MenuItem
+          label={joinToegestaan(ann(), wandEind())
+            ? t('annotation.wallJoinDisallow')
+            : t('annotation.wallJoinAllow')}
+          disabled={isLocked()}
+          onClick={() => {
+            const a = ann();
+            const eind = wandEind();
+            if (!a || !eind) return;
+            const nu = joinToegestaan(a, eind);
+            // Eén ongedaan-stap; de partnerwand leest de vlag bij het
+            // hertekenen, dus hij hoeft zelf niet te veranderen.
+            commitAnnotationMutation(a, (w) => zetJoin(w, eind, !nu));
+            if (getActiveDocument()?.selectedAnnotation === a) showProperties(a);
+            redraw();
+          }}
+        />
+        <Separator />
+      </Show>
+
+      <MenuItem icon={cutIcon} label={tCommon('cut')} shortcut="Ctrl+X" disabled={isPaarVergrendeld()} onClick={() => {
         const a = ann();
         const doc = getActiveDocument();
-        copyAnnotation(a);
-        const idx = (doc?.annotations || []).indexOf(a);
-        recordDelete(a, idx);
-        if (doc) doc.annotations = doc.annotations.filter(x => x !== a);
+        // Een vervanging (#508) wordt in haar geheel geknipt.
+        const weg = expandCorrectionGroups(doc?.annotations, [a]);
+        if (weg.length > 1) copyAnnotations(weg);
+        else copyAnnotation(a);
+        deleteAnnotationsWithUndo(doc, weg);
         hideProperties();
         redraw();
       }} />
@@ -363,7 +521,7 @@ function AnnotationMenuContent() {
         <Separator />
       </Show>
 
-      <MenuItem icon={deleteIcon} label={tCommon('delete')} shortcut="Delete" disabled={isLocked()} onClick={async () => {
+      <MenuItem icon={deleteIcon} label={tCommon('delete')} shortcut="Delete" disabled={isPaarVergrendeld()} onClick={async () => {
         const a = ann();
         const confirmed = await showConfirm({
           title: t('deleteAnnotation.title'),
@@ -371,15 +529,13 @@ function AnnotationMenuContent() {
           preferenceKey: 'confirmBeforeDelete'
         });
         if (confirmed) {
-          const doc = getActiveDocument();
-          const idx = (doc?.annotations || []).indexOf(a);
-          recordDelete(a, idx);
-          if (doc) doc.annotations = doc.annotations.filter(x => x !== a);
+          // Een vervanging (#508) gaat in haar geheel, met één ongedaan-stap.
+          deleteAnnotationsWithUndo(getActiveDocument(), [a]);
           hideProperties();
           redraw();
         }
       }} />
-      <MenuItem icon={flattenIcon} label={tCommon('flatten')} disabled={isLocked()} onClick={() => {
+      <MenuItem icon={flattenIcon} label={tCommon('flatten')} disabled={isPaarVergrendeld()} onClick={() => {
         const a = ann();
         if (a) {
           commitAnnotationMutation(a, annotation => { annotation.flattened = true; });
@@ -455,9 +611,7 @@ function AnnotationMenuContent() {
 
       <Separator />
 
-      <Submenu icon={layerIcon} label={<>{t('annotation.layer')} <span class="context-menu-value">{tCommon('none')}</span></>}>
-        <MenuItem label={t('annotation.noLayersAvailable')} disabled={true} />
-      </Submenu>
+      <LayerSubmenu annotations={() => (ann() ? [ann()] : [])} />
 
       <Submenu icon={arrangeIcon} label={t('annotation.arrange')}>
         <div class="arrange-icon-grid">
@@ -578,6 +732,35 @@ function AnnotationMenuContent() {
           }
         }} />
         <Separator />
+        {/* Maatketting verlengen of inkorten (#477): dimension-chain-tool.js. */}
+        <MenuItem icon={convertMeasurementIcon} label={t('annotation.dimChainAdd')} disabled={isLocked()} onClick={() => {
+          const a = ann();
+          if (a) {
+            setTool('dimChainAdd');
+            // Pas na het kiezen: het wisselen ruimt het vorige doel op, en een
+            // geweigerde wissel (alleen-lezen PDF/A) laat geen doel achter.
+            if (state.currentTool === 'dimChainAdd') state.dimChainTargetId = a.id;
+          }
+        }} />
+        <MenuItem icon={convertMeasurementIcon} label={t('annotation.dimChainRemove')} disabled={isLocked()} onClick={() => {
+          const a = ann();
+          if (a) {
+            setTool('dimChainRemove');
+            // Pas na het kiezen: het wisselen ruimt het vorige doel op, en een
+            // geweigerde wissel (alleen-lezen PDF/A) laat geen doel achter.
+            if (state.currentTool === 'dimChainRemove') state.dimChainTargetId = a.id;
+          }
+        }} />
+        <Separator />
+      </Show>
+
+      {/* Ruimtetag: de ruimte zelf is met een klik niet te pakken (#477). */}
+      <Show when={ann()?.type === 'parametricSymbol' && ann()?.symbolId === 'room-tag'}>
+        <MenuItem icon={convertMeasurementIcon} label={t('annotation.selectRoom')} shortcut="Tab" onClick={() => {
+          const a = ann();
+          if (a) selecteerRuimteVanTag(a);
+        }} />
+        <Separator />
       </Show>
 
       <Show when={isMeasureArea()}>
@@ -623,6 +806,14 @@ function AnnotationMenuContent() {
 function MultiAnnotationMenuContent() {
   const { t } = useTranslation('context');
   const count = () => multiSelectCount();
+  // Hoek trimmen (#476): de geselecteerde wanden. count() en position()
+  // (bij elke rechtsklik een nieuw object) maken dit reactief op elke nieuwe
+  // multiselectie; de selectie zelf is geen signaal.
+  const geselecteerdeWanden = () => {
+    count(); position();
+    return (getActiveDocument()?.selectedAnnotations || [])
+      .filter(a => a?.type === 'wall' && !a.locked);
+  };
 
   return (
     <>
@@ -632,11 +823,11 @@ function MultiAnnotationMenuContent() {
       }} />
       <MenuItem icon={cutIcon} label={t('multiSelect.cutAnnotations', { count: count() })} onClick={() => {
         const _d = getActiveDocument();
-        const _sel = _d ? _d.selectedAnnotations : [];
+        const _sel = _d ? expandCorrectionGroups(_d.annotations, _d.selectedAnnotations) : [];
+        // Geen vergrendelde helft van een vervanging ongevraagd meenemen.
+        if (_sel.some(a => a.locked && !_d.selectedAnnotations.includes(a))) return;
         copyAnnotations(_sel);
-        recordBulkDelete(_sel);
-        const toDelete = new Set(_sel);
-        if (_d) _d.annotations = _d.annotations.filter(a => !toDelete.has(a));
+        deleteAnnotationsWithUndo(_d, _sel);
         clearSelection();
         hideProperties();
         redraw();
@@ -655,6 +846,10 @@ function MultiAnnotationMenuContent() {
 
       <Separator />
 
+      <LayerSubmenu annotations={() => [...(getActiveDocument()?.selectedAnnotations || [])]} />
+
+      <Separator />
+
       <MenuItem label={t('multiSelect.alignLeft')} onClick={() => { alignAnnotations('left'); redraw(); }} />
       <MenuItem label={t('multiSelect.alignRight')} onClick={() => { alignAnnotations('right'); redraw(); }} />
       <MenuItem label={t('multiSelect.alignTop')} onClick={() => { alignAnnotations('top'); redraw(); }} />
@@ -667,6 +862,25 @@ function MultiAnnotationMenuContent() {
         <MenuItem label={t('multiSelect.distributeVertically')} onClick={() => { alignAnnotations('distribute-v'); redraw(); }} />
       </Show>
 
+      <Show when={geselecteerdeWanden().length >= 2}>
+        <Separator />
+        <MenuItem label={t('multiSelect.trimWallCorners')} onClick={() => {
+          const wanden = geselecteerdeWanden();
+          const plan = hoekTrimPlan(wanden, wallHalfWidthPx);
+          const geraakt = wanden.filter(w => plan.some(z => z.id === w.id));
+          if (!geraakt.length) return;
+          // Alles in één ongedaan-stap.
+          const voor = geraakt.map(w => cloneAnnotation(w));
+          const nu = new Date().toISOString();
+          for (const w of geraakt) {
+            pasTrimToe(w, plan);
+            w.modifiedAt = nu;
+          }
+          recordBulkModify(geraakt, voor);
+          redraw();
+        }} />
+      </Show>
+
       <Separator />
 
       <MenuItem icon={deleteIcon} label={t('multiSelect.deleteAnnotations', { count: count() })} onClick={async () => {
@@ -677,10 +891,7 @@ function MultiAnnotationMenuContent() {
         });
         if (confirmed) {
           const _d = getActiveDocument();
-          const _sel = _d ? _d.selectedAnnotations : [];
-          recordBulkDelete(_sel);
-          const toDelete = new Set(_sel);
-          if (_d) _d.annotations = _d.annotations.filter(a => !toDelete.has(a));
+          deleteAnnotationsWithUndo(_d, _d ? [..._d.selectedAnnotations] : []);
           clearSelection();
           hideProperties();
           redraw();
@@ -894,14 +1105,14 @@ function ThumbnailMenuContent() {
       <MenuItem icon={thumbnailRotateLeftIcon}
         label={isMulti() ? t('thumbnail.rotateLeftPages', { count: count() }) : t('thumbnail.rotateLeft')}
         onClick={async () => {
-          const { rotatePage } = await import('../../pdf/renderer.js');
-          for (const p of pages()) await rotatePage(-90, p);
+          const { draaiPaginas } = await import('../../pdf/pagina-draaien.js');
+          await draaiPaginas(-90, pages());
         }} />
       <MenuItem icon={thumbnailRotateRightIcon}
         label={isMulti() ? t('thumbnail.rotateRightPages', { count: count() }) : t('thumbnail.rotateRight')}
         onClick={async () => {
-          const { rotatePage } = await import('../../pdf/renderer.js');
-          for (const p of pages()) await rotatePage(90, p);
+          const { draaiPaginas } = await import('../../pdf/pagina-draaien.js');
+          await draaiPaginas(90, pages());
         }} />
 
       <Separator />
