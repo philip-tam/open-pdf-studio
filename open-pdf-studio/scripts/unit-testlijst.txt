@@ -250,3 +250,4 @@ js/pdf/saver/ap-opacity.test.mjs
 js/pdf/saver/ap-opacity-opslaan.test.mjs
 js/pdf/print-meerperblad.test.mjs
 js/pdf/flattened-copy.test.mjs
+js/text/wrap-tekst.test.mjs
