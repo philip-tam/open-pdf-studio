@@ -251,3 +251,5 @@ js/pdf/saver/ap-opacity-opslaan.test.mjs
 js/pdf/print-meerperblad.test.mjs
 js/pdf/flattened-copy.test.mjs
 js/text/wrap-tekst.test.mjs
+js/tools/embedded-image-edit.test.mjs
+js/tools/embedded-image-drag.test.mjs
