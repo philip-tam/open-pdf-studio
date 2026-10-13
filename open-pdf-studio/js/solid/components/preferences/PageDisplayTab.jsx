@@ -31,6 +31,17 @@ export default function PageDisplayTab(props) {
           <input type="number" min="50" max="300" value={p.zoomDpi[0]()} onInput={e => p.zoomDpi[1](parseInt(e.target.value) || 96)} />
         </div>
         <div class="pref-row">
+          <label>{t('pageDisplay.defaultView')}</label>
+          <PrefSelect
+            value={p.defaultViewMode[0]}
+            setValue={p.defaultViewMode[1]}
+            options={[
+              { value: 'single', label: t('pageDisplay.defaultViewSingle') },
+              { value: 'continuous', label: t('pageDisplay.defaultViewContinuous') },
+            ]}
+          />
+        </div>
+        <div class="pref-row">
           <label>{t('pageDisplay.pageSharpen')}</label>
           <PrefSelect
             value={p.pageSharpen[0]}

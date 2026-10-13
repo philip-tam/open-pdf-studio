@@ -5,6 +5,7 @@ export interface Preferences {
   // Weergavemodus waarmee een document opent: 'continuous' (doorlopend,
   // de standaard voor nieuwe installaties) of 'single' (één pagina).
   defaultViewMode: 'continuous' | 'single';
+  defaultViewModeV2: boolean;
 
   // General
   authorName: string;

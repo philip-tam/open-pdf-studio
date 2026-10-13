@@ -1,3 +1,4 @@
+import { standaardWeergave } from '../../core/weergave-standaard.js';
 import { state, createDocument, getActiveDocument, findDocumentByPath, clearSelection } from '../../core/state.js';
 import { appVersion } from '../../core/app-version.js';
 import { renderPage, renderContinuous, clearPdfView } from '../../pdf/renderer.js';
@@ -37,7 +38,7 @@ export function createTab(filePath = null, autoSwitch = true) {
   const doc = createDocument(filePath);
   // Weergavemodus uit de voorkeuren; doorlopend scrollen is de standaard
   // (createDocument zelf blijft een pure helper).
-  doc.viewMode = state.preferences?.defaultViewMode === 'single' ? 'single' : 'continuous';
+  doc.viewMode = standaardWeergave(state.preferences);
   state.documents.push(doc);
 
   // Switch to the new tab

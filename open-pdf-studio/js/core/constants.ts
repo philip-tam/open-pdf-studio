@@ -51,7 +51,9 @@ export const DEFAULT_PREFERENCES: Preferences = {
   // default) rather than Single's one-wheel-tick-jumps-a-whole-page
   // behaviour. See ViewTab.jsx's "Single"/"Continuous" buttons to switch
   // per document.
-  defaultViewMode: 'continuous',
+  defaultViewMode: 'single',
+  // Zet de oude standaard (doorlopend) één keer om naar enkelpagina; zie core/weergave-standaard.js.
+  defaultViewModeV2: false,
 
   // General — authorName defaults to '' (resolved to OS username at load time)
   authorName: '',

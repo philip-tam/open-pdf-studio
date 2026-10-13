@@ -211,6 +211,9 @@
     "pageSharpenLevel2": "Gemiddeld",
     "pageSharpenLevel3": "Sterk",
     "pageSharpenLevel4": "Maximaal",
+    "defaultView": "Standaardweergave voor geopende documenten",
+    "defaultViewSingle": "Enkele pagina",
+    "defaultViewContinuous": "Doorlopend scrollen",
     "showScrollbars": "Canvas-schuifbalken tonen"
   },
   "measurement": {

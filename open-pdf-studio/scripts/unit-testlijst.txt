@@ -254,3 +254,4 @@ js/text/wrap-tekst.test.mjs
 js/tools/embedded-image-edit.test.mjs
 js/tools/embedded-image-drag.test.mjs
 js/tools/scan-text-geom.test.mjs
+js/core/weergave-standaard.test.mjs
