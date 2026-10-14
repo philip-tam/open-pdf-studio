@@ -82,7 +82,7 @@
     "orderVertical": "Vertical",
     "orderVerticalReversed": "Vertical reversed",
     "pageBorder": "Print page border",
-    "perSheetNote": "Each page is scaled to fit its cell, so the page scaling above does not apply. The preview shows a single page.",
+    "perSheetNote": "Each page is scaled to fit its cell, so the page scaling above does not apply.",
     "autoRotate": "Auto-Rotate",
     "autoCenter": "Auto-Center",
     "advancedOptions": "Advanced Print Options",
@@ -983,5 +983,11 @@
     "colLabel": "Page label",
     "ocrLegend": "Pages marked OCR were read by text recognition; check them before applying.",
     "reset": "Reset to page numbers"
+  },
+  "pdfPassword": {
+    "title": "Password Required",
+    "message": "\"{{fileName}}\" is protected with a password. Enter the password to open it read-only.",
+    "label": "Password:",
+    "wrong": "Wrong password, try again."
   }
 }

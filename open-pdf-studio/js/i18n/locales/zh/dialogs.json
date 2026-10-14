@@ -82,7 +82,7 @@
     "orderVertical": "纵向",
     "orderVerticalReversed": "纵向（反向）",
     "pageBorder": "打印页面边框",
-    "perSheetNote": "每页都会缩放以适合其单元格，因此上方的页面缩放设置不适用。预览仅显示单个页面。",
+    "perSheetNote": "每页都会缩放以适合其单元格，因此上方的页面缩放设置不适用。",
     "autoRotate": "自动旋转",
     "autoCenter": "自动居中",
     "advancedOptions": "高级打印选项",
@@ -983,5 +983,11 @@
     "colLabel": "页面的标签",
     "ocrLegend": "标有 OCR 的页面是通过文字识别读取的；应用前请检查。",
     "reset": "恢复为页码"
+  },
+  "pdfPassword": {
+    "title": "需要密码",
+    "message": "“{{fileName}}”受密码保护。输入密码以只读方式打开。",
+    "label": "密码：",
+    "wrong": "密码错误，请重试。"
   }
 }

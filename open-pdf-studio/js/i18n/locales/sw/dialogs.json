@@ -82,7 +82,7 @@
     "orderVertical": "Wima",
     "orderVerticalReversed": "Wima kinyume",
     "pageBorder": "Chapisha mpaka wa ukurasa",
-    "perSheetNote": "Kila ukurasa hupimwa kutoshea kisanduku chake, kwa hivyo ukubwa wa ukurasa ulio juu hautumiki. Hakikisho linaonyesha ukurasa mmoja tu.",
+    "perSheetNote": "Kila ukurasa hupimwa kutoshea kisanduku chake, kwa hivyo ukubwa wa ukurasa ulio juu hautumiki.",
     "autoRotate": "Zungusha Kiotomatiki",
     "autoCenter": "Weka Katikati Kiotomatiki",
     "advancedOptions": "Chaguo za Kina za Uchapishaji",
@@ -983,5 +983,11 @@
     "colLabel": "Lebo ya ukurasa",
     "ocrLegend": "Kurasa zilizowekwa alama ya OCR zilisomwa kwa utambuzi wa maandishi; zikague kabla ya kutekeleza.",
     "reset": "Rejesha namba za kurasa"
+  },
+  "pdfPassword": {
+    "title": "Nenosiri linahitajika",
+    "message": "\"{{fileName}}\" imelindwa kwa nenosiri. Weka nenosiri ili kuifungua kwa kusoma tu.",
+    "label": "Nenosiri:",
+    "wrong": "Nenosiri si sahihi, jaribu tena."
   }
 }

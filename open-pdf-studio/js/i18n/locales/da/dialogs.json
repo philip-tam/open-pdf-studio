@@ -82,7 +82,7 @@
     "orderVertical": "Lodret",
     "orderVerticalReversed": "Lodret omvendt",
     "pageBorder": "Udskriv sidekant",
-    "perSheetNote": "Hver side skaleres, så den passer i sin celle, så sideskaleringen ovenfor gælder ikke. Forhåndsvisningen viser en enkelt side.",
+    "perSheetNote": "Hver side skaleres, så den passer i sin celle, så sideskaleringen ovenfor gælder ikke.",
     "autoRotate": "Auto-roter",
     "autoCenter": "Auto-centrer",
     "advancedOptions": "Avancerede udskriftsindstillinger",
@@ -983,5 +983,11 @@
     "colLabel": "Sideetiket",
     "ocrLegend": "Sider markeret med OCR er læst med tekstgenkendelse; kontroller dem, før du anvender.",
     "reset": "Nulstil til sidetal"
+  },
+  "pdfPassword": {
+    "title": "Adgangskode påkrævet",
+    "message": "\"{{fileName}}\" er beskyttet med en adgangskode. Angiv adgangskoden for at åbne den skrivebeskyttet.",
+    "label": "Adgangskode:",
+    "wrong": "Forkert adgangskode, prøv igen."
   }
 }

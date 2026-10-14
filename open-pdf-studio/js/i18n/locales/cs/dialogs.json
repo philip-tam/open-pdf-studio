@@ -82,7 +82,7 @@
     "orderVertical": "Svisle",
     "orderVerticalReversed": "Svisle obráceně",
     "pageBorder": "Tisknout okraj stránky",
-    "perSheetNote": "Každá stránka se přizpůsobí své buňce, takže výše uvedené měřítko stránky se nepoužije. Náhled zobrazuje jedinou stránku.",
+    "perSheetNote": "Každá stránka se přizpůsobí své buňce, takže výše uvedené měřítko stránky se nepoužije.",
     "autoRotate": "Automatické otočení",
     "autoCenter": "Automatické vystředění",
     "advancedOptions": "Pokročilé možnosti tisku",
@@ -983,5 +983,11 @@
     "colLabel": "Popisek stránky",
     "ocrLegend": "Stránky označené OCR byly načteny rozpoznáváním textu; před použitím je zkontrolujte.",
     "reset": "Obnovit čísla stránek"
+  },
+  "pdfPassword": {
+    "title": "Je vyžadováno heslo",
+    "message": "„{{fileName}}“ je chráněn heslem. Zadejte heslo a otevřete jej jen pro čtení.",
+    "label": "Heslo:",
+    "wrong": "Nesprávné heslo, zkuste to znovu."
   }
 }

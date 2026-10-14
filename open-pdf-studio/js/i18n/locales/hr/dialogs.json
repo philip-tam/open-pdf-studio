@@ -82,7 +82,7 @@
     "orderVertical": "Okomito",
     "orderVerticalReversed": "Okomito obrnuto",
     "pageBorder": "Ispiši obrub stranice",
-    "perSheetNote": "Svaka se stranica prilagođava svojoj ćeliji, pa se gornje skaliranje stranice ne primjenjuje. Pretpregled prikazuje jednu stranicu.",
+    "perSheetNote": "Svaka se stranica prilagođava svojoj ćeliji, pa se gornje skaliranje stranice ne primjenjuje.",
     "autoRotate": "Automatsko rotiranje",
     "autoCenter": "Automatsko centriranje",
     "advancedOptions": "Napredne opcije ispisa",
@@ -983,5 +983,11 @@
     "colLabel": "Oznaka stranice",
     "ocrLegend": "Stranice označene s OCR pročitane su prepoznavanjem teksta; provjerite ih prije primjene.",
     "reset": "Vrati na brojeve stranica"
+  },
+  "pdfPassword": {
+    "title": "Potrebna je lozinka",
+    "message": "„{{fileName}}” zaštićen je lozinkom. Unesite lozinku da biste ga otvorili samo za čitanje.",
+    "label": "Lozinka:",
+    "wrong": "Pogrešna lozinka, pokušajte ponovno."
   }
 }

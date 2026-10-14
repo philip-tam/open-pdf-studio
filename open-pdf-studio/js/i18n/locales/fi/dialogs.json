@@ -82,7 +82,7 @@
     "orderVertical": "Pystysuunta",
     "orderVerticalReversed": "Pystysuunta käänteinen",
     "pageBorder": "Tulosta sivun reunus",
-    "perSheetNote": "Jokainen sivu skaalataan sopimaan soluunsa, joten yllä oleva sivun skaalaus ei ole käytössä. Esikatselu näyttää yhden sivun.",
+    "perSheetNote": "Jokainen sivu skaalataan sopimaan soluunsa, joten yllä oleva sivun skaalaus ei ole käytössä.",
     "autoRotate": "Automaattinen kierto",
     "autoCenter": "Automaattinen keskitys",
     "advancedOptions": "Tulostuksen lisäasetukset",
@@ -983,5 +983,11 @@
     "colLabel": "Sivun nimiö",
     "ocrLegend": "OCR-merkityt sivut luettiin tekstintunnistuksella; tarkista ne ennen käyttöönottoa.",
     "reset": "Palauta sivunumerot"
+  },
+  "pdfPassword": {
+    "title": "Salasana vaaditaan",
+    "message": "”{{fileName}}” on suojattu salasanalla. Avaa se vain luku -tilassa antamalla salasana.",
+    "label": "Salasana:",
+    "wrong": "Väärä salasana, yritä uudelleen."
   }
 }

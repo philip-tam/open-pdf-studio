@@ -82,7 +82,7 @@
     "orderVertical": "Vertikal",
     "orderVerticalReversed": "Vertikal umgekehrt",
     "pageBorder": "Seitenrahmen drucken",
-    "perSheetNote": "Jede Seite wird auf ihre Zelle skaliert, daher gilt die obige Seitenskalierung nicht. Die Vorschau zeigt eine einzelne Seite.",
+    "perSheetNote": "Jede Seite wird auf ihre Zelle skaliert, daher gilt die obige Seitenskalierung nicht.",
     "autoRotate": "Automatisch drehen",
     "autoCenter": "Automatisch zentrieren",
     "advancedOptions": "Erweiterte Druckoptionen",
@@ -983,5 +983,11 @@
     "colLabel": "Seitenbeschriftung",
     "ocrLegend": "Mit OCR markierte Seiten wurden per Texterkennung gelesen; prüfen Sie sie vor dem Anwenden.",
     "reset": "Auf Seitenzahlen zurücksetzen"
+  },
+  "pdfPassword": {
+    "title": "Kennwort erforderlich",
+    "message": "„{{fileName}}“ ist mit einem Kennwort geschützt. Geben Sie das Kennwort ein, um die Datei schreibgeschützt zu öffnen.",
+    "label": "Kennwort:",
+    "wrong": "Falsches Kennwort, bitte erneut versuchen."
   }
 }

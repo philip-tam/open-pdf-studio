@@ -82,7 +82,7 @@
     "orderVertical": "Dikey",
     "orderVerticalReversed": "Dikey, ters",
     "pageBorder": "Sayfa kenarlığını yazdır",
-    "perSheetNote": "Her sayfa kendi hücresine sığacak şekilde ölçeklenir; bu nedenle yukarıdaki sayfa ölçeklendirmesi uygulanmaz. Önizleme tek bir sayfa gösterir.",
+    "perSheetNote": "Her sayfa kendi hücresine sığacak şekilde ölçeklenir; bu nedenle yukarıdaki sayfa ölçeklendirmesi uygulanmaz.",
     "autoRotate": "Otomatik Döndür",
     "autoCenter": "Otomatik Ortala",
     "advancedOptions": "Gelişmiş Yazdırma Seçenekleri",
@@ -983,5 +983,11 @@
     "colLabel": "Sayfa etiketi",
     "ocrLegend": "OCR işaretli sayfalar metin tanıma ile okundu; uygulamadan önce kontrol edin.",
     "reset": "Sayfa numaralarına sıfırla"
+  },
+  "pdfPassword": {
+    "title": "Parola gerekli",
+    "message": "\"{{fileName}}\" parola ile korunuyor. Salt okunur açmak için parolayı girin.",
+    "label": "Parola:",
+    "wrong": "Yanlış parola, tekrar deneyin."
   }
 }

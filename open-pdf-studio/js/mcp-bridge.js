@@ -236,10 +236,29 @@ async function handleOpenPdf(params) {
   tabsMod.switchToTab(tabIndex);
   const doc = stateMod.state.documents[tabIndex];
   if (!doc.pdfDoc) {
+    // A PDF with an open password shows the password dialog and waits for
+    // the user; the bridge answers right away instead of blocking until a
+    // timeout. The load continues in the app once the password is entered.
+    const pwStore = await import('./solid/stores/wachtwoordDialoogStore.js');
+    let stopListening = () => {};
+    const passwordAsked = new Promise((resolve) => {
+      stopListening = pwStore.bijWachtwoordVraag(() => resolve('password'));
+    });
+    const loading = loaderMod.loadPDF(path, tabIndex).then(() => 'loaded');
+    let first;
     try {
-      await loaderMod.loadPDF(path, tabIndex);
+      first = await Promise.race([loading, passwordAsked]);
     } catch (e) {
       return { ok: false, error: `loadPDF: ${e?.message ?? e}` };
+    } finally {
+      stopListening();
+    }
+    if (first === 'password') {
+      loading.catch(() => {});
+      return { ok: true, dialog: 'pdf-password', file_path: path, tab_id: tabIndex };
+    }
+    if (!stateMod.state.documents.includes(doc)) {
+      return { ok: false, error: 'the document was closed while loading', file_path: path };
     }
   }
   const ready = await waitForActiveLoad(doc, 30000);
@@ -1938,6 +1957,10 @@ async function handleListTabs() {
       pageCount: d.pdfDoc?.numPages ?? 0,
       isUntitled: !!d.isUntitled,
       currentPage: d.currentPage ?? null,
+      // Opened with a password: read-only; filePath is then the decrypted
+      // working copy and originalFilePath the user's file.
+      passwordProtected: !!d.passwordProtected,
+      originalFilePath: d.originalFilePath ?? null,
       annotationCount: (d.annotations || []).length,
     })),
   };
@@ -2023,6 +2046,11 @@ async function handleSavePdf(params) {
   const stateMod = await import('./core/state.js');
   const doc = stateMod.getActiveDocument();
   if (!doc?.pdfDoc) return { ok: false, error: 'no active document' };
+  // Opened with a password: read-only, never saved (not even as a copy).
+  const pwMod = await import('./pdf/wachtwoord-pdf.js');
+  if (pwMod.opslaanGeweigerd(doc)) {
+    return { ok: false, error: 'document is read-only: it was opened with a password and cannot be saved', readOnly: true };
+  }
   if (!path && (!doc.filePath || doc.isUntitled)) {
     // savePDF() without a real path falls through to the Save As file picker
     // — never acceptable on a headless bridge. The caller must supply a path.
@@ -2567,27 +2595,48 @@ function _isElementDisabled(el) {
 }
 
 const _wacht = (ms) => new Promise((r) => setTimeout(r, ms));
-const _lintRegels = () => import('./core/mcp-lint-opdrachten.js');
+// Loaded once; the sync tab helpers below run after the first await of it.
+let _lintRegelsModule = null;
+const _lintRegels = async () => (_lintRegelsModule ??= await import('./core/mcp-lint-opdrachten.js'));
 
-/** The active ribbon tab according to the ribbon store, or null. */
+/** The tab name of a tab button: data-tab, `#<id>` or its aria-controls panel. */
+function _naamVanTabKnop(el) {
+  return _lintRegelsModule.tabNaam({
+    dataTab: el.getAttribute('data-tab') || '', id: el.id || '', ariaControls: el.getAttribute('aria-controls') || '',
+  });
+}
+
+/** The ribbon tab on screen. The DOM wins over the ribbon store: a tab button
+ *  an extension put into the DOM itself shows its tab outside the store. */
 async function _actiefTabblad() {
+  let storeTab = null;
   try {
     const store = await import('./solid/stores/ribbonStore.js');
-    return store.activeTab();
+    storeTab = store.activeTab();
   } catch {
-    return null; // store unavailable
+    // store unavailable
+  }
+  try {
+    const { actiefTabblad } = await _lintRegels();
+    const knoppen = _lintTabKnoppen().map(({ tab, el }) => ({
+      tab, actief: el.classList.contains('active') || el.getAttribute('aria-selected') === 'true',
+    }));
+    return actiefTabblad(knoppen, storeTab);
+  } catch {
+    return storeTab;
   }
 }
 
 /** Every tab button of the ribbon in DOM order: built-in tabs, extension
- *  tabs (#551) and tab buttons an extension put into the DOM itself. A tab
- *  is named by its data-tab, or `#<id>` without one; File is not a tab. */
+ *  tabs (#551) and tab buttons an extension put into the DOM itself. A tab is
+ *  named by its data-tab, else `#<id>`, else the panel in aria-controls
+ *  (`tab-<name>` gives `<name>`); File is not a tab. */
 function _lintTabKnoppen() {
   const uit = [];
   const gezien = new Set();
   for (const el of document.querySelectorAll('.ribbon-tab')) {
     if (el.classList.contains('file-tab')) continue;
-    const tab = el.getAttribute('data-tab') || (el.id ? `#${el.id}` : '');
+    const tab = _naamVanTabKnop(el);
     if (!tab || gezien.has(tab)) continue;
     gezien.add(tab);
     uit.push({ tab, el });
@@ -2596,15 +2645,14 @@ function _lintTabKnoppen() {
 }
 
 function _tabKnop(tab) {
-  if (tab.startsWith('#')) return document.getElementById(tab.slice(1));
-  return document.querySelector(`.ribbon-tab[data-tab="${CSS.escape(tab)}"]`);
+  return _lintTabKnoppen().find((t) => t.tab === tab)?.el ?? null;
 }
 
 /** The tab of a tab button (or of an element inside one), or null. */
 function _tabVanKnop(el) {
   const knop = el?.closest?.('.ribbon-tab');
   if (!knop || knop.classList.contains('file-tab')) return null;
-  return knop.getAttribute('data-tab') || (knop.id ? `#${knop.id}` : null);
+  return _naamVanTabKnop(knop);
 }
 
 /** Click the tab button and give Solid time to mount the content. */

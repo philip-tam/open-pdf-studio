@@ -82,7 +82,7 @@
     "orderVertical": "Pionowo",
     "orderVerticalReversed": "Pionowo odwrotnie",
     "pageBorder": "Drukuj obramowanie strony",
-    "perSheetNote": "Każda strona jest skalowana do swojej komórki, więc powyższe skalowanie strony nie ma zastosowania. Podgląd pokazuje pojedynczą stronę.",
+    "perSheetNote": "Każda strona jest skalowana do swojej komórki, więc powyższe skalowanie strony nie ma zastosowania.",
     "autoRotate": "Automatyczny obrót",
     "autoCenter": "Automatyczne centrowanie",
     "advancedOptions": "Zaawansowane opcje drukowania",
@@ -983,5 +983,11 @@
     "colLabel": "Etykieta strony",
     "ocrLegend": "Strony oznaczone OCR odczytano za pomocą rozpoznawania tekstu; sprawdź je przed zastosowaniem.",
     "reset": "Przywróć numery stron"
+  },
+  "pdfPassword": {
+    "title": "Wymagane hasło",
+    "message": "Plik „{{fileName}}” jest chroniony hasłem. Wprowadź hasło, aby otworzyć go tylko do odczytu.",
+    "label": "Hasło:",
+    "wrong": "Nieprawidłowe hasło, spróbuj ponownie."
   }
 }

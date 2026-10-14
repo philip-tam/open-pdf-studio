@@ -82,7 +82,7 @@
     "orderVertical": "Vertical",
     "orderVerticalReversed": "Vertical inversé",
     "pageBorder": "Imprimer le contour de page",
-    "perSheetNote": "Chaque page est mise à l'échelle pour tenir dans sa cellule : la mise à l'échelle de page ci-dessus ne s'applique donc pas. L'aperçu montre une seule page.",
+    "perSheetNote": "Chaque page est mise à l'échelle pour tenir dans sa cellule : la mise à l'échelle de page ci-dessus ne s'applique donc pas.",
     "autoRotate": "Rotation automatique",
     "autoCenter": "Centrage automatique",
     "advancedOptions": "Options d'impression avancées",
@@ -983,5 +983,11 @@
     "colLabel": "Étiquette de page",
     "ocrLegend": "Les pages marquées OCR ont été lues par reconnaissance de texte ; vérifiez-les avant d'appliquer.",
     "reset": "Rétablir les numéros de page"
+  },
+  "pdfPassword": {
+    "title": "Mot de passe requis",
+    "message": "« {{fileName}} » est protégé par un mot de passe. Saisissez le mot de passe pour l’ouvrir en lecture seule.",
+    "label": "Mot de passe :",
+    "wrong": "Mot de passe incorrect, réessayez."
   }
 }

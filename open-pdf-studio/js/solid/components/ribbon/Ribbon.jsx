@@ -15,6 +15,7 @@ import { lintRegister } from '../../../plugins/ribbon-tab-registry.js';
 import { activeTab, setActiveTab, contextualTabsVisible } from '../../stores/ribbonStore.js';
 import { imageSelected } from '../../stores/imageEditStore.js';
 import { simpleLayout, setSimpleLayout } from '../../stores/simpleLayoutStore.js';
+import { symbolInsertActive } from '../../../symbols/symbol-insert-format-store.js';
 import { openAppMenu } from '../../../ui/chrome/menus.js';
 import { state } from '../../../core/state.js';
 import { savePreferences } from '../../../core/preferences.js';
@@ -140,9 +141,13 @@ export default function Ribbon() {
           <RibbonTab label={t('tabs.format')} dataTab="format" isContextual={true} id="tab-format-btn"
             isActive={activeTab() === 'format'}
             onClick={() => selectTab('format')} />
-          <RibbonTab label={t('tabs.arrange')} dataTab="arrange" isContextual={true} id="tab-arrange-btn"
-            isActive={activeTab() === 'arrange'}
-            onClick={() => selectTab('arrange')} />
+          {/* Schikken werkt op een selectie; tijdens het invoegen van
+              symbolen (#587) staat alleen Opmaak open. */}
+          <Show when={!symbolInsertActive()}>
+            <RibbonTab label={t('tabs.arrange')} dataTab="arrange" isContextual={true} id="tab-arrange-btn"
+              isActive={activeTab() === 'arrange'}
+              onClick={() => selectTab('arrange')} />
+          </Show>
         </Show>
         <Show when={imageSelected()}>
           <Show when={!contextualTabsVisible()}>
