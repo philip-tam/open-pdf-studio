@@ -23,8 +23,8 @@
   "printQueue": {
     "save": "Save",
     "saving": "Saving…",
-    "title": "Print jobs — Open PDF Printer",
-    "empty": "No print jobs yet. Print from any application to \"Open PDF Printer\" and the job shows up here.",
+    "title": "Print jobs — PT PDF Printer",
+    "empty": "No print jobs yet. Print from any application to \"PT PDF Printer\" and the job shows up here.",
     "pages": "Pages",
     "merge": "Merge",
     "open": "Open",
@@ -256,7 +256,13 @@
     "allPages": "All pages",
     "firstPageOnly": "First page only",
     "range": "Range:",
-    "rangePlaceholder": "e.g. 1-5, 8"
+    "rangePlaceholder": "e.g. 1-5, 8",
+    "bates": "Bates numbering:",
+    "batesHint": "Numbers the pages with {bates}: prefix, number with leading zeros, suffix",
+    "batesPrefix": "Prefix",
+    "batesStart": "Start",
+    "batesDigits": "Digits",
+    "batesSuffix": "Suffix"
   },
   "manageWatermarks": {
     "title": "Manage Watermarks",
@@ -963,5 +969,19 @@
     "underlayLimited": "Resolution reduced to {{dpi}} dpi",
     "underlayNoMeasure": "Not applicable to an underlay; the measuring scale comes from the page",
     "queued": "{{n}} more drawing(s) queued"
+  },
+  "pageLabels": {
+    "title": "Page labels",
+    "intro": "Type the page name in the field. \"{{select}}\" picks text on the page: it is inserted as {OCR1}, {OCR2}… and read from the same place on every page. Example: {OCR1} - {OCR2}",
+    "name": "Page name:",
+    "pickHint": "Drag a box around the text to use, for example the drawing number. Esc cancels.",
+    "noText": "(no text found)",
+    "example": "Example:",
+    "useOcr": "Use OCR where a box has no text (scanned sheets, slower)",
+    "read": "Read all pages",
+    "reading": "Reading page {{done}} of {{total}}...",
+    "colLabel": "Page label",
+    "ocrLegend": "Pages marked OCR were read by text recognition; check them before applying.",
+    "reset": "Reset to page numbers"
   }
 }

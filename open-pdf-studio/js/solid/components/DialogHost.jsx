@@ -18,6 +18,7 @@ import SignatureDialog from './dialogs/SignatureDialog.jsx';
 import TextAnnotationDialog from './dialogs/TextAnnotationDialog.jsx';
 import UpdateDialog from './dialogs/UpdateDialog.jsx';
 import BookmarkDialog from './dialogs/BookmarkDialog.jsx';
+import PageLabelsDialog from './dialogs/PageLabelsDialog.jsx';
 import FormValidationDialog from './dialogs/FormValidationDialog.jsx';
 import StampPickerDialog from './dialogs/StampPickerDialog.jsx';
 import CalibrationDialog from './dialogs/CalibrationDialog.jsx';
@@ -39,6 +40,7 @@ import HandtekeningDetailDialog from './dialogs/HandtekeningDetailDialog.jsx';
 import ViewportScaleDialog from './dialogs/ViewportScaleDialog.jsx';
 import ScaleRegionDialog from './dialogs/ScaleRegionDialog.jsx';
 import MeasuredLengthDialog from './dialogs/MeasuredLengthDialog.jsx';
+import ScreenCalibrationDialog from './dialogs/ScreenCalibrationDialog.jsx';
 import TitleBlockDialog from './dialogs/TitleBlockDialog.jsx';
 import CompareDialog from './compare/CompareDialog.jsx';
 import CadExportDialog from './dialogs/CadExportDialog.jsx';
@@ -79,6 +81,7 @@ const DIALOG_MAP = {
   'text-annotation': TextAnnotationDialog,
   'update': UpdateDialog,
   'bookmark': BookmarkDialog,
+  'page-labels': PageLabelsDialog,
   'form-validation': FormValidationDialog,
   'stamp-picker': StampPickerDialog,
   'calibration': CalibrationDialog,
@@ -101,6 +104,7 @@ const DIALOG_MAP = {
   'viewport-scale': ViewportScaleDialog,
   'scale-region': ScaleRegionDialog,
   'measured-length': MeasuredLengthDialog,
+  'screen-calibration': ScreenCalibrationDialog,
   'compare': CompareDialog,
   'cad-export': CadExportDialog,
   'cad-import': CadImportDialog,

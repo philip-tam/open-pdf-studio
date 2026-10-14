@@ -23,8 +23,8 @@
   "printQueue": {
     "save": "Opslaan",
     "saving": "Opslaan…",
-    "title": "Afdrukopdrachten — Open PDF Printer",
-    "empty": "Nog geen afdrukopdrachten. Print vanuit een programma naar \"Open PDF Printer\" en de opdracht verschijnt hier.",
+    "title": "Afdrukopdrachten — PT PDF Printer",
+    "empty": "Nog geen afdrukopdrachten. Print vanuit een programma naar \"PT PDF Printer\" en de opdracht verschijnt hier.",
     "pages": "Bladzijden",
     "merge": "Samenvoegen",
     "open": "Openen",
@@ -237,7 +237,13 @@
     "allPages": "Alle pagina's",
     "firstPageOnly": "Alleen eerste pagina",
     "range": "Bereik:",
-    "rangePlaceholder": "bijv. 1-5, 8"
+    "rangePlaceholder": "bijv. 1-5, 8",
+    "bates": "Bates-nummering:",
+    "batesHint": "Nummert de pagina's met {bates}: voorvoegsel, nummer met voorloopnullen, achtervoegsel",
+    "batesPrefix": "Voorvoegsel",
+    "batesStart": "Begin",
+    "batesDigits": "Cijfers",
+    "batesSuffix": "Achtervoegsel"
   },
   "manageWatermarks": {
     "title": "Watermerken beheren",
@@ -306,8 +312,8 @@
   "calibration": {
     "title": "Schaalcalibratie",
     "helpText": "Teken een meetlijn van bekende lengte en voer vervolgens de werkelijke afstand hier in.",
-    "knownDistance": "Known distance:",
-    "measuredPixels": "Measured pixels:",
+    "knownDistance": "Bekende afstand:",
+    "measuredPixels": "Gemeten pixels:",
     "methodReference": "Referentielijn",
     "methodRatio": "Schaalverhouding",
     "referenceHelp": "Voer de werkelijke afstand in voor een bekende meetlijn.",
@@ -510,7 +516,7 @@
   },
   "parametricSymbolPicker": {
     "title": "Parametrisch symbool kiezen",
-    "cancel": "Cancel"
+    "cancel": "Annuleren"
   },
   "straighten": {
     "title": "Pagina Rechtzetten",
@@ -964,5 +970,19 @@
     "underlayLimited": "Resolutie verlaagd naar {{dpi}} dpi",
     "underlayNoMeasure": "Niet van toepassing op een onderlegger; de meetschaal komt van de pagina",
     "queued": "Nog {{n}} tekening(en) in de wachtrij"
+  },
+  "pageLabels": {
+    "title": "Paginalabels",
+    "intro": "Typ de paginanaam in het veld. „{{select}}” neemt tekst van de pagina over: die komt erin als {OCR1}, {OCR2}… en wordt op elke pagina op dezelfde plek gelezen. Voorbeeld: {OCR1} - {OCR2}",
+    "name": "Paginanaam:",
+    "pickHint": "Sleep een vak om de tekst die u wilt gebruiken, bijvoorbeeld het tekeningnummer. Esc breekt af.",
+    "noText": "(geen tekst gevonden)",
+    "example": "Voorbeeld:",
+    "useOcr": "OCR gebruiken waar een vak geen tekst heeft (gescande bladen, langzamer)",
+    "read": "Alle pagina's lezen",
+    "reading": "Pagina {{done}} van {{total}} lezen...",
+    "colLabel": "Paginalabel",
+    "ocrLegend": "Pagina's met OCR zijn met tekstherkenning gelezen; controleer ze voordat u toepast.",
+    "reset": "Terug naar paginanummers"
   }
 }

@@ -10,7 +10,8 @@ import { tekstvakKnipvlak } from './rendering/textbox-layout.js';
 import { drawArrowheadOnCanvas, applyBorderStyle, drawDimensionLineEnding } from './rendering/decorations.js';
 import { catmullRomSpline } from '../tools/tools/spline-tool.js';
 import { catmullRomToBezier, splineArrowEndTangent } from './spline-arrow-geometry.js';
-import { drawDimension, drawMeasureAreaShape, drawCentroidLabel, drawMeasurePerimeterShape } from './rendering/measurements.js';
+import { drawDimension, drawMeasureAreaShape, drawCentroidLabel, drawMeasurePerimeterShape, drawVlakZijdematen } from './rendering/measurements.js';
+import { vlakZijdeTeksten } from './measurement.js';
 import { maatlijnTekst } from './maat-label.js';
 import { maatlijnVelden } from './maatlijn-geometrie.js';
 import { tagWeergaveParams } from '../plattegrond/ruimte-koppeling.js';
@@ -36,9 +37,9 @@ import { drawEmbeddedImageOverlay } from '../tools/tools/remove-image-tool.js';
 import { drawScanTextOverlay } from '../tools/tools/scan-text-tool.js';
 import { updateQuickAccessButtons, updateContextualTabs, drawGrid, snapToGrid } from './rendering/ui-state.js';
 import { drawCommentIcon } from './rendering/comment-icons.js';
-import { drawCaret, strikeLine, replaceStrikeColor } from './rendering/caret.js';
+import { drawCaret, drawMarkupLines, replaceStrikeColor } from './rendering/caret.js';
 import { spatialIndex, annotationBounds } from './spatial-index.js';
-import { bitmapVoor, bijNieuweTegel } from './vector-snippet-preview.js';
+import { bitmapVoor, bijNieuweTegel, KNIPSEL_UITVOER_FOUT } from './vector-snippet-preview.js';
 import { invalidateScaleRegionCache, pixelsPerUnitFor, getRegionScaleFactor } from './scale-region.js';
 import { metSchaalBronnen } from './schaal-bronnen.js';
 import { drawSnapIndicator } from '../tools/snap-engine.js';
@@ -1278,8 +1279,16 @@ export function drawAnnotation(ctx, annotation, snippetBitmaps = null) {
       const zoom = (vpz && vpz.active)
         ? vpz.zoom
         : (state.documents[state.activeDocumentIndex]?.scale || 1);
-      const bmp = snippetBitmaps ? snippetBitmaps.get(annotation) : bitmapVoor(annotation, zoom);
-      if (snippetBitmaps && !bmp) throw new Error('Vectorknipsel ontbreekt in uitvoer');
+      // Afdruk of export: het beeld komt uit bereidKnipselsVoorUitvoer, nooit
+      // uit de schermcache, en ontbreekt het, dan stopt de uitvoer in plaats
+      // van het lege kader af te drukken (#511).
+      const uitvoer = !!_lagen && !laag('selectie');
+      const bmp = snippetBitmaps ? snippetBitmaps.get(annotation) : (uitvoer ? null : bitmapVoor(annotation, zoom));
+      if ((snippetBitmaps || uitvoer) && !bmp) {
+        const fout = new Error('Vectorknipsel ontbreekt in uitvoer');
+        fout.code = KNIPSEL_UITVOER_FOUT;
+        throw fout;
+      }
       ctx.save();
       const kcx = annotation.x + annotation.width / 2;
       const kcy = annotation.y + annotation.height / 2;
@@ -1431,21 +1440,7 @@ export function drawAnnotation(ctx, annotation, snippetBitmaps = null) {
       ctx.strokeStyle = ouderKleur || strokeColor;
       ctx.lineWidth = thinLw(annotation.lineWidth ?? 1);
       ctx.lineCap = 'round';
-      if (annotation.rects && annotation.rects.length > 0) {
-        annotation.rects.forEach(rect => {
-          const [van, tot] = strikeLine(rect, annotation.textDir);
-          ctx.beginPath();
-          ctx.moveTo(van.x, van.y);
-          ctx.lineTo(tot.x, tot.y);
-          ctx.stroke();
-        });
-      } else {
-        const [van, tot] = strikeLine(annotation, annotation.textDir);
-        ctx.beginPath();
-        ctx.moveTo(van.x, van.y);
-        ctx.lineTo(tot.x, tot.y);
-        ctx.stroke();
-      }
+      drawMarkupLines(ctx, annotation);
       break;
     }
 
@@ -1455,25 +1450,16 @@ export function drawAnnotation(ctx, annotation, snippetBitmaps = null) {
       break;
 
     case 'textUnderline':
-      // Draw underline at the bottom of each text rect
+    case 'textSquiggly':
+      // Onderstreping of kronkellijn langs de onderkant van de tekst in de
+      // leesrichting (textDir), op dezelfde lijn als de opgeslagen
+      // appearance (#564): bij verticale tekst langs de kolom. De kronkellijn
+      // krijgt ronde hoeken, zoals in de appearance.
       ctx.strokeStyle = strokeColor;
       ctx.lineWidth = thinLw(annotation.lineWidth ?? 1);
       ctx.lineCap = 'round';
-      if (annotation.rects && annotation.rects.length > 0) {
-        annotation.rects.forEach(rect => {
-          const bottomY = rect.y + rect.height - 1;
-          ctx.beginPath();
-          ctx.moveTo(rect.x, bottomY);
-          ctx.lineTo(rect.x + rect.width, bottomY);
-          ctx.stroke();
-        });
-      } else {
-        const bottomY = annotation.y + annotation.height - 1;
-        ctx.beginPath();
-        ctx.moveTo(annotation.x, bottomY);
-        ctx.lineTo(annotation.x + annotation.width, bottomY);
-        ctx.stroke();
-      }
+      ctx.lineJoin = 'round';
+      drawMarkupLines(ctx, annotation);
       break;
 
     case 'stamp': {
@@ -2034,6 +2020,11 @@ export function drawAnnotation(ctx, annotation, snippetBitmaps = null) {
       // in de ruimtetag van een plattegrond) en het vlak toont geen eigen label.
       if (annotation.measureText && annotation.measureShowLabel !== false) {
         drawCentroidLabel(ctx, annotation.points, annotation.measureText, strokeColor, annotation);
+      }
+      // Zijdematen (#536): alleen als ze voor dit vlak aanstaan; dezelfde
+      // schaal, eenheid en afronding als de oppervlaktetekst.
+      if (annotation.measureShowEdgeLengths === true) {
+        drawVlakZijdematen(ctx, vlakZijdeTeksten(annotation), strokeColor);
       }
       break;
     }

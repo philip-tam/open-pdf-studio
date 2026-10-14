@@ -2932,6 +2932,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "lcms2"
+version = "6.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "80205450f4d8b4de92f18111de879f3df4a6b728915e89b73c38f7a59a81ad90"
+dependencies = [
+ "bytemuck",
+ "foreign-types",
+ "lcms2-sys",
+]
+
+[[package]]
+name = "lcms2-sys"
+version = "4.0.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "264db0b78119c5a37d78bb41fb355daab29b3b29430b53cd92e3da51f0ab06cc"
+dependencies = [
+ "cc",
+ "dunce",
+ "libc",
+ "pkg-config",
+]
+
+[[package]]
 name = "leb128fmt"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3659,6 +3682,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "open-pdf-cmyk"
+version = "0.1.0"
+dependencies = [
+ "flate2",
+ "image",
+ "lcms2",
+ "lopdf",
+ "serde",
+ "serde_json",
+ "turbojpeg",
+]
+
+[[package]]
 name = "open-pdf-render"
 version = "0.1.0"
 dependencies = [
@@ -3675,7 +3711,7 @@ dependencies = [
 
 [[package]]
 name = "open-pdf-studio"
-version = "0.35.0"
+version = "0.36.0"
 dependencies = [
  "anyhow",
  "axum",
@@ -3701,6 +3737,7 @@ dependencies = [
  "objc2-uniform-type-identifiers",
  "open",
  "open-pdf-cad",
+ "open-pdf-cmyk",
  "open-pdf-render",
  "p256",
  "p384",
@@ -3736,7 +3773,9 @@ dependencies = [
  "tokio",
  "url",
  "urlencoding",
+ "webview2-com",
  "whoami",
+ "windows 0.61.3",
  "windows-sys 0.59.0",
  "x509-cert",
  "zeroize",

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   scaleToPercent, percentToScale, cssPxPerPtAt100, normalizeZoomDpi, setZoomDpi, getZoomDpi,
-  DEFAULT_ZOOM_DPI, nextZoomPercent, nextScaleStep,
+  DEFAULT_ZOOM_DPI, nextZoomPercent, nextScaleStep, setZoomDpiSource, effectiveZoomDpi,
 } from './zoom-display.js';
 
 test('standaard 110 dpi: 100% is 110/72 CSS px per pt', () => {
@@ -71,4 +71,22 @@ test('nextScaleStep geeft een schaal die als ronde procenten wordt getoond', () 
     assert.deepEqual(seen, [125, 150, 200, 300]);
   }
   setZoomDpi(110);
+});
+
+test('een schermkalibratie (#520) bepaalt 100%: de bron gaat voor de voorkeur', () => {
+  setZoomDpiSource(() => 141.7);
+  assert.equal(effectiveZoomDpi(), 141.7);
+  assert.equal(cssPxPerPtAt100(), 141.7 / 72);
+  assert.equal(scaleToPercent(141.7 / 72), 100);
+  assert.equal(scaleToPercent(nextScaleStep(141.7 / 72, +1)), 125);
+  // Een gemeten waarde buiten het voorkeurbereik wordt niet afgekapt.
+  setZoomDpiSource(() => 48);
+  assert.equal(cssPxPerPtAt100(), 48 / 72);
+  // Een expliciete dpi blijft gelden.
+  assert.equal(scaleToPercent(96 / 72, 96), 100);
+  // Geen (bruikbare) bron: terug naar setZoomDpi.
+  setZoomDpiSource(() => null);
+  assert.equal(effectiveZoomDpi(), DEFAULT_ZOOM_DPI);
+  setZoomDpiSource(null);
+  assert.equal(cssPxPerPtAt100(), 110 / 72);
 });

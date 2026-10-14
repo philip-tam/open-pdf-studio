@@ -25,6 +25,7 @@ import { resolveGroupLinks } from './loader/correction-load.js';
 import { loadIfNeeded } from './queued-load.js';
 import { leesAnnotatieLagen, pasGelezenLagenToe } from './saver/annotatie-lagen.js';
 import { voegAnnotatiesToe } from './loader/annotaties-toevoegen.js';
+import { pdfjsBronnen } from '../core/basis-url.js';
 
 
 // Convert one batch of pdf.js annotations and push them to doc.annotations,
@@ -110,10 +111,7 @@ export async function reloadDocumentFromBytes(doc, bytes) {
   // Replace the pdf.js document with one loaded from the new bytes
   doc.pdfDoc = await pdfjsLib.getDocument({
     data: bytes.slice(), // copy — pdf.js transfers the buffer
-    cMapUrl: '/pdfjs/web/cmaps/',
-    cMapPacked: true,
-    standardFontDataUrl: '/pdfjs/web/standard_fonts/',
-    wasmUrl: '/pdfjs/web/wasm/',
+    ...pdfjsBronnen(),
     isEvalSupported: false,
     verbosity: 0,
   }).promise;
@@ -164,10 +162,7 @@ function _attachPdfDocGetPageRecovery(doc, filePath) {
         if (!cached) throw e;
         const fresh = await pdfjsLib.getDocument({
           data: cached.slice(),
-          cMapUrl: '/pdfjs/web/cmaps/',
-          cMapPacked: true,
-          standardFontDataUrl: '/pdfjs/web/standard_fonts/',
-    wasmUrl: '/pdfjs/web/wasm/',
+          ...pdfjsBronnen(),
           isEvalSupported: false,
           verbosity: 0,
         }).promise;
@@ -366,10 +361,7 @@ export async function loadPDF(filePath, docIndex, preloadedData = null) {
     // Load PDF using pdf.js (this transfers the buffer to a worker)
     doc.pdfDoc = await pdfjsLib.getDocument({
       data: typedArray,
-      cMapUrl: '/pdfjs/web/cmaps/',
-      cMapPacked: true,
-      standardFontDataUrl: '/pdfjs/web/standard_fonts/',
-    wasmUrl: '/pdfjs/web/wasm/',
+      ...pdfjsBronnen(),
       isEvalSupported: false,
       verbosity: 0,
     }).promise;
@@ -528,6 +520,11 @@ export async function loadPDF(filePath, docIndex, preloadedData = null) {
       if (isClosed()) return;
       doc.bookmarks = await loadBookmarksFromPdf(doc.pdfDoc);
       if (isClosed()) return;
+      // Paginalabels (bladnamen, #580) uit /PageLabels.
+      const { laadPaginaLabels } = await import('./pagina-labels-app.js');
+      if (isClosed()) return;
+      await laadPaginaLabels(doc);
+      if (isClosed()) return;
     }
     console.log(`[PERF] bookmarks DONE: ${(performance.now() - _t0).toFixed(0)}ms`);
 
@@ -544,6 +541,22 @@ export async function loadPDF(filePath, docIndex, preloadedData = null) {
         if (isClosed()) return;
         if (presets.length > 0) doc.stylePresets = presets;
       }).catch(() => { /* presets zijn optioneel — negeer leesfouten */ });
+    }
+
+    // Titel en kop-/voetteksten uit het bestand (#375): de definities komen
+    // terug in de lijst, zodat een nieuwe save ze vervangt in plaats van er
+    // nog een exemplaar overheen te zetten. Niet-blokkerend, zoals hierboven.
+    {
+      const bron = doc.filePath;
+      getSharedPdfLibDoc(doc).then(async (pdfLibDoc) => {
+        if (isClosed() || !pdfLibDoc) return;
+        const { leesKopVoetUitBestand } = await import('../watermark/kopvoet-weergave.js');
+        if (isClosed()) return;
+        if (leesKopVoetUitBestand(doc, pdfLibDoc, bron) && isActive()) {
+          const { redrawAnnotations, redrawContinuous } = await import('../annotations/rendering.js');
+          if (doc.viewMode === 'continuous') redrawContinuous(); else redrawAnnotations();
+        }
+      }).catch((e) => { console.warn('[loader] kop-/voetteksten niet gelezen:', e); });
     }
 
     // Meetschalen uit de PDF zelf (/VP + /Measure): CAD-plots en de DWG/DXF-
@@ -929,10 +942,7 @@ export async function createBlankPDF(widthPt, heightPt, numPages) {
     // Load into pdf.js for viewing
     doc.pdfDoc = await pdfjsLib.getDocument({
       data: typedArray,
-      cMapUrl: '/pdfjs/web/cmaps/',
-      cMapPacked: true,
-      standardFontDataUrl: '/pdfjs/web/standard_fonts/',
-    wasmUrl: '/pdfjs/web/wasm/',
+      ...pdfjsBronnen(),
       isEvalSupported: false,
       verbosity: 0,
     }).promise;
