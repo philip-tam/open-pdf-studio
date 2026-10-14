@@ -1544,6 +1544,8 @@
 .ribbon-slider-option .ribbon-slider-value {
   min-width: 3.5em;
   text-align: right;
+}
+
 /* ─── Linttabbladen van extensies (#551) ───────────────────────────────────
    De host tekent extensietabbladen met de bestaande lintklassen; hier alleen
    de aanvullingen. Uitsluitend themavariabelen, geen eigen kleuren. */
