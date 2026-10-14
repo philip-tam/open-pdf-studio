@@ -65,6 +65,7 @@
   "selectedPdfNoPages": "Вибраний PDF не містить сторінок.",
   "failedToSavePdf": "Не вдалося зберегти PDF: {{error}}",
   "failedToLoadPdf": "Не вдалося завантажити PDF: {{error}}",
+  "restrictionsRemoved": "This PDF has editing restrictions. You are editing an unprotected copy of its pages; use Save As to keep the original file unchanged.",
   "failedToCreateDocument": "Не вдалося створити документ: {{error}}",
   "failedToReplacePage": "Не вдалося замінити сторінку: {{error}}",
   "failedToMergeFile": "Не вдалося об'єднати: {{file}}\n{{error}}",

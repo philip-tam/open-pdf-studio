@@ -1818,6 +1818,32 @@ fn worker_died(e: &anyhow::Error) -> bool {
     msg.ends_with(" EOF") || msg.starts_with("write to worker") || msg.starts_with("read from worker")
 }
 
+/// Opens a PDF that has editing restrictions (an owner password but no
+/// password to open it) and returns an unprotected copy of its pages, so the
+/// rest of the app (pdf-lib) can read and edit it. Fails for a file that needs
+/// a password to open.
+#[tauri::command]
+async fn remove_pdf_restrictions(path: String) -> Result<tauri::ipc::Response, String> {
+    let bytes = std::fs::read(&path).map_err(|e| format!("Cannot read {}: {}", path, e))?;
+    tokio::task::spawn_blocking(move || -> Result<Vec<u8>, String> {
+        let _guard = pdfium_renderer::inproc_guard();
+        let pdfium = pdfium_renderer::pdfium();
+        let source = pdfium
+            .load_pdf_from_byte_slice(&bytes, None)
+            .map_err(|e| format!("Failed to open PDF: {}", e))?;
+        let mut copy = pdfium
+            .create_new_pdf()
+            .map_err(|e| format!("Failed to create PDF: {}", e))?;
+        copy.pages_mut()
+            .append(&source)
+            .map_err(|e| format!("Failed to copy pages: {}", e))?;
+        copy.save_to_bytes().map_err(|e| format!("Failed to save PDF: {}", e))
+    })
+    .await
+    .map_err(|e| e.to_string())?
+    .map(tauri::ipc::Response::new)
+}
+
 #[tauri::command]
 async fn render_pdf_page(
     path: String,
@@ -2952,6 +2978,7 @@ pub fn run(opts: StartupOpts) {
             list_printer_spool,
             discard_spool_pdf,
             download_pdf_from_url,
+            remove_pdf_restrictions,
             list_pdf_files,
             save_preferences,
             load_preferences,

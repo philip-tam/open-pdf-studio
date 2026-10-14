@@ -65,6 +65,7 @@
   "selectedPdfNoPages": "चयनित PDF में कोई पृष्ठ नहीं है।",
   "failedToSavePdf": "PDF सहेजने में विफल: {{error}}",
   "failedToLoadPdf": "PDF लोड करने में विफल: {{error}}",
+  "restrictionsRemoved": "This PDF has editing restrictions. You are editing an unprotected copy of its pages; use Save As to keep the original file unchanged.",
   "failedToCreateDocument": "दस्तावेज़ बनाने में विफल: {{error}}",
   "failedToReplacePage": "पृष्ठ बदलने में विफल: {{error}}",
   "failedToMergeFile": "मर्ज करने में विफल: {{file}}\n{{error}}",

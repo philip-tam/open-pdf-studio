@@ -65,6 +65,7 @@
   "selectedPdfNoPages": "Odabrani PDF nema stranica.",
   "failedToSavePdf": "Spremanje PDF-a nije uspjelo: {{error}}",
   "failedToLoadPdf": "Učitavanje PDF-a nije uspjelo: {{error}}",
+  "restrictionsRemoved": "This PDF has editing restrictions. You are editing an unprotected copy of its pages; use Save As to keep the original file unchanged.",
   "failedToCreateDocument": "Izrada dokumenta nije uspjela: {{error}}",
   "failedToReplacePage": "Zamjena stranice nije uspjela: {{error}}",
   "failedToMergeFile": "Spajanje nije uspjelo: {{file}}\n{{error}}",

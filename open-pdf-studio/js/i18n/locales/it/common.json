@@ -65,6 +65,7 @@
   "selectedPdfNoPages": "Il PDF selezionato non ha pagine.",
   "failedToSavePdf": "Impossibile salvare il PDF: {{error}}",
   "failedToLoadPdf": "Impossibile caricare il PDF: {{error}}",
+  "restrictionsRemoved": "This PDF has editing restrictions. You are editing an unprotected copy of its pages; use Save As to keep the original file unchanged.",
   "failedToCreateDocument": "Impossibile creare il documento: {{error}}",
   "failedToReplacePage": "Impossibile sostituire la pagina: {{error}}",
   "failedToMergeFile": "Unione non riuscita: {{file}}\n{{error}}",

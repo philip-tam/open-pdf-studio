@@ -65,6 +65,7 @@
   "selectedPdfNoPages": "தேர்ந்தெடுத்த PDF-இல் பக்கங்கள் இல்லை.",
   "failedToSavePdf": "PDF-ஐச் சேமிக்க முடியவில்லை: {{error}}",
   "failedToLoadPdf": "PDF-ஐ ஏற்ற முடியவில்லை: {{error}}",
+  "restrictionsRemoved": "This PDF has editing restrictions. You are editing an unprotected copy of its pages; use Save As to keep the original file unchanged.",
   "failedToCreateDocument": "ஆவணத்தை உருவாக்க முடியவில்லை: {{error}}",
   "failedToReplacePage": "பக்கத்தை மாற்ற முடியவில்லை: {{error}}",
   "failedToMergeFile": "ஒன்றிணைக்க முடியவில்லை: {{file}}\n{{error}}",

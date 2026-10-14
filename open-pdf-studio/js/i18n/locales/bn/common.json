@@ -65,6 +65,7 @@
   "selectedPdfNoPages": "নির্বাচিত PDF-এ কোনো পৃষ্ঠা নেই।",
   "failedToSavePdf": "PDF সংরক্ষণ করতে ব্যর্থ: {{error}}",
   "failedToLoadPdf": "PDF লোড করতে ব্যর্থ: {{error}}",
+  "restrictionsRemoved": "This PDF has editing restrictions. You are editing an unprotected copy of its pages; use Save As to keep the original file unchanged.",
   "failedToCreateDocument": "নথি তৈরি করতে ব্যর্থ: {{error}}",
   "failedToReplacePage": "পৃষ্ঠা প্রতিস্থাপন করতে ব্যর্থ: {{error}}",
   "failedToMergeFile": "একত্রিত করতে ব্যর্থ: {{file}}\n{{error}}",

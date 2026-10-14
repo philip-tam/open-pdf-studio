@@ -65,6 +65,7 @@
   "selectedPdfNoPages": "A kiválasztott PDF-nek nincsenek oldalai.",
   "failedToSavePdf": "A PDF mentése sikertelen: {{error}}",
   "failedToLoadPdf": "A PDF betöltése sikertelen: {{error}}",
+  "restrictionsRemoved": "This PDF has editing restrictions. You are editing an unprotected copy of its pages; use Save As to keep the original file unchanged.",
   "failedToCreateDocument": "A dokumentum létrehozása sikertelen: {{error}}",
   "failedToReplacePage": "Az oldal cseréje sikertelen: {{error}}",
   "failedToMergeFile": "Az összefűzés sikertelen: {{file}}\n{{error}}",

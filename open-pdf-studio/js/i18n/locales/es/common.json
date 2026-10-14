@@ -65,6 +65,7 @@
   "selectedPdfNoPages": "El PDF seleccionado no tiene páginas.",
   "failedToSavePdf": "No se pudo guardar el PDF: {{error}}",
   "failedToLoadPdf": "No se pudo cargar el PDF: {{error}}",
+  "restrictionsRemoved": "This PDF has editing restrictions. You are editing an unprotected copy of its pages; use Save As to keep the original file unchanged.",
   "failedToCreateDocument": "No se pudo crear el documento: {{error}}",
   "failedToReplacePage": "No se pudo reemplazar la página: {{error}}",
   "failedToMergeFile": "Error al combinar: {{file}}\n{{error}}",

@@ -65,6 +65,7 @@
   "selectedPdfNoPages": "PDF ที่เลือกไม่มีหน้า",
   "failedToSavePdf": "บันทึก PDF ไม่สำเร็จ: {{error}}",
   "failedToLoadPdf": "โหลด PDF ไม่สำเร็จ: {{error}}",
+  "restrictionsRemoved": "This PDF has editing restrictions. You are editing an unprotected copy of its pages; use Save As to keep the original file unchanged.",
   "failedToCreateDocument": "สร้างเอกสารไม่สำเร็จ: {{error}}",
   "failedToReplacePage": "แทนที่หน้าไม่สำเร็จ: {{error}}",
   "failedToMergeFile": "รวมไม่สำเร็จ: {{file}}\n{{error}}",

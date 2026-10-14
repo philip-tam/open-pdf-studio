@@ -65,6 +65,7 @@
   "selectedPdfNoPages": "Den valgte PDF har ingen sider.",
   "failedToSavePdf": "PDF'en kunne ikke gemmes: {{error}}",
   "failedToLoadPdf": "PDF'en kunne ikke indlæses: {{error}}",
+  "restrictionsRemoved": "This PDF has editing restrictions. You are editing an unprotected copy of its pages; use Save As to keep the original file unchanged.",
   "failedToCreateDocument": "Dokumentet kunne ikke oprettes: {{error}}",
   "failedToReplacePage": "Siden kunne ikke erstattes: {{error}}",
   "failedToMergeFile": "Fletning mislykkedes: {{file}}\n{{error}}",

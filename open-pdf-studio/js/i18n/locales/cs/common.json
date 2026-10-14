@@ -65,6 +65,7 @@
   "selectedPdfNoPages": "Vybrané PDF nemá žádné stránky.",
   "failedToSavePdf": "Uložení PDF se nezdařilo: {{error}}",
   "failedToLoadPdf": "Načtení PDF se nezdařilo: {{error}}",
+  "restrictionsRemoved": "This PDF has editing restrictions. You are editing an unprotected copy of its pages; use Save As to keep the original file unchanged.",
   "failedToCreateDocument": "Vytvoření dokumentu se nezdařilo: {{error}}",
   "failedToReplacePage": "Nahrazení stránky se nezdařilo: {{error}}",
   "failedToMergeFile": "Sloučení se nezdařilo: {{file}}\n{{error}}",

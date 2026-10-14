@@ -338,3 +338,4 @@ js/plugins/agent-tasks-plugin-api.test.mjs
 js/core/mcp-schermafdruk.test.mjs
 js/core/mcp-ui-boom.test.mjs
 js/core/mcp-lint-opdrachten.test.mjs
+js/pdf/encrypted-pdf.test.mjs

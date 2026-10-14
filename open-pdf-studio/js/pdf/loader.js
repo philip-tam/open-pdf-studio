@@ -23,6 +23,7 @@ import { convertPdfAnnotation } from './loader/annotation-converter.js';
 import { statusReplyFromPdfAnnotation, applyStatusReplies } from './loader/status-replies.js';
 import { resolveGroupLinks } from './loader/correction-load.js';
 import { loadIfNeeded } from './queued-load.js';
+import { pdfBytesHaveEncryption } from './encrypted-pdf.js';
 import { leesAnnotatieLagen, pasGelezenLagenToe } from './saver/annotatie-lagen.js';
 import { voegAnnotatiesToe } from './loader/annotaties-toevoegen.js';
 import { pdfjsBronnen } from '../core/basis-url.js';
@@ -355,6 +356,21 @@ export async function loadPDF(filePath, docIndex, preloadedData = null) {
       // Cache a copy of original bytes for saver (pdf.js transfers the buffer
       // to a web worker, which detaches the original Uint8Array making it length 0)
       originalBytesCache.set(filePath, typedArray.slice());
+    }
+    // A PDF with editing restrictions (owner password only): pdf-lib cannot
+    // read it, so edit an unprotected copy of its pages. Save As keeps the
+    // original file untouched.
+    if (!preloadedData && isTauri() && pdfBytesHaveEncryption(typedArray)) {
+      try {
+        const open = await invoke('remove_pdf_restrictions', { path: filePath });
+        if (isClosed()) return;
+        typedArray = new Uint8Array(open);
+        originalBytesCache.set(filePath, typedArray.slice());
+        doc.restrictionsRemoved = true;
+        showMessage(i18next.t('restrictionsRemoved'));
+      } catch (e) {
+        console.warn('[loader] could not remove PDF restrictions:', e?.message ?? e);
+      }
     }
     console.log(`[PERF] File read done: ${(performance.now() - _t0).toFixed(0)}ms, size: ${typedArray.length} bytes`);
 

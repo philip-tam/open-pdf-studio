@@ -65,6 +65,7 @@
   "selectedPdfNoPages": "Valitussa PDF:ssä ei ole sivuja.",
   "failedToSavePdf": "PDF:n tallennus epäonnistui: {{error}}",
   "failedToLoadPdf": "PDF:n lataus epäonnistui: {{error}}",
+  "restrictionsRemoved": "This PDF has editing restrictions. You are editing an unprotected copy of its pages; use Save As to keep the original file unchanged.",
   "failedToCreateDocument": "Asiakirjan luonti epäonnistui: {{error}}",
   "failedToReplacePage": "Sivun korvaaminen epäonnistui: {{error}}",
   "failedToMergeFile": "Yhdistäminen epäonnistui: {{file}}\n{{error}}",

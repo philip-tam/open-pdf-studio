@@ -65,6 +65,7 @@
   "selectedPdfNoPages": "PDF yang dipilih tidak memiliki halaman.",
   "failedToSavePdf": "Gagal menyimpan PDF: {{error}}",
   "failedToLoadPdf": "Gagal memuat PDF: {{error}}",
+  "restrictionsRemoved": "This PDF has editing restrictions. You are editing an unprotected copy of its pages; use Save As to keep the original file unchanged.",
   "failedToCreateDocument": "Gagal membuat dokumen: {{error}}",
   "failedToReplacePage": "Gagal mengganti halaman: {{error}}",
   "failedToMergeFile": "Gagal menggabungkan: {{file}}\n{{error}}",
