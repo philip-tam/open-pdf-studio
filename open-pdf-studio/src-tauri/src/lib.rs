@@ -1823,6 +1823,15 @@ fn worker_died(e: &anyhow::Error) -> bool {
 /// password to open it) and returns an unprotected copy of its pages, so the
 /// rest of the app (pdf-lib) can read and edit it. Fails for a file that needs
 /// a password to open.
+/// A file the app opens from the command line or the OS "Open with": a PDF, or
+/// a picture that becomes a one-page document.
+fn is_openable_file(path: &str) -> bool {
+    let lower = path.to_lowercase();
+    [".pdf", ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp"]
+        .iter()
+        .any(|ext| lower.ends_with(ext))
+}
+
 #[tauri::command]
 async fn remove_pdf_restrictions(path: String) -> Result<tauri::ipc::Response, String> {
     let bytes = std::fs::read(&path).map_err(|e| format!("Cannot read {}: {}", path, e))?;
@@ -2647,7 +2656,7 @@ pub fn run(opts: StartupOpts) {
     // Collect any PDF file paths passed on the command line (for file associations)
     let opened_files: Vec<String> = args.iter()
         .skip(1)
-        .filter(|arg| arg.to_lowercase().ends_with(".pdf") && !arg.starts_with('-'))
+        .filter(|arg| is_openable_file(arg) && !arg.starts_with('-'))
         .cloned()
         .collect();
 
@@ -2748,7 +2757,7 @@ pub fn run(opts: StartupOpts) {
                         let _ = window.set_focus();
                     }
                     let files: Vec<String> = argv.iter()
-                        .filter(|arg: &&String| arg.to_lowercase().ends_with(".pdf") && !arg.starts_with('-'))
+                        .filter(|arg: &&String| is_openable_file(arg) && !arg.starts_with('-'))
                         .cloned()
                         .collect();
                     for path in &files {
@@ -3107,7 +3116,7 @@ pub fn run(opts: StartupOpts) {
                     .filter(|url| url.scheme() == "file")
                     .filter_map(|url| url.to_file_path().ok())
                     .map(|p| p.to_string_lossy().to_string())
-                    .filter(|p| p.to_lowercase().ends_with(".pdf"))
+                    .filter(|p| is_openable_file(p))
                     .collect();
                 if !files.is_empty() {
                     for path in &files {

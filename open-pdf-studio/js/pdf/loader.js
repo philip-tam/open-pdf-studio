@@ -24,6 +24,7 @@ import { statusReplyFromPdfAnnotation, applyStatusReplies } from './loader/statu
 import { resolveGroupLinks } from './loader/correction-load.js';
 import { loadIfNeeded } from './queued-load.js';
 import { pdfBytesHaveEncryption } from './encrypted-pdf.js';
+import { AFBEELDING_EXTENSIES, isAfbeeldingPad } from './open-image-pdf.js';
 import { leesAnnotatieLagen, pasGelezenLagenToe } from './saver/annotatie-lagen.js';
 import { voegAnnotatiesToe } from './loader/annotaties-toevoegen.js';
 import { pdfjsBronnen } from '../core/basis-url.js';
@@ -909,7 +910,7 @@ export async function openPDFFile() {
 
     // Allow selecting multiple PDFs at once; each opens in its own tab.
     // CAD-tekeningen mogen ook: die gaan via het importvenster (#400).
-    const result = await openFileDialog(['pdf', 'dwg', 'dxf'], { defaultPath, multiple: true });
+    const result = await openFileDialog(['pdf', 'dwg', 'dxf', ...AFBEELDING_EXTENSIES], { defaultPath, multiple: true });
     if (result) {
       // Tauri returns an array with { multiple: true }; the invoke-fallback
       // still returns a single string — normalize to an array of paths.
@@ -921,6 +922,11 @@ export async function openPDFFile() {
         // Een CAD-tekening is geen PDF: die gaat via het importvenster (#400).
         const { openAlsCadTekening } = await import('./cad-import.js');
         if (await openAlsCadTekening(path)) continue;
+        if (isAfbeeldingPad(path)) {
+          const { openAlsAfbeelding } = await import('./open-image.js');
+          await openAlsAfbeelding(path);
+          continue;
+        }
         // Create a new tab for the file (will switch to existing tab if already open)
         const { index } = createTab(path);
         await loadPDFIfNeeded(path, index);

@@ -92,12 +92,14 @@ import { isTauri, isMobile, isDevMode, getOpenedFiles, loadSession, saveSession,
 import { enterSimpleLayout } from './solid/stores/simpleLayoutStore.js';
 import { sessieHerstelBeleid } from './core/sessie-herstel.js';
 import { sessieBestanden, bronPad } from './pdf/wachtwoord-pdf.js';
+import { isAfbeeldingPad } from './pdf/open-image-pdf.js';
+import { openAlsAfbeelding } from './pdf/open-image.js';
 
 // Open PDF files: tabs created instantly, loads serialized through ONE global
 // queue - also across separate openFiles() calls (the Windows single-instance
 // plugin sends a separate open-files event per file). The loop itself lives in
 // queued-load.js, where it runs in a unit test against a real store.
-const openFiles = createFileOpenQueue({
+const openPdfFiles = createFileOpenQueue({
   documents: () => state.documents,
   createTab,
   switchToTab,
@@ -110,6 +112,16 @@ const openFiles = createFileOpenQueue({
     }
   },
 });
+
+// Afbeeldingen (Openen met > PT PDF Studio) worden naamloze PDF's van één pagina.
+function openFiles(filePaths, options) {
+  const lijst = Array.isArray(filePaths) ? filePaths : [];
+  const afbeeldingen = lijst.filter(isAfbeeldingPad);
+  for (const pad of afbeeldingen) {
+    openAlsAfbeelding(pad).catch((e) => console.warn('Failed to open image:', pad, e));
+  }
+  return openPdfFiles(lijst.filter((p) => !isAfbeeldingPad(p)), options);
+}
 
 // Register open-files listener immediately (before init) so events from the
 // single-instance plugin are never lost. Queue files until the app is ready.
