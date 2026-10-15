@@ -30,6 +30,9 @@ import {
 const VOORBEELD_BREEDTE = 300;
 const VOORBEELD_HOOGTE = 340;
 const MM_PER_PT = 25.4 / 72;
+// "Opslaan als PDF" zonder gekozen papier in de Pagina-instelling: een A4-vel
+// (eigen keuze van deze fork; upstream laat elke pagina haar eigen vel).
+const PDF_STANDAARD_VEL = { breedteMm: 210, hoogteMm: 297, bedrukbaar: null };
 
 // Twee keuzesets voor de plaatsing zijn gelijk als alle waarden gelijk zijn;
 // zo tekent het voorbeeld niet opnieuw als er alleen een nieuw object komt.
@@ -709,7 +712,7 @@ export default function PrintDialog(props) {
     const vel = bekendVel(effectief());
     const marges = printerMarges().get(papierVerzoekSleutel(selectedPrinter(), gevraagdPapier())) || null;
     return {
-      papier: vel ? { ...vel, bedrukbaar: marges } : (pdfDoel() ? 'pagina' : null),
+      papier: vel ? { ...vel, bedrukbaar: marges } : (pdfDoel() ? PDF_STANDAARD_VEL : null),
       orientatie: printArgumenten({
         autoRotate: autoRotate(),
         paginaInstelling: getPageSetupSettings(),
@@ -743,7 +746,7 @@ export default function PrintDialog(props) {
       // Een printer die nog niet geantwoord heeft: nog niets tonen. Bij
       // "Opslaan als PDF" zonder formaat is het vel de pagina zelf.
       if (!pdfDoel()) return '';
-      naam = velNaam(paginaMaat());
+      naam = 'A4';
     } else if (e.bron === 'onbekend') {
       // Onbekend papier = de standaard van de printer (dezelfde tekst als in
       // de Pagina-instelling).
