@@ -99,7 +99,7 @@ import { openAlsAfbeelding } from './pdf/open-image.js';
 // queue - also across separate openFiles() calls (the Windows single-instance
 // plugin sends a separate open-files event per file). The loop itself lives in
 // queued-load.js, where it runs in a unit test against a real store.
-const openPdfFiles = createFileOpenQueue({
+const openFiles = createFileOpenQueue({
   documents: () => state.documents,
   createTab,
   switchToTab,
@@ -114,13 +114,13 @@ const openPdfFiles = createFileOpenQueue({
 });
 
 // Afbeeldingen (Openen met > PT PDF Studio) worden naamloze PDF's van één pagina.
-function openFiles(filePaths, options) {
+function openBestanden(filePaths, options) {
   const lijst = Array.isArray(filePaths) ? filePaths : [];
   const afbeeldingen = lijst.filter(isAfbeeldingPad);
   for (const pad of afbeeldingen) {
     openAlsAfbeelding(pad).catch((e) => console.warn('Failed to open image:', pad, e));
   }
-  return openPdfFiles(lijst.filter((p) => !isAfbeeldingPad(p)), options);
+  return openFiles(lijst.filter((p) => !isAfbeeldingPad(p)), options);
 }
 
 // Register open-files listener immediately (before init) so events from the
@@ -132,7 +132,7 @@ if (window.__TAURI__?.event) {
     const files = event.payload;
     if (!Array.isArray(files)) return;
     if (appReady) {
-      openFiles(files);
+      openBestanden(files);
     } else {
       pendingOpenFiles.push(...files);
     }
@@ -362,7 +362,7 @@ async function init() {
 
   // Drain any files queued by the single-instance plugin before the app was ready
   if (pendingOpenFiles.length > 0 && !hasCommandLineFile) {
-    openFiles(pendingOpenFiles);
+    openBestanden(pendingOpenFiles);
   }
   pendingOpenFiles = [];
   appReady = true;
@@ -401,7 +401,7 @@ async function init() {
       const norm = (p) => String(p || '').replace(/\//g, '\\').toLowerCase();
       const alreadyOpen = state.documents.some(d => norm(d.filePath) === norm(testPdf));
       if (!alreadyOpen && await fileExists(testPdf)) {
-        await openFiles([testPdf]);
+        await openBestanden([testPdf]);
       }
     } catch (e) {
       console.warn('[dev] test.pdf auto-open failed:', e);
@@ -414,7 +414,7 @@ async function init() {
     if (window.__TAURI__?.event?.listen) {
       window.__TAURI__.event.listen('open-pdf-in-window', (evt) => {
         const path = evt?.payload?.pdfPath || evt?.payload?.pdf_path;
-        if (path) openFiles([path]);
+        if (path) openBestanden([path]);
       });
     }
   } catch (e) {
@@ -445,7 +445,7 @@ async function checkCommandLineArgs() {
   try {
     const files = await getOpenedFiles();
     if (Array.isArray(files) && files.length > 0) {
-      await openFiles(files);
+      await openBestanden(files);
       return true;
     }
   } catch (e) {
@@ -557,7 +557,7 @@ async function restoreLastSession() {
         // The existence checks above can take seconds on cloud/network drives.
         // If the user already opened a document meanwhile, restore the old
         // tabs in the background instead of yanking focus away from it.
-        await openFiles(validFiles, { activate: state.documents.length === 0 });
+        await openBestanden(validFiles, { activate: state.documents.length === 0 });
       }
     }
   } catch (e) {
