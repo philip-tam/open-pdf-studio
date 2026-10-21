@@ -1472,6 +1472,13 @@ export function drawAnnotation(ctx, annotation, snippetBitmaps = null) {
         const raw = annotation._cachedImg;
         if (raw instanceof HTMLImageElement) stampImg = raw;
       }
+      // Een afbeelding die nog decodeert (net geladen uit een PDF): teken
+      // opnieuw zodra hij klaar is, anders blijft de stempel onzichtbaar tot de
+      // volgende herteken.
+      if (stampImg && !stampImg.complete && !stampImg._redrawBijLaden) {
+        stampImg._redrawBijLaden = true;
+        stampImg.addEventListener('load', () => { try { redrawAnnotations(); } catch (_) {} }, { once: true });
+      }
       if (stampImg && stampImg.complete) {
         ctx.save();
         const cx = annotation.x + annotation.width / 2;
