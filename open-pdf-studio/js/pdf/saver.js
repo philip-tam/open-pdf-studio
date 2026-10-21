@@ -1603,10 +1603,27 @@ async function _savePDFNu(saveAsPath, activeDoc) {
 
           case 'stamp': {
             // Stamp annotation — with or without embedded image
-            const x1 = convertX(ann.x);
-            const y1 = convertY(ann.y + ann.height);
-            const x2 = convertX(ann.x + ann.width);
-            const y2 = convertY(ann.y);
+            let x1 = convertX(ann.x);
+            let y1 = convertY(ann.y + ann.height);
+            let x2 = convertX(ann.x + ann.width);
+            let y2 = convertY(ann.y);
+
+            // Een gedraaide tekststempel: /Rect is de assen-uitgelijnde omhullende
+            // van de gedraaide vorm en de appearance tekent hem gedraaid (/Matrix),
+            // zoals in de app. Zonder dit tonen andere lezers hem rechtop.
+            const stempelDraaiing = (!ann.imageData && ann.stampText && ann.rotation && pageRot === 0)
+              ? ann.rotation : 0;
+            if (stempelDraaiing) {
+              const cxS = (x1 + x2) / 2;
+              const cyS = (y1 + y2) / 2;
+              const radS = stempelDraaiing * Math.PI / 180;
+              const cosS = Math.abs(Math.cos(radS));
+              const sinS = Math.abs(Math.sin(radS));
+              const halfW = (ann.width / 2) * cosS + (ann.height / 2) * sinS;
+              const halfH = (ann.width / 2) * sinS + (ann.height / 2) * cosS;
+              x1 = cxS - halfW; x2 = cxS + halfW;
+              y1 = cyS - halfH; y2 = cyS + halfH;
+            }
 
             // Map app stamp names to PDF spec standard names (ISO 32000-1 Table 181)
             const stdStampNames = {
@@ -1675,10 +1692,19 @@ async function _savePDFNu(saveAsPath, activeDoc) {
               let s = `q\n${stPrefix}2 w ${sr} ${sg} ${sb} RG\n${rrect(0, 0, visW, visH, r)}S\n`;
               s += `BT\n/F1 ${fontSize} Tf\n${sr} ${sg} ${sb} rg\n${textX} ${textY} Td\n(${escaped}) Tj\nET\nQ\n`;
               const fontDict = context.obj({ Type: 'Font', Subtype: 'Type1', BaseFont: 'Helvetica-Bold', Encoding: 'WinAnsiEncoding' });
-              const apStream = context.stream(s, {
+              const apDictStempel = {
                 Type: 'XObject', Subtype: 'Form', BBox: [0, 0, w, h],
                 Resources: context.obj({ Font: context.obj({ F1: fontDict }) })
-              });
+              };
+              if (stempelDraaiing) {
+                // Hoek in PDF-ruimte (tegen de klok in) is het tegengestelde van
+                // de zichtbare draaiing; afgerond zodat 0/±1 exact serialiseren.
+                const radM = -stempelDraaiing * Math.PI / 180;
+                const cosM = Math.round(Math.cos(radM) * 1e6) / 1e6;
+                const sinM = Math.round(Math.sin(radM) * 1e6) / 1e6;
+                apDictStempel.Matrix = [cosM, sinM, -sinM, cosM, 0, 0];
+              }
+              const apStream = context.stream(s, apDictStempel);
               const apStreamRef = context.register(apStream);
               annotDict.set(PDFName.of('AP'), context.obj({ N: apStreamRef }));
               // De tekst zelf, zodat de stempel als tekststempel terugkomt

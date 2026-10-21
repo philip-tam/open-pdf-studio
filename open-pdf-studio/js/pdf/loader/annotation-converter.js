@@ -1429,10 +1429,10 @@ async function converteerPdfAnnotatie(annot, pageNum, viewport, stampImageMap, a
 
       // Image stamp - extracted from PDF structure via pdf-lib
       const stRect = convertRect(annot.rect);
-      const x = stRect.x;
-      const y = stRect.y;
-      const w = stRect.width;
-      const h = stRect.height;
+      let x = stRect.x;
+      let y = stRect.y;
+      let w = stRect.width;
+      let h = stRect.height;
 
       const gevondenBeeld = findImageEntryForAnnotation(stampImageMap, annot, 'stamp');
       // Een tekststempel van de app: de uitsnede van de weergave is geen bron.
@@ -1457,6 +1457,13 @@ async function converteerPdfAnnotatie(annot, pageNum, viewport, stampImageMap, a
         while (stRotation > 180) stRotation -= 360;
         while (stRotation < -180) stRotation += 360;
         if (Math.abs(stRotation) <= 1) stRotation = 0;
+      }
+
+      // Een gedraaide tekststempel heeft als /Rect de omhullende van de gedraaide
+      // vorm: de echte maat komt uit de /BBox van de appearance, anders groeit
+      // hij bij elke opslaan-en-heropenen-rondgang.
+      if (eigenTekst && stRotation !== 0 && extraColors.rotation) {
+        ({ x, y, width: w, height: h } = echteVormMaat(stRect));
       }
 
       // Reverse-map PDF standard names back to app stamp names
