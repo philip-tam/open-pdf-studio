@@ -58,13 +58,8 @@
     "i18next-browser-languagedetector": "^8.2.1",
     "mupdf": "^1.27.0",
     "pdf-lib": "^1.17.1",
-    "pdfjs-dist": "6.3.289",
-    "solid-js": "^1.9.11"
-  },
-  "allowScripts": {
-    "esbuild@0.27.3": true,
-    "fsevents@2.3.3": true,
-    "fsevents@2.3.2": true,
-    "sharp@0.34.5": true
+    "pdfjs-dist": "6.4.299",
+    "solid-js": "^1.9.11",
+    "three": "0.170.0"
   }
 }

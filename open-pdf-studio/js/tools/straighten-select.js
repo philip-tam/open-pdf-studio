@@ -9,7 +9,7 @@ import { updateStatusMessage } from '../ui/chrome/status-bar.js';
 import { render } from 'solid-js/web';
 import StraightenOverlay from '../solid/components/StraightenOverlay.jsx';
 import { startScreenshot, endScreenshot, openDialog } from '../bridge.js';
-import { getCurrentCanvases, selectionToAppRect } from './screenshot.js';
+import { getCurrentCanvases, selectionToAppRect } from './selectie-hulp.js';
 
 let disposeOverlay = null;
 

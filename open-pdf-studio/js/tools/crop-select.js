@@ -10,7 +10,7 @@ import { updateStatusMessage } from '../ui/chrome/status-bar.js';
 import { render } from 'solid-js/web';
 import CropSelectOverlay from '../solid/components/CropSelectOverlay.jsx';
 import { startScreenshot, endScreenshot } from '../bridge.js';
-import { getCurrentCanvases, selectionToAppRect, clampAppRect } from './screenshot.js';
+import { getCurrentCanvases, selectionToAppRect, clampAppRect } from './selectie-hulp.js';
 
 let disposeOverlay = null;
 
