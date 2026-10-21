@@ -53,6 +53,8 @@ export default function ProtectPdfDialog() {
     setFout('');
     setBezig(true);
     const invoer = { gebruiker: gebruiker(), eigenaar: eigenaar(), rechten: rechten() };
+    // De wachtwoorden niet langer in de dialoog laten staan dan nodig.
+    setGebruiker(''); setGebruikerHerhaald(''); setEigenaar(''); setEigenaarHerhaald('');
     close();
     try {
       const { maakBeveiligdeKopie } = await import('../../../pdf/protect-pdf.js');

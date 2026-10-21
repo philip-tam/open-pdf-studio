@@ -1171,6 +1171,7 @@
     "samePassword": "Gebruik een ander wachtwoord om te openen dan om de rechten te wijzigen.",
     "saveFirst": "Het document moet eerst worden opgeslagen voordat een beveiligde kopie gemaakt kan worden. Nu opslaan?",
     "saved": "Beveiligde kopie opgeslagen:\n{{path}}",
-    "failed": "Het document kon niet worden beveiligd: {{error}}"
+    "failed": "Het document kon niet worden beveiligd: {{error}}",
+    "tooShort": "Een wachtwoord moet minstens 6 tekens hebben. Gebruik liefst 12 of meer."
   }
 }

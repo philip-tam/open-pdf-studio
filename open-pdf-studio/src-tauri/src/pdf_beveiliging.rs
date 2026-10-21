@@ -16,6 +16,7 @@ use cbc::cipher::{block_padding::{NoPadding, Pkcs7}, BlockEncryptMut, KeyIvInit}
 use lopdf::{Dictionary, Document, Object, ObjectId, StringFormat};
 use rand::RngCore;
 use sha2::{Digest, Sha256, Sha384, Sha512};
+use zeroize::Zeroize;
 
 type Aes256CbcEnc = cbc::Encryptor<aes::Aes256>;
 type Aes128CbcEnc = cbc::Encryptor<aes::Aes128>;
@@ -71,10 +72,16 @@ impl Rechten {
     }
 }
 
-fn wachtwoord_bytes(w: &str) -> Vec<u8> {
-    let mut b = w.as_bytes().to_vec();
+/// Het wachtwoord zoals de norm het wil voor revisie 6: SASLprep (NFKC en
+/// verboden tekens), daarna UTF-8, hoogstens 127 bytes. Zonder SASLprep opent
+/// een wachtwoord met bijvoorbeeld een "é" in een andere viewer niet als het
+/// daar anders (gecomponeerd of ontbonden) is getypt.
+fn wachtwoord_bytes(w: &str) -> Result<Vec<u8>, String> {
+    let genormaliseerd = stringprep::saslprep(w)
+        .map_err(|_| "Het wachtwoord bevat tekens die in een PDF-wachtwoord niet zijn toegestaan.".to_string())?;
+    let mut b = genormaliseerd.as_bytes().to_vec();
     b.truncate(127);
-    b
+    Ok(b)
 }
 
 /// Algoritme 2.B (ISO 32000-2): de wachtwoordhash van revisie 6.
@@ -131,18 +138,20 @@ struct Sleutels {
     perms: Vec<u8>,
 }
 
-fn maak_sleutels(gebruiker: &str, eigenaar: &str, p: i32, rng: &mut impl RngCore) -> Sleutels {
+fn maak_sleutels(gebruiker: &str, eigenaar: &str, p: i32, rng: &mut impl RngCore) -> Result<Sleutels, String> {
     let mut bestand = [0u8; 32];
     rng.fill_bytes(&mut bestand);
 
-    let gw = wachtwoord_bytes(gebruiker);
-    let mut ew = wachtwoord_bytes(eigenaar);
+    let mut gw = wachtwoord_bytes(gebruiker)?;
+    let mut ew = wachtwoord_bytes(eigenaar)?;
     if ew.is_empty() {
         // Geen eigenaarwachtwoord: een willekeurig, onbekend wachtwoord, zodat
-        // niemand de rechten met een leeg wachtwoord kan omzeilen.
-        let mut w = [0u8; 16];
+        // niemand de rechten met een leeg wachtwoord kan omzeilen. 32 willekeurige
+        // bytes als hex (64 tekens, 256 bits).
+        let mut w = [0u8; 32];
         rng.fill_bytes(&mut w);
-        ew = w.iter().map(|b| b"abcdefghijklmnopqrstuvwxyz0123456789"[(*b as usize) % 36]).collect();
+        ew = w.iter().flat_map(|b| format!("{b:02x}").into_bytes()).collect();
+        w.zeroize();
     }
 
     let mut u_val_zout = [0u8; 8];
@@ -176,7 +185,9 @@ fn maak_sleutels(gebruiker: &str, eigenaar: &str, p: i32, rng: &mut impl RngCore
     aes.encrypt_block(&mut b);
     let perms = b.to_vec();
 
-    Sleutels { bestand, u, ue, o, oe, perms }
+    gw.zeroize();
+    ew.zeroize();
+    Ok(Sleutels { bestand, u, ue, o, oe, perms })
 }
 
 /// Eén tekenreeks of stream: AES-256-CBC met een willekeurige iv voorop, PKCS#7.
@@ -194,8 +205,10 @@ fn versleutel_bytes(sleutel: &[u8; 32], data: &[u8], rng: &mut impl RngCore) -> 
 
 fn versleutel_object(obj: &mut Object, sleutel: &[u8; 32], rng: &mut impl RngCore) {
     match obj {
-        Object::String(bytes, _) => {
+        Object::String(bytes, formaat) => {
             *bytes = versleutel_bytes(sleutel, bytes, rng);
+            // Versleutelde bytes zijn willekeurig: hex is het veiligst om weg te schrijven.
+            *formaat = StringFormat::Hexadecimal;
         }
         Object::Array(items) => {
             for item in items.iter_mut() {
@@ -259,7 +272,7 @@ pub fn beveilig_pdf(
     }
     let mut rng = rand::rngs::OsRng;
     let p = rechten.bits();
-    let sleutels = maak_sleutels(gebruikerswachtwoord, eigenaarwachtwoord, p, &mut rng);
+    let mut sleutels = maak_sleutels(gebruikerswachtwoord, eigenaarwachtwoord, p, &mut rng)?;
 
     let ids: Vec<ObjectId> = doc.objects.keys().copied().collect();
     for id in ids {
@@ -280,6 +293,7 @@ pub fn beveilig_pdf(
 
     let mut uit = Vec::with_capacity(bytes.len() + 4096);
     doc.save_to(&mut uit).map_err(|e| format!("Kan de PDF niet schrijven: {e}"))?;
+    sleutels.bestand.zeroize();
     Ok(uit)
 }
 
@@ -293,12 +307,19 @@ pub async fn protect_pdf_file(
     rechten: Rechten,
 ) -> Result<(), String> {
     tokio::task::spawn_blocking(move || {
-        if gebruikerswachtwoord.is_empty() && eigenaarwachtwoord.is_empty() {
-            return Err("Vul minstens één wachtwoord in.".to_string());
-        }
-        let bytes = std::fs::read(&bron).map_err(|e| format!("Kan {bron} niet lezen: {e}"))?;
-        let uit = beveilig_pdf(&bytes, &gebruikerswachtwoord, &eigenaarwachtwoord, &rechten)?;
-        std::fs::write(&doel, uit).map_err(|e| format!("Kan {doel} niet schrijven: {e}"))
+        let mut gebruikerswachtwoord = gebruikerswachtwoord;
+        let mut eigenaarwachtwoord = eigenaarwachtwoord;
+        let resultaat = (|| {
+            if gebruikerswachtwoord.is_empty() && eigenaarwachtwoord.is_empty() {
+                return Err("Vul minstens één wachtwoord in.".to_string());
+            }
+            let bytes = std::fs::read(&bron).map_err(|e| format!("Kan {bron} niet lezen: {e}"))?;
+            let uit = beveilig_pdf(&bytes, &gebruikerswachtwoord, &eigenaarwachtwoord, &rechten)?;
+            std::fs::write(&doel, uit).map_err(|e| format!("Kan {doel} niet schrijven: {e}"))
+        })();
+        gebruikerswachtwoord.zeroize();
+        eigenaarwachtwoord.zeroize();
+        resultaat
     })
     .await
     .map_err(|e| e.to_string())?
@@ -331,6 +352,141 @@ mod tests {
         let c = hash_r6(b"ander", b"zoutzout", &[]);
         assert_eq!(a, b);
         assert_ne!(a, c);
+    }
+
+    use cbc::cipher::BlockDecryptMut;
+    use lopdf::dictionary;
+
+    fn aes256_cbc_nul_iv_terug(sleutel: &[u8; 32], data: &[u8]) -> Vec<u8> {
+        cbc::Decryptor::<aes::Aes256>::new_from_slices(sleutel, &[0u8; 16])
+            .unwrap()
+            .decrypt_padded_vec_mut::<NoPadding>(data)
+            .unwrap()
+    }
+
+    #[test]
+    fn gebruikers_en_eigenaarsleutel_geven_dezelfde_bestandssleutel_terug() {
+        let mut rng = rand::rngs::OsRng;
+        let s = maak_sleutels("open-ww", "rechten-ww", Rechten::default().bits(), &mut rng).unwrap();
+        // Gebruiker: U = hash(ww, validatiezout) + validatiezout + sleutelzout.
+        let (u_hash, u_zouten) = s.u.split_at(32);
+        assert_eq!(s.u.len(), 48);
+        assert_eq!(hash_r6(b"open-ww", &u_zouten[..8], &[]).as_slice(), u_hash);
+        let ue_sleutel = hash_r6(b"open-ww", &u_zouten[8..16], &[]);
+        assert_eq!(aes256_cbc_nul_iv_terug(&ue_sleutel, &s.ue), s.bestand.to_vec());
+        // Een verkeerd wachtwoord valideert niet.
+        assert_ne!(hash_r6(b"fout", &u_zouten[..8], &[]).as_slice(), u_hash);
+        // Eigenaar: dezelfde sleutel, met U als extra invoer.
+        let (o_hash, o_zouten) = s.o.split_at(32);
+        assert_eq!(hash_r6(b"rechten-ww", &o_zouten[..8], &s.u).as_slice(), o_hash);
+        let oe_sleutel = hash_r6(b"rechten-ww", &o_zouten[8..16], &s.u);
+        assert_eq!(aes256_cbc_nul_iv_terug(&oe_sleutel, &s.oe), s.bestand.to_vec());
+    }
+
+    #[test]
+    fn perms_bevat_p_en_de_vaste_tekens() {
+        use aes::cipher::BlockDecrypt;
+        let mut rng = rand::rngs::OsRng;
+        let p = Rechten { print: false, ..Rechten::default() }.bits();
+        let s = maak_sleutels("a1b2c3", "", p, &mut rng).unwrap();
+        let aes = aes::Aes256::new_from_slice(&s.bestand).unwrap();
+        let mut blok = aes::cipher::generic_array::GenericArray::clone_from_slice(&s.perms);
+        aes.decrypt_block(&mut blok);
+        assert_eq!(&blok[0..4], &p.to_le_bytes());
+        assert_eq!(&blok[4..8], &[0xFF; 4]);
+        assert_eq!(blok[8], b'T');
+        assert_eq!(&blok[9..12], b"adb");
+    }
+
+    #[test]
+    fn zonder_eigenaarwachtwoord_is_het_eigenaarwachtwoord_onbekend_maar_geldig() {
+        let mut rng = rand::rngs::OsRng;
+        let s = maak_sleutels("a1b2c3", "", Rechten::default().bits(), &mut rng).unwrap();
+        // Het lege wachtwoord opent de eigenaarssleutel niet.
+        let (o_hash, o_zouten) = s.o.split_at(32);
+        assert_ne!(hash_r6(b"", &o_zouten[..8], &s.u).as_slice(), o_hash);
+    }
+
+    #[test]
+    fn saslprep_maakt_gecomponeerd_en_ontbonden_gelijk() {
+        let gecomponeerd = wachtwoord_bytes("caf\u{e9}-ww").unwrap();
+        let ontbonden = wachtwoord_bytes("cafe\u{301}-ww").unwrap();
+        assert_eq!(gecomponeerd, ontbonden);
+        assert!(wachtwoord_bytes("a\u{0}b").is_err(), "stuurtekens zijn niet toegestaan");
+    }
+
+    #[test]
+    fn wachtwoord_wordt_op_127_bytes_afgekapt() {
+        assert_eq!(wachtwoord_bytes(&"x".repeat(300)).unwrap().len(), 127);
+    }
+
+    #[test]
+    fn iv_is_per_aanroep_anders_en_de_lengte_klopt() {
+        let mut rng = rand::rngs::OsRng;
+        let sleutel = [7u8; 32];
+        let a = versleutel_bytes(&sleutel, b"zelfde tekst", &mut rng);
+        let b = versleutel_bytes(&sleutel, b"zelfde tekst", &mut rng);
+        assert_ne!(a, b);
+        assert_eq!(a.len(), 16 + 16);
+        assert_eq!(versleutel_bytes(&sleutel, b"", &mut rng).len(), 32);
+        assert_eq!(versleutel_bytes(&sleutel, &[0u8; 16], &mut rng).len(), 16 + 32);
+    }
+
+    fn kleine_pdf() -> Vec<u8> {
+        let mut doc = Document::with_version("1.5");
+        let pages_id = doc.new_object_id();
+        let content = lopdf::Stream::new(Dictionary::new(), b"BT /F1 12 Tf 10 10 Td (geheime tekst) Tj ET".to_vec());
+        let content_id = doc.add_object(content);
+        let page_id = doc.add_object(dictionary! {
+            "Type" => "Page", "Parent" => pages_id, "Contents" => content_id,
+            "MediaBox" => vec![0.into(), 0.into(), 200.into(), 100.into()],
+        });
+        doc.objects.insert(pages_id, Object::Dictionary(dictionary! {
+            "Type" => "Pages", "Kids" => vec![page_id.into()], "Count" => 1,
+        }));
+        let catalog_id = doc.add_object(dictionary! { "Type" => "Catalog", "Pages" => pages_id });
+        let info_id = doc.add_object(dictionary! {
+            "Title" => Object::string_literal("Mijn (titel)"),
+        });
+        doc.trailer.set("Root", catalog_id);
+        doc.trailer.set("Info", info_id);
+        let mut uit = Vec::new();
+        doc.save_to(&mut uit).unwrap();
+        uit
+    }
+
+    #[test]
+    fn beveiligd_bestand_heeft_encrypt_woordenboek_en_geen_leesbare_tekst() {
+        let bron = kleine_pdf();
+        assert!(String::from_utf8_lossy(&bron).contains("geheime tekst"));
+        let uit = beveilig_pdf(&bron, "open-ww", "rechten-ww", &Rechten::default()).unwrap();
+        let tekst = String::from_utf8_lossy(&uit);
+        assert!(!tekst.contains("geheime tekst"), "de inhoud staat nog leesbaar in het bestand");
+        assert!(!tekst.contains("Mijn (titel)"), "de titel staat nog leesbaar in het bestand");
+        assert!(tekst.starts_with("%PDF-2.0"));
+
+        let doc = Document::load_mem(&uit).unwrap_or_else(|e| panic!("kan het resultaat niet lezen: {e}"));
+        let enc_ref = doc.trailer.get(b"Encrypt").unwrap().as_reference().unwrap();
+        let enc = doc.get_object(enc_ref).unwrap().as_dict().unwrap();
+        assert_eq!(enc.get(b"V").unwrap().as_i64().unwrap(), 5);
+        assert_eq!(enc.get(b"R").unwrap().as_i64().unwrap(), 6);
+        assert_eq!(enc.get(b"CF").unwrap().as_dict().unwrap().get(b"StdCF").unwrap().as_dict().unwrap()
+            .get(b"CFM").unwrap().as_name().unwrap(), b"AESV3");
+        assert_eq!(enc.get(b"U").unwrap().as_str().unwrap().len(), 48);
+        assert_eq!(enc.get(b"O").unwrap().as_str().unwrap().len(), 48);
+        assert_eq!(enc.get(b"UE").unwrap().as_str().unwrap().len(), 32);
+        assert_eq!(enc.get(b"OE").unwrap().as_str().unwrap().len(), 32);
+        assert_eq!(enc.get(b"Perms").unwrap().as_str().unwrap().len(), 16);
+        assert!(doc.trailer.get(b"ID").is_ok());
+    }
+
+    #[test]
+    fn al_beveiligde_pdf_wordt_geweigerd_of_opnieuw_beveiligd_zonder_fout() {
+        let eerste = beveilig_pdf(&kleine_pdf(), "open-ww", "", &Rechten::default()).unwrap();
+        // lopdf leest een R6-bestand niet als ontsleuteld; het tweede beveiligen
+        // mag het eerste nooit stilletjes dubbel versleutelen.
+        let tweede = beveilig_pdf(&eerste, "ander-ww", "", &Rechten::default());
+        assert!(tweede.is_err(), "een al beveiligd bestand moet geweigerd worden");
     }
 
     /// Handmatig: PDF_IN, PDF_OUT, PDF_USER en PDF_OWNER uit de omgeving; het

@@ -1170,6 +1170,7 @@
     "samePassword": "Use a different password for opening and for changing the rights.",
     "saveFirst": "The document has to be saved before a protected copy can be made. Save it now?",
     "saved": "Protected copy saved:\n{{path}}",
-    "failed": "Could not protect the document: {{error}}"
+    "failed": "Could not protect the document: {{error}}",
+    "tooShort": "A password needs at least 6 characters. Use 12 or more if you can."
   }
 }
