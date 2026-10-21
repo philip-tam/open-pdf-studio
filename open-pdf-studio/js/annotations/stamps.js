@@ -7,7 +7,7 @@ import { showProperties } from '../ui/panels/properties-panel.js';
 import { redrawAnnotations, redrawContinuous } from './rendering.js';
 import { updateStatusMessage } from '../ui/chrome/status-bar.js';
 import { openDialog } from '../bridge.js';
-import { BUILTIN_STAMP_DEFAULT_WIDTH, BUILTIN_STAMP_DEFAULT_HEIGHT, BUILT_IN_STAMPS } from './stamp-defaults.js';
+import { builtinStampMaat, BUILT_IN_STAMPS } from './stamp-defaults.js';
 import { overrideStampMaat } from './svg-real-size.js';
 import { stampPxPerMm } from './stamp-scale.js';
 import { rasterizeSvg } from './svg-raster.js';
@@ -29,8 +29,8 @@ export function showStampPicker(x, y) {
 function placeStamp(stamp, x, y) {
   if (!getActiveDocument()?.pdfDoc) return;
 
-  const width = BUILTIN_STAMP_DEFAULT_WIDTH;
-  const height = BUILTIN_STAMP_DEFAULT_HEIGHT;
+  const doc = getActiveDocument();
+  const { width, height } = builtinStampMaat(paginaMaat(doc?.currentPage || 1, doc)?.breedte);
 
   const ann = createAnnotation({
     type: 'stamp',

@@ -344,3 +344,4 @@ js/pdf/encrypted-pdf.test.mjs
 js/pdf/wachtwoord-pdf.test.mjs
 js/pdf/page-transition.test.mjs
 js/pdf/open-image.test.mjs
+js/annotations/stamp-defaults.test.mjs

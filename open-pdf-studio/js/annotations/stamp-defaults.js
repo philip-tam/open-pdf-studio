@@ -17,6 +17,20 @@ export const SYMBOL_STAMP_DEFAULT_SIZE = 400;
 export const BUILTIN_STAMP_DEFAULT_WIDTH = 1600;
 export const BUILTIN_STAMP_DEFAULT_HEIGHT = 500;
 
+/**
+ * Maat van een nieuw ingebouwd tekststempel op een pagina van `paginaBreedte`
+ * (app-coördinaten): een kwart van de paginabreedte, met de beeldverhouding van
+ * de standaardmaat. Zonder bekende paginamaat de vaste standaardmaat. Zo past
+ * het stempel op elke pagina, en niet alleen op een zeer grote tekening.
+ * @param {number|null|undefined} paginaBreedte
+ * @returns {{ width: number, height: number }}
+ */
+export function builtinStampMaat(paginaBreedte) {
+  if (!(paginaBreedte > 0)) return { width: BUILTIN_STAMP_DEFAULT_WIDTH, height: BUILTIN_STAMP_DEFAULT_HEIGHT };
+  const width = Math.min(BUILTIN_STAMP_DEFAULT_WIDTH, Math.max(100, Math.round(paginaBreedte * 0.25)));
+  return { width, height: Math.round(width * BUILTIN_STAMP_DEFAULT_HEIGHT / BUILTIN_STAMP_DEFAULT_WIDTH) };
+}
+
 // Fallback-hoogte voor override-stempels zonder expliciete grootte
 // (bv. extensie-stempels). Was 80, nu 10x = 800. Breedte volgt uit aspect.
 export const OVERRIDE_STAMP_DEFAULT_HEIGHT = 800;

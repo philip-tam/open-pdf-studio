@@ -1638,7 +1638,10 @@ async function _savePDFNu(saveAsPath, activeDoc) {
               Subtype: 'Stamp',
               Rect: [x1, y1, x2, y2],
               // /Name is een PDFName: alleen ASCII (de echte naam staat in /Subj en OPS_StampName).
-              Name: asciiPdfName(pdfStampName, 'Draft'),
+              // Een tekststempel met eigen appearance krijgt een eigen naam: met
+              // een standaardnaam ('Draft') tekent Acrobat zijn eigen rode stempel
+              // zodra je het stempel bewerkt of draait.
+              Name: asciiPdfName((!ann.imageData && ann.stampText) ? `OPS_${pdfStampName.replace(/\s+/g, "")}` : pdfStampName, 'Draft'),
               Subj: pdfTextString(ann.stampName || pdfStampName),
               C: colorArr,
               CA: opacity,
