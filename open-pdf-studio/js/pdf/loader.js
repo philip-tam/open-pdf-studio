@@ -761,9 +761,17 @@ export async function loadPDF(filePath, docIndex, preloadedData = null) {
       // Redraw annotations on the current page now that background loading is done
       if (isActive() && doc.pdfDoc) {
         console.log(`[PERF-BG] redrawAnnotations after bg load START`);
-        const { redrawAnnotations } = await import('../annotations/rendering.js');
+        const { redrawAnnotations, redrawContinuous } = await import('../annotations/rendering.js');
         redrawAnnotations();
         console.log(`[PERF-BG] redrawAnnotations after bg load DONE`);
+        // Een tab die terwijl de app draait wordt geopend, krijgt zijn overlay
+        // nog een keer van maat (zoom op de pagina passen) nadat de annotaties
+        // geladen zijn; dat wist het canvas. Eén nahertekening daarna, anders
+        // blijven bijvoorbeeld stempels onzichtbaar tot de eerste scroll.
+        setTimeout(() => {
+          if (isClosed() || !isActive() || !doc.pdfDoc) return;
+          if (doc.viewMode === 'continuous') redrawContinuous(); else redrawAnnotations();
+        }, 600);
       }
     }).catch((e) => { console.error('[PERF-BG] loadExistingAnnotations error:', e); });
 
