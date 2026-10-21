@@ -27,6 +27,7 @@ import CropMarginsDialog from './dialogs/CropMarginsDialog.jsx';
 import OcrLanguageDialog from './dialogs/OcrLanguageDialog.jsx';
 import StraightenDialog from './dialogs/StraightenDialog.jsx';
 import ShiftPageDialog from './dialogs/ShiftPageDialog.jsx';
+import ProtectPdfDialog from './dialogs/ProtectPdfDialog.jsx';
 import ResizePagesDialog from './dialogs/ResizePagesDialog.jsx';
 import CompressDialog from './dialogs/CompressDialog.jsx';
 import ScreenshotDialog from './dialogs/ScreenshotDialog.jsx';
@@ -94,6 +95,7 @@ const DIALOG_MAP = {
   'ocr-language': OcrLanguageDialog,
   'straighten-page': StraightenDialog,
   'shift-page': ShiftPageDialog,
+  'protect-pdf': ProtectPdfDialog,
   'resize-pages': ResizePagesDialog,
   'compress': CompressDialog,
   'screenshot': ScreenshotDialog,

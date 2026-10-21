@@ -1,6 +1,6 @@
 [package]
 name = "open-pdf-studio"
-version = "0.47.0"
+version = "0.48.0"
 description = "A free, open-source PDF annotation editor"
 authors = ["OpenAEC Foundation"]
 license = "LGPL-3.0-or-later"
@@ -75,6 +75,7 @@ sha1 = { version = "0.10", features = ["oid"] }
 des = { version = "0.8", features = ["zeroize"] }
 rc2 = { version = "0.8", features = ["zeroize"] }
 cbc = { version = "0.1", features = ["alloc", "zeroize"] }
+aes = "0.8"
 rsa = "0.9"
 # ECDSA-verificatie (handtekeningen en certificaatketens, spec §7.1). 0.13 is de
 # der 0.7-lijn; "pkcs8" levert ook Signature::from_der.

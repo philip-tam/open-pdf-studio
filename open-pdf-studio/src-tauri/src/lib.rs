@@ -4,6 +4,7 @@
 #![recursion_limit = "256"]
 
 mod accounts;
+mod pdf_beveiliging;
 mod atomic_file;
 pub mod beveiligde_pdf;
 pub mod cad_export;
@@ -3169,6 +3170,7 @@ pub fn run(opts: StartupOpts) {
             discard_spool_pdf,
             download_pdf_from_url,
             remove_pdf_restrictions,
+            pdf_beveiliging::protect_pdf_file,
             list_pdf_files,
             save_preferences,
             load_preferences,
