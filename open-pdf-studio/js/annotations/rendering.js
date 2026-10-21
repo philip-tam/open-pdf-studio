@@ -1500,7 +1500,11 @@ export function drawAnnotation(ctx, annotation, snippetBitmaps = null) {
         const color = annotation.stampColor || annotation.color || '#ef4444';
         ctx.strokeStyle = color;
         ctx.lineWidth = 2;
-        ctx.strokeRect(-annotation.width / 2, -annotation.height / 2, annotation.width, annotation.height);
+        // Afgeronde hoeken, zoals de appearance die de saver schrijft.
+        ctx.beginPath();
+        ctx.roundRect(-annotation.width / 2, -annotation.height / 2, annotation.width, annotation.height,
+          Math.min(annotation.width, annotation.height) * 0.15);
+        ctx.stroke();
 
         ctx.fillStyle = color;
         ctx.font = `bold ${Math.min(annotation.height * 0.5, 24)}px Arial`;
