@@ -63,6 +63,7 @@
     "strokeColor": "Warna Garis",
     "color": "Warna",
     "opacity": "Kelegapan",
+    "fillOpacity": "Kelegapan Isian",
     "lineWidth": "Lebar Garisan",
     "borderWidth": "Lebar Sempadan",
     "borderStyle": "Gaya Sempadan",
@@ -247,6 +248,9 @@
     "linkImageTitle": "Pautkan imej",
     "imageFilter": "Imej"
   },
+  "sizeUnit": {
+    "tooltip": "Unit saiz"
+  },
   "multiSelect": "{{count}} anotasi dipilih",
   "pdfText": "Teks PDF",
   "types": {
@@ -349,6 +353,18 @@
     "importComments": "Import komen...",
     "exportComments": "Eksport komen ke fail data...",
     "exportSelectedComments": "Eksport komen terpilih ke fail data...",
+    "exportListCsv": "Eksport senarai ke CSV...",
+    "summarizeComingSoon": "Akan datang",
+    "listExported": "Senarai ulasan dieksport ke CSV",
+    "csvPage": "Halaman",
+    "csvType": "Jenis",
+    "csvAuthor": "Pengarang",
+    "csvDate": "Tarikh",
+    "csvStatus": "Status",
+    "csvSubject": "Subjek",
+    "csvContents": "Kandungan",
+    "csvColor": "Warna",
+    "csvLayer": "Lapisan",
     "schedules": "Jadual",
     "addPage": "Tambah halaman",
     "pageLabels": "Label halaman (pembina nama)"

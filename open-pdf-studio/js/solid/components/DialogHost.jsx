@@ -7,9 +7,9 @@ import InsertPageDialog from './dialogs/InsertPageDialog.jsx';
 import DeletePagesDialog from './dialogs/DeletePagesDialog.jsx';
 import PagePropertiesDialog from './dialogs/PagePropertiesDialog.jsx';
 import ExtractPagesDialog from './dialogs/ExtractPagesDialog.jsx';
+import SplitDocumentDialog from './dialogs/SplitDocumentDialog.jsx';
 import MergePdfsDialog from './dialogs/MergePdfsDialog.jsx';
 import PrintDialog from './dialogs/PrintDialog.jsx';
-import PrintQueueDialog from './dialogs/PrintQueueDialog.jsx';
 import PageSetupDialog from './dialogs/PageSetupDialog.jsx';
 import WatermarkDialog from './dialogs/WatermarkDialog.jsx';
 import HeaderFooterDialog from './dialogs/HeaderFooterDialog.jsx';
@@ -29,6 +29,7 @@ import StraightenDialog from './dialogs/StraightenDialog.jsx';
 import ShiftPageDialog from './dialogs/ShiftPageDialog.jsx';
 import ResizePagesDialog from './dialogs/ResizePagesDialog.jsx';
 import CompressDialog from './dialogs/CompressDialog.jsx';
+import ScreenshotDialog from './dialogs/ScreenshotDialog.jsx';
 import FeedbackDialog from './dialogs/FeedbackDialog.jsx';
 import MessageDialog from './dialogs/MessageDialog.jsx';
 import AboutDialog from './dialogs/AboutDialog.jsx';
@@ -37,6 +38,7 @@ import ShortcutsDialog from './dialogs/ShortcutsDialog.jsx';
 import ExtensionsDialog from './dialogs/ExtensionsDialog.jsx';
 import ConfirmDialog from './dialogs/ConfirmDialog.jsx';
 import PasswordDialog from './dialogs/PasswordDialog.jsx';
+import RecoveryDialog from './dialogs/RecoveryDialog.jsx';
 import HandtekeningDetailDialog from './dialogs/HandtekeningDetailDialog.jsx';
 import ViewportScaleDialog from './dialogs/ViewportScaleDialog.jsx';
 import ScaleRegionDialog from './dialogs/ScaleRegionDialog.jsx';
@@ -47,6 +49,7 @@ import CompareDialog from './compare/CompareDialog.jsx';
 import CadExportDialog from './dialogs/CadExportDialog.jsx';
 import CadImportDialog from './dialogs/CadImportDialog.jsx';
 import AnnotationLayerDeleteDialog from './dialogs/AnnotationLayerDeleteDialog.jsx';
+import FlattenAllDialog from './dialogs/FlattenAllDialog.jsx';
 import TextEditOverlay from './TextEditOverlay.jsx';
 import StavenreeksInlineEditor from './StavenreeksInlineEditor.jsx';
 import ParametricLabelInlineEditor from './ParametricLabelInlineEditor.jsx';
@@ -71,9 +74,9 @@ const DIALOG_MAP = {
   'delete-pages': DeletePagesDialog,
   'page-properties': PagePropertiesDialog,
   'extract-pages': ExtractPagesDialog,
+  'split-document': SplitDocumentDialog,
   'merge-pdfs': MergePdfsDialog,
   'print': PrintDialog,
-  'print-queue': PrintQueueDialog,
   'page-setup': PageSetupDialog,
   'watermark': WatermarkDialog,
   'header-footer': HeaderFooterDialog,
@@ -93,6 +96,7 @@ const DIALOG_MAP = {
   'shift-page': ShiftPageDialog,
   'resize-pages': ResizePagesDialog,
   'compress': CompressDialog,
+  'screenshot': ScreenshotDialog,
   'feedback': FeedbackDialog,
   'message': MessageDialog,
   'about': AboutDialog,
@@ -110,7 +114,9 @@ const DIALOG_MAP = {
   'cad-export': CadExportDialog,
   'cad-import': CadImportDialog,
   'annotation-layer-delete': AnnotationLayerDeleteDialog,
+  'flatten-all': FlattenAllDialog,
   'pdf-password': PasswordDialog,
+  'recovery': RecoveryDialog,
 };
 
 export default function DialogHost() {

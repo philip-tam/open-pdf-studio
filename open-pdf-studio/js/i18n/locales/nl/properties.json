@@ -43,6 +43,7 @@
     "strokeColor": "Lijnkleur",
     "color": "Kleur",
     "opacity": "Dekking",
+    "fillOpacity": "Vuldekking",
     "borderStyle": "Randstijl",
     "cross": "Kruis",
     "crossHint": "Tekent een kruis in de rechthoek, cirkel of ellips (bijv. een sparing)",
@@ -227,6 +228,9 @@
     "linkImageTitle": "Afbeelding koppelen",
     "imageFilter": "Afbeeldingen"
   },
+  "sizeUnit": {
+    "tooltip": "Eenheid voor maten"
+  },
   "multiSelect": "{{count}} annotaties geselecteerd",
   "pdfText": "PDF-tekst",
   "types": {
@@ -328,6 +332,18 @@
     "importComments": "Opmerkingen importeren...",
     "exportComments": "Opmerkingen exporteren naar gegevensbestand...",
     "exportSelectedComments": "Geselecteerde opmerkingen exporteren naar gegevensbestand...",
+    "exportListCsv": "Lijst exporteren naar CSV...",
+    "summarizeComingSoon": "Binnenkort beschikbaar",
+    "listExported": "Opmerkingenlijst geëxporteerd naar CSV",
+    "csvPage": "Pagina",
+    "csvType": "Type",
+    "csvAuthor": "Auteur",
+    "csvDate": "Datum",
+    "csvStatus": "Status",
+    "csvSubject": "Onderwerp",
+    "csvContents": "Inhoud",
+    "csvColor": "Kleur",
+    "csvLayer": "Laag",
     "measurements": "Metingen",
     "schedules": "Staten",
     "addPage": "Pagina toevoegen",

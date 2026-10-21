@@ -63,6 +63,7 @@
     "strokeColor": "Rangi ya Mstari",
     "color": "Rangi",
     "opacity": "Uwazi",
+    "fillOpacity": "Uwazi wa Kujaza",
     "lineWidth": "Upana wa Mstari",
     "borderWidth": "Upana wa Mpaka",
     "borderStyle": "Mtindo wa Mpaka",
@@ -247,6 +248,9 @@
     "linkImageTitle": "Unganisha picha",
     "imageFilter": "Picha"
   },
+  "sizeUnit": {
+    "tooltip": "Kipimo cha ukubwa"
+  },
   "multiSelect": "maoni {{count}} yamechaguliwa",
   "pdfText": "Maandishi ya PDF",
   "types": {
@@ -349,6 +353,18 @@
     "importComments": "Ingiza maoni...",
     "exportComments": "Hamisha maoni kwenye faili ya data...",
     "exportSelectedComments": "Hamisha maoni yaliyochaguliwa kwenye faili ya data...",
+    "exportListCsv": "Hamisha orodha kwenda CSV...",
+    "summarizeComingSoon": "Inakuja hivi karibuni",
+    "listExported": "Orodha ya maoni imehamishwa kwenda CSV",
+    "csvPage": "Ukurasa",
+    "csvType": "Aina",
+    "csvAuthor": "Mwandishi",
+    "csvDate": "Tarehe",
+    "csvStatus": "Hali",
+    "csvSubject": "Mada",
+    "csvContents": "Maudhui",
+    "csvColor": "Rangi",
+    "csvLayer": "Tabaka",
     "schedules": "Majedwali ya orodha",
     "addPage": "Ongeza ukurasa",
     "pageLabels": "Lebo za kurasa (kiunda majina)"

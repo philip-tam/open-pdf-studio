@@ -1,6 +1,6 @@
 import { cssPxPerPtAt100, nextScaleStep } from '../core/zoom-display.js';
 import { state, getActiveDocument, getPageRotation, setPageRotation } from '../core/state.js';
-import { isTauri, invoke } from '../core/platform.js';
+import { isTauri, isMobile, heeftRustRenderer, invoke } from '../core/platform.js';
 import { pdfjsFallbackNodig } from './render-route.js';
 import { bepaalOverlayMaat, pasOverlayMaatToe } from './overlay-canvas-size.js';
 import { paginaGetekend } from './pagina-getekend.js';
@@ -30,6 +30,7 @@ import { rotateTextDir } from '../annotations/corrections/geometry.js';
 import { isTextAnchored } from '../annotations/corrections/model.js';
 import { stopAlleWielScrollers } from './wiel-scroll.js';
 import { werkelijkeGrootteZoom, kalibratieVoor } from './schermkalibratie.js';
+import { thinLinesKey, thinLinesOn } from './thin-lines.js';
 // Hi-DPI support: render canvases at device pixel ratio for sharp text
 export function getCanvasDPR() { return window.devicePixelRatio || 1; }
 
@@ -346,7 +347,8 @@ async function _renderPageImpl(pageNum) {
 
   // Try Rust open-pdf-render first (pure Rust, fast), fall back to PDF.js
   const _t0 = performance.now();
-  const _canUseTauri = isTauri();
+  // Alleen het bureaublad heeft PDFium; mobiel tekent met PDF.js (#593).
+  const _canUseTauri = heeftRustRenderer();
   const _hasFilePath = !!doc.filePath;
   let _skipBitmapRender = false;
 
@@ -576,7 +578,8 @@ async function _renderPageImpl(pageNum) {
   // dimensions) — the user sees "one big white screen" instead of an A4
   // page. Render directly to pdf-canvas via PDF.js for blank docs.
   if (pdfjsFallbackNodig({
-    inTauri: _canUseTauri,
+    inTauri: isTauri(),
+    mobiel: isMobile(),
     hasFilePath: _hasFilePath,
     viewportNamHetOver: _skipBitmapRender,
   })) {
@@ -807,7 +810,7 @@ export async function renderPageOffscreen(pageNum) {
   // Zonder Tauri (webversie) of zonder bestandspad kan PDFium niet; dan tekent
   // PDF.js. Dit is GEEN stille terugval voor een Rust-fout — die blijft hard
   // falen hieronder, zodat een rasterbug zichtbaar blijft.
-  if (pdfjsFallbackNodig({ inTauri: isTauri(), hasFilePath: !!doc.filePath })) {
+  if (pdfjsFallbackNodig({ inTauri: isTauri(), mobiel: isMobile(), hasFilePath: !!doc.filePath })) {
     try {
       await tekenPaginaMetPdfJs(page, viewport, pdfCanvas);
       if (_isStaleDoc(doc)) return;
@@ -1240,7 +1243,7 @@ async function renderContinuousPage(pageNum) {
   const pdfCtxEl = pdfCanvasEl.getContext('2d');
 
   // Webversie/documenten zonder pad: PDF.js tekent. Zie render-route.js.
-  const _pdfjsPad = pdfjsFallbackNodig({ inTauri: isTauri(), hasFilePath: !!doc.filePath });
+  const _pdfjsPad = pdfjsFallbackNodig({ inTauri: isTauri(), mobiel: isMobile(), hasFilePath: !!doc.filePath });
 
   // ─── PERF FIX #2 + #3 (BARN measurement scaffold) ───────────────────
   //  (#1 — de DPR-factor laten vallen — is teruggedraaid, issue #549: de
@@ -1294,7 +1297,10 @@ async function renderContinuousPage(pageNum) {
 
   const label = `[render p${pageNum} scale ${renderScale.toFixed(2)}]`;
   console.time(label);
-  const _jsCacheKey = `${doc.filePath}|${pageNum}|${Math.round(renderScale * 10000)}|${extraRotation || 0}`;
+  // Lijnstand (Thin Lines, #595) hoort bij het beeld: sleutel én render
+  // gebruiken dezelfde, vastgelegd bij de start van deze render.
+  const _thin = thinLinesOn();
+  const _jsCacheKey = `${doc.filePath}|${pageNum}|${Math.round(renderScale * 10000)}|${extraRotation || 0}|${thinLinesKey(_thin)}`;
   console.time(label + ' cache-lookup');
   const _cached = _bitmapJSCacheGet(_jsCacheKey);
   console.timeEnd(label + ' cache-lookup');
@@ -1341,6 +1347,7 @@ async function renderContinuousPage(pageNum) {
         // viewport). Omitting it rendered the page un-rotated into a rotated
         // box — the old-orientation remnant of issue #262 in continuous view.
         rotation: extraRotation || 0,
+        thinLines: _thin,
       });
       console.timeEnd(label + ' invoke-render');
       if (_isStaleDoc(doc)) { console.timeEnd(label); return; }
@@ -2050,7 +2057,7 @@ async function _runPrefetch(centerPage, waited) {
 // Cache-only mirror of renderPage()'s cold vector path: analyze → extract →
 // prepareImages. Never touches #pdf-canvas or the viewport singleton.
 async function _prefetchOnePage(doc, pageNum, centerPage) {
-  if (!isTauri() || !doc.filePath) return;
+  if (!heeftRustRenderer() || !doc.filePath) return;
   if (state.renderEngineOverride != null) return; // user forced a raster engine
   const rotation = getPageRotation(pageNum);
   const vr = await import('./vector-renderer.js');

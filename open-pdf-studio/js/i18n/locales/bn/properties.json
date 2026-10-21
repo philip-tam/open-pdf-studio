@@ -63,6 +63,7 @@
     "strokeColor": "স্ট্রোক রঙ",
     "color": "রঙ",
     "opacity": "অস্বচ্ছতা",
+    "fillOpacity": "ভরাটের অস্বচ্ছতা",
     "lineWidth": "রেখার প্রস্থ",
     "borderWidth": "সীমানার প্রস্থ",
     "borderStyle": "সীমানা শৈলী",
@@ -247,6 +248,9 @@
     "linkImageTitle": "ছবি লিঙ্ক করুন",
     "imageFilter": "ছবি"
   },
+  "sizeUnit": {
+    "tooltip": "মাপের একক"
+  },
   "multiSelect": "{{count}} টীকা নির্বাচিত",
   "pdfText": "PDF পাঠ্য",
   "types": {
@@ -349,6 +353,18 @@
     "importComments": "মন্তব্য আমদানি...",
     "exportComments": "মন্তব্য ডেটা ফাইলে রপ্তানি...",
     "exportSelectedComments": "নির্বাচিত মন্তব্য ডেটা ফাইলে রপ্তানি...",
+    "exportListCsv": "তালিকা CSV-তে রপ্তানি করুন...",
+    "summarizeComingSoon": "শীঘ্রই আসছে",
+    "listExported": "মন্তব্যের তালিকা CSV-তে রপ্তানি হয়েছে",
+    "csvPage": "পৃষ্ঠা",
+    "csvType": "ধরন",
+    "csvAuthor": "লেখক",
+    "csvDate": "তারিখ",
+    "csvStatus": "অবস্থা",
+    "csvSubject": "বিষয়",
+    "csvContents": "বিষয়বস্তু",
+    "csvColor": "রং",
+    "csvLayer": "স্তর",
     "schedules": "শিডিউল",
     "addPage": "পৃষ্ঠা যোগ করুন",
     "pageLabels": "পৃষ্ঠা লেবেল (নাম নির্মাতা)"

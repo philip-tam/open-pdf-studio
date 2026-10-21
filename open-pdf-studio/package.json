@@ -1,13 +1,13 @@
 {
   "name": "open-pdf-studio",
-  "version": "0.46.0",
+  "version": "0.47.0",
   "description": "A free, open-source PDF annotation editor built with Tauri",
   "scripts": {
     "prepare:native-runtime": "node scripts/native-runtime.mjs",
     "prepare:ocr-runtime": "node scripts/ocr-runtime.mjs",
-    "predev": "npm run prepare:native-runtime && npm run prepare:ocr-runtime && cargo build -p pdfium-worker",
+    "predev": "npm run prepare:native-runtime && npm run prepare:ocr-runtime && cargo build -p pdfium-worker -p open-pdf-thumbnails",
     "dev": "vite",
-    "prebuild": "npm run prepare:native-runtime && npm run prepare:ocr-runtime && cargo build --release -p pdfium-worker",
+    "prebuild": "npm run prepare:native-runtime && npm run prepare:ocr-runtime && cargo build --release -p pdfium-worker -p open-pdf-thumbnails",
     "build": "vite build",
     "build:hosted": "vite build --mode hosted",
     "build:web-unit": "vite build --config vite.web-unit.config.js",

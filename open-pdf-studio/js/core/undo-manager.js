@@ -228,7 +228,7 @@ export async function undo() {
 
   if (cmd.type === 'pageStructure') {
     const { restorePageState } = await import('../pdf/page-manager.js');
-    await restorePageState(cmd.oldBytes, cmd.oldAnnotations, cmd.oldRotations, cmd.oldPage);
+    await restorePageState(cmd.oldBytes, cmd.oldAnnotations, cmd.oldRotations, cmd.oldPage, { bookmarks: cmd.bookmarks?.old });
     applyOcrShift(getActiveDocument()?.ocrResults, cmd.ocrShift, -1);
     syncModifiedState();
     updateButtons();
@@ -282,7 +282,7 @@ export async function redo() {
 
   if (cmd.type === 'pageStructure') {
     const { restorePageState } = await import('../pdf/page-manager.js');
-    await restorePageState(cmd.newBytes, cmd.newAnnotations, cmd.newRotations, cmd.newPage);
+    await restorePageState(cmd.newBytes, cmd.newAnnotations, cmd.newRotations, cmd.newPage, { bookmarks: cmd.bookmarks?.new });
     applyOcrShift(getActiveDocument()?.ocrResults, cmd.ocrShift, 1);
     syncModifiedState();
     updateButtons();
@@ -858,6 +858,28 @@ export function recordBulkAdd(annotations) {
   execute({ type: 'bulkAdd', items });
 }
 
+// A correction that keeps growing in the proofreading mode (#508: pressing
+// Delete again extends the strike-through) stays one undo step: the add at
+// the top of the stack takes the new shape, so one undo removes the whole
+// correction. Only while that add is the last step, nothing can be redone,
+// no transaction is open and the document was not saved after it; otherwise
+// false, and the caller records an ordinary modify step.
+export function amendLastAdd(annotation) {
+  if (!annotation || undoTransactionDepth > 0) return false;
+  const doc = getActiveDocument();
+  if (!doc) return false;
+  const stack = getUndoStack();
+  const top = stack[stack.length - 1];
+  if (!top || top.type !== 'addAnnotation' || top.annotation?.id !== annotation.id) return false;
+  if ((doc.redoStack || []).length > 0) return false;
+  if (doc.savedUndoStackLength === stack.length) return false;
+  if (pendingPropertyChange) flushPropertyChange();
+  top.annotation = cloneAnnotation(annotation);
+  syncModifiedState();
+  scheduleThumbnailRefresh(top);
+  return true;
+}
+
 export function recordAnnotationOrder(oldOrder, newOrder) {
   if (!Array.isArray(oldOrder) || !Array.isArray(newOrder)) return;
   if (oldOrder.length !== newOrder.length) return;
@@ -1032,5 +1054,10 @@ export function recordPageStructure(oldBytes, oldAnnotations, oldRotations, oldP
     newRotations: { ...newRotations },
     newPage: newPage,
     ...(extra.ocrShift ? { ocrShift: { ...extra.ocrShift, pages: [...extra.ocrShift.pages] } } : {}),
+    // Bladwijzers vóór en na (samenvoegen): de bewerking verandert ze.
+    ...(extra.bookmarks ? { bookmarks: {
+      old: extra.bookmarks.old.map((b) => ({ ...b })),
+      new: extra.bookmarks.new.map((b) => ({ ...b })),
+    } } : {}),
   });
 }

@@ -1,5 +1,8 @@
 import { leesOpslag, verwijderOpslag } from './opslag.js';
+import { bestandsnaamUitPad } from './bestandsnaam.js';
 import { gastObject } from './gehost.js';
+import { rustRenderPadBeschikbaar } from '../pdf/render-route.js';
+import { slaOverInHeadless } from './headless.js';
 
 /**
  * Tauri API wrapper module
@@ -119,16 +122,9 @@ export async function hostVersies(id) {
 // Extract a display-friendly file name from a path or content:// URI
 export function extractFileName(pathOrUri) {
   if (!pathOrUri) return 'Document';
-  // content:// URIs: try to decode and extract last segment
-  if (pathOrUri.startsWith('content://')) {
-    const decoded = decodeURIComponent(pathOrUri);
-    // Try common patterns: .../document/primary:Download/file.pdf or raw:/storage/.../file.pdf
-    const match = decoded.match(/[/:]([^/:]+\.pdf)$/i);
-    if (match) return match[1];
-    // Fallback: last path segment
-    const segments = decoded.split(/[/:]+/).filter(Boolean);
-    return segments[segments.length - 1] || 'Document';
-  }
+  // content:// URIs (Android): de weergavenaam van de ContentResolver, of
+  // een leesbare naam uit de URI zelf (#596).
+  if (pathOrUri.startsWith('content://')) return bestandsnaamUitPad(pathOrUri);
   // Regular filesystem path
   const parts = pathOrUri.replace(/\\/g, '/').split('/');
   return parts[parts.length - 1] || 'Document';
@@ -162,6 +158,12 @@ export function isMobile() {
   return _isMobile;
 }
 
+// Kan het Rust-renderpad (PDFium) hier draaien? Niet in de browser en niet op
+// Android/iOS: daar zit geen PDFium in de app (#593). Zie pdf/render-route.js.
+export function heeftRustRenderer() {
+  return rustRenderPadBeschikbaar({ inTauri: isTauri(), mobiel: isMobile() });
+}
+
 // Get Tauri APIs from global object
 function getTauriWindow() {
   if (!isTauri()) return null;
@@ -176,6 +178,8 @@ function getTauriCore() {
 // Window controls
 export async function minimizeWindow() {
   if (!isTauri()) return;
+  // Headless (testinstantie): een geminimaliseerd venster rendert niet meer.
+  if (slaOverInHeadless('minimize')) return;
   const win = getTauriWindow();
   if (win) {
     const currentWindow = win.getCurrentWindow();
@@ -185,6 +189,8 @@ export async function minimizeWindow() {
 
 export async function maximizeWindow() {
   if (!isTauri()) return;
+  // Headless: maximaliseren zet het venster op een monitor.
+  if (slaOverInHeadless('maximize')) return;
   const win = getTauriWindow();
   if (win) {
     const currentWindow = win.getCurrentWindow();
@@ -227,6 +233,8 @@ export async function setWindowFullscreen(enabled) {
     }
     return;
   }
+  // Headless: volledig scherm zet het venster op een monitor.
+  if (slaOverInHeadless('fullscreen')) return;
   const win = getTauriWindow();
   if (!win) return;
   try {
@@ -471,6 +479,8 @@ export async function openExternal(url) {
     window.open(url, '_blank');
     return;
   }
+  // Headless: geen browser van de gebruiker naar voren halen.
+  if (slaOverInHeadless(`open external ${url}`)) return;
 
   // Try using the shell plugin
   if (window.__TAURI__.shell) {
