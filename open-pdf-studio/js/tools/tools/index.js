@@ -18,6 +18,7 @@ import { measureDistanceTool, measureAreaTool, measurePerimeterTool, addHoleTool
 import { filledAreaTool } from './filled-area-tool.js';
 import { systeemrasterTool, systeemplafondTool } from './systeemraster-tool.js';
 import { measureAngleTool } from './angle-tool.js';
+import { calibrateXyTool } from './calibrate-xy-tool.js';
 import { commentTool, textTool, stampTool, signatureTool, editTextTool } from './text-tool.js';
 import { calibrationPickTool } from './calibration-pick-tool.js';
 import { scaleMeasureTool } from './scale-measure-tool.js';
@@ -101,6 +102,7 @@ export function registerAllTools() {
   registerTool('measureArea', measureAreaTool);
   registerTool('measurePerimeter', measurePerimeterTool);
   registerTool('measureAngle', measureAngleTool);
+  registerTool('calibrateXY', calibrateXyTool);
   registerTool('addHole', addHoleTool);
   // Maatketting verlengen / een hulplijn eruit halen (#477).
   registerTool('dimChainAdd', dimChainAddTool);

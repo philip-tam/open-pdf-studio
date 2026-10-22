@@ -48,7 +48,9 @@
     "autoDetectTitle": "Detectar escala da legenda",
     "scaleDetected": "Escala detectada",
     "noScaleFound": "Nenhuma escala encontrada",
-    "detecting": "Detectando..."
+    "detecting": "Detectando...",
+    "calibrateXy": "Calibrate",
+    "calibrateXyTitle": "Calibrate per axis: trace a known dimension along the x-axis and/or y-axis"
   },
   "home": {
     "document": "Documento",

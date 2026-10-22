@@ -48,7 +48,9 @@
     "autoDetectTitle": "Detect scale from title block",
     "scaleDetected": "Målestokk oppdaget",
     "noScaleFound": "Fant ingen målestokk",
-    "detecting": "Oppdager..."
+    "detecting": "Oppdager...",
+    "calibrateXy": "Calibrate",
+    "calibrateXyTitle": "Calibrate per axis: trace a known dimension along the x-axis and/or y-axis"
   },
   "home": {
     "document": "Dokument",

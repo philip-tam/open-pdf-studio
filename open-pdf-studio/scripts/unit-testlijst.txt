@@ -445,3 +445,4 @@ js/core/getal-invoer-velden.test.mjs
 js/ui/getal-veld.test.mjs
 js/getal-velden-bron.test.mjs
 js/pdf/protect-pdf.test.mjs
+js/annotations/schaal-xy.test.mjs

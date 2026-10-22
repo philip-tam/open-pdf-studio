@@ -1,6 +1,8 @@
 import { getActiveDocument } from '../../core/state.js';
 import { applyToolTransform } from '../tool-context.js';
 import { zetRechtopRond } from '../../pdf/weergave-ruimte.js';
+import { findMeasureScale } from '../../annotations/measurement.js';
+import { hoekInGraden } from '../../annotations/schaal-xy.js';
 
 /**
  * Angle measurement tool — 3-click: point1, vertex, point2
@@ -45,13 +47,10 @@ export const measureAngleTool = {
       const vertex = state.dimPoints[1];
       const p3 = { x: ptX, y: ptY };
 
-      // Calculate angle
-      const angle1 = Math.atan2(p1.y - vertex.y, p1.x - vertex.x);
-      const angle2 = Math.atan2(p3.y - vertex.y, p3.x - vertex.x);
-      let angleDeg = (angle2 - angle1) * (180 / Math.PI);
-      if (angleDeg < 0) angleDeg += 360;
-      // Use the interior (smaller) angle
-      if (angleDeg > 180) angleDeg = 360 - angleDeg;
+      // Calculate angle (the interior, smaller one). Een plan met een andere
+      // schaal per as (schaal-xy.js) meet in de echte maten.
+      const angleDeg = hoekInGraden(p1, vertex, p3,
+        findMeasureScale(getActiveDocument()?.currentPage || 1, vertex.x, vertex.y));
 
       const prefs = state.preferences;
       const ann = ctx.createAnnotation({
@@ -146,9 +145,8 @@ export const measureAngleTool = {
       canvasCtx.stroke();
 
       // Calculate angle for label
-      let angleDeg = (a2 - a1) * (180 / Math.PI);
-      if (angleDeg < 0) angleDeg += 360;
-      if (angleDeg > 180) angleDeg = 360 - angleDeg;
+      const angleDeg = hoekInGraden({ x: p1.x, y: p1.y }, vertex, { x: p3x, y: p3y },
+        findMeasureScale(getActiveDocument()?.currentPage || 1, vertex.x, vertex.y));
 
       // Label at midpoint of arc
       const midAngle = counterclockwise

@@ -48,7 +48,9 @@
     "autoDetectTitle": "Detect scale from title block",
     "scaleDetected": "مقیاس تشخیص داده شد",
     "noScaleFound": "مقیاسی یافت نشد",
-    "detecting": "در حال تشخیص..."
+    "detecting": "در حال تشخیص...",
+    "calibrateXy": "Calibrate",
+    "calibrateXyTitle": "Calibrate per axis: trace a known dimension along the x-axis and/or y-axis"
   },
   "home": {
     "document": "سند",

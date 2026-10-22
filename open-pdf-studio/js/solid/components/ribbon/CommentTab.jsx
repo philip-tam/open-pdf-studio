@@ -166,6 +166,10 @@ export function CommentGroups() {
             <RibbonButton size="small" id="tool-measure-angle" title={t('measure.measureAngle') || 'Hoek meten'} icon={measureAngleIcon} label={t('measure.angle') || 'Hoek'}
               disabled={noPdf() || isPdfAReadOnly()} active={state.currentTool === 'measureAngle'} onClick={() => setTool('measureAngle')} />
           </RibbonButtonStack>
+          <RibbonButtonStack>
+            <RibbonButton size="small" id="tool-calibrate-xy" title={t('measure.calibrateXyTitle')} icon={calibrateIcon} label={t('measure.calibrateXy')}
+              disabled={noPdf() || isPdfAReadOnly()} active={state.currentTool === 'calibrateXY'} onClick={() => setTool('calibrateXY')} />
+          </RibbonButtonStack>
         </RibbonGroup>
 
         {/* Schaal group (Schaalgebied / Schaalgebied op pagina) moved to the

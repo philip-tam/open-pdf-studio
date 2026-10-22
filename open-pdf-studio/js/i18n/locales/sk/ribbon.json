@@ -48,7 +48,9 @@
     "autoDetectTitle": "Detect scale from title block",
     "scaleDetected": "Mierka zistená",
     "noScaleFound": "Nenašla sa mierka",
-    "detecting": "Rozpoznávanie..."
+    "detecting": "Rozpoznávanie...",
+    "calibrateXy": "Calibrate",
+    "calibrateXyTitle": "Calibrate per axis: trace a known dimension along the x-axis and/or y-axis"
   },
   "home": {
     "document": "Dokument",

@@ -48,7 +48,9 @@
     "autoDetectTitle": "Detect scale from title block",
     "scaleDetected": "پیمانہ شناخت ہو گیا",
     "noScaleFound": "کوئی پیمانہ نہیں ملا",
-    "detecting": "شناخت ہو رہی ہے..."
+    "detecting": "شناخت ہو رہی ہے...",
+    "calibrateXy": "Calibrate",
+    "calibrateXyTitle": "Calibrate per axis: trace a known dimension along the x-axis and/or y-axis"
   },
   "home": {
     "document": "دستاویز",

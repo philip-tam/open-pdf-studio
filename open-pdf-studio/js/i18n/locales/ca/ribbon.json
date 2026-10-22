@@ -48,7 +48,9 @@
     "autoDetectTitle": "Detectar escala del quadre de titol",
     "scaleDetected": "Escala detectada",
     "noScaleFound": "Cap escala trobada",
-    "detecting": "Detectant..."
+    "detecting": "Detectant...",
+    "calibrateXy": "Calibrate",
+    "calibrateXyTitle": "Calibrate per axis: trace a known dimension along the x-axis and/or y-axis"
   },
   "home": {
     "document": "Document",

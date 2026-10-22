@@ -2,6 +2,8 @@ import type { Annotation } from './annotation.js';
 
 export interface MeasureScale {
   pixelsPerUnit: number;
+  /** Punten per eenheid langs de y-as als die afwijkt van de x-as (schaal-xy.js). */
+  pixelsPerUnitY?: number;
   unit: string;
   method: string;
   scaleRatio: number;

@@ -1173,5 +1173,23 @@
     "saved": "Protected copy saved:\n{{path}}",
     "failed": "Could not protect the document: {{error}}",
     "tooShort": "A password needs at least 6 characters. Use 12 or more if you can."
+  },
+  "calibrateXy": {
+    "title": "Calibrate per Axis",
+    "axisX": "horizontal (x-axis)",
+    "axisY": "vertical (y-axis)",
+    "traceFirst": "Calibrate: click the two ends of a known dimension along the x-axis or the y-axis. Right-click or Esc cancels.",
+    "tracing": "Tracing a {{axis}} dimension. Click the second end.",
+    "traceOther": "Now click the two ends of a known {{axis}} dimension.",
+    "sameAxis": "That was a {{axis}} dimension again. Trace a dimension along the other axis, or press Esc.",
+    "askSize": "Enter the real size of the {{axis}} dimension you traced.",
+    "actualSize": "Actual dimension:",
+    "unit": "Unit for a plain number:",
+    "hint": "Examples: 12.5 m, 350 cm, 4200 mm, 5'6\" or 5 ft 6 in.",
+    "invalid": "Enter a size greater than zero, for example 12.5 m or 5'6\".",
+    "askOther": "The {{done}} dimension is set. Calibrate the {{other}} too? Choose OK to trace a {{other}} dimension, Cancel to use the same scale for both axes.",
+    "doneOne": "Scale set: 100 pt on the drawing is {{x}} (same scale on both axes).",
+    "doneBoth": "Scale set per axis: 100 pt on the drawing is {{x}} horizontally and {{y}} vertically. Areas, lengths and angles use both.",
+    "failed": "The scale could not be set from these dimensions."
   }
 }

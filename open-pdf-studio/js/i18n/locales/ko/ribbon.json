@@ -48,7 +48,9 @@
     "autoDetectTitle": "Detect scale from title block",
     "scaleDetected": "축척 감지됨",
     "noScaleFound": "축척을 찾을 수 없음",
-    "detecting": "감지 중..."
+    "detecting": "감지 중...",
+    "calibrateXy": "Calibrate",
+    "calibrateXyTitle": "Calibrate per axis: trace a known dimension along the x-axis and/or y-axis"
   },
   "home": {
     "document": "문서",

@@ -48,7 +48,9 @@
     "autoDetectTitle": "Rileva scala dal cartiglio",
     "scaleDetected": "Scala rilevata",
     "noScaleFound": "Nessuna scala trovata",
-    "detecting": "Rilevamento..."
+    "detecting": "Rilevamento...",
+    "calibrateXy": "Calibrate",
+    "calibrateXyTitle": "Calibrate per axis: trace a known dimension along the x-axis and/or y-axis"
   },
   "home": {
     "document": "Documento",

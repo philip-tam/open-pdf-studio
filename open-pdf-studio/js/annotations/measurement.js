@@ -10,6 +10,7 @@ import { cloneAnnotation } from './factory.js';
 import { leesOpslagJson, schrijfOpslagJson, verwijderOpslag } from '../core/opslag.js';
 import { nettoVlakOppervlak } from './vlak-ringen.js';
 import { vlakZijden, lengteEenheid } from './vlak-zijden.js';
+import { isAnisotroop, lengteInEenheden, omtrekInEenheden, oppervlakInEenheden, hoekInGraden } from './schaal-xy.js';
 import { isSpotCoord, spotCoordTekst } from './spot-coord.js';
 import {
   recordBulkModify,
@@ -53,7 +54,12 @@ export function findMeasureScale(pageNum, x, y) {
   const doc = getActiveDocument();
   const docScale = doc?.measureScale;
   if (docScale && docScale.pixelsPerUnit > 0) {
-    return { pixelsPerUnit: docScale.pixelsPerUnit, unit: docScale.unit || 'mm' };
+    return {
+      pixelsPerUnit: docScale.pixelsPerUnit,
+      unit: docScale.unit || 'mm',
+      // Een oud plan met een andere schaal in de y-richting (schaal-xy.js).
+      ...(docScale.pixelsPerUnitY > 0 ? { pixelsPerUnitY: docScale.pixelsPerUnitY } : {}),
+    };
   }
   // 3. Legacy global preference
   const ms = state.preferences.measureScale;
@@ -76,9 +82,9 @@ export function snapDistanceTo10(fromX, fromY, toX, toY, pageNum) {
   const step = state.preferences.measureCtrlSnap || 10;
   const page = pageNum ?? getActiveDocument()?.currentPage ?? 1;
   const ms = getMeasureScale(page, (fromX + toX) / 2, (fromY + toY) / 2);
-  const measuredValue = pixelDist / ms.pixelsPerUnit;
+  const measuredValue = lengteInEenheden(dx, dy, ms);
   const snappedValue = Math.max(Math.round(measuredValue / step) * step, step);
-  const ratio = (snappedValue * ms.pixelsPerUnit) / pixelDist;
+  const ratio = snappedValue / measuredValue;
   return { x: fromX + dx * ratio, y: fromY + dy * ratio };
 }
 
@@ -94,7 +100,7 @@ export function calculateDistance(x1, y1, x2, y2, pageNum) {
     ? getMeasureScale(pageNum, midX, midY)
     : getMeasureScale();
   return {
-    value: pixelDist / scale.pixelsPerUnit,
+    value: lengteInEenheden(dx, dy, scale),
     unit: scale.unit,
     pixels: pixelDist
   };
@@ -124,7 +130,7 @@ export function calculateArea(points, holes, pageNum) {
   } else {
     scale = getMeasureScale();
   }
-  const scaledArea = area / (scale.pixelsPerUnit * scale.pixelsPerUnit);
+  const scaledArea = oppervlakInEenheden(area, scale);
   return {
     value: scaledArea,
     unit: scale.unit + '\u00B2',
@@ -160,7 +166,7 @@ export function vlakLengteSchaal(ann) {
   } else {
     scale = getMeasureScale();
   }
-  return { perPt: 1 / scale.pixelsPerUnit, unit: scale.unit || 'mm' };
+  return { perPt: 1 / scale.pixelsPerUnit, unit: scale.unit || 'mm', schaal: scale };
 }
 
 /** De oppervlakte van een meetvlak ({ value, unit, pixels }), met zijn eigen schaal. */
@@ -196,8 +202,13 @@ export function herberekenVlakMaat(ann) {
 export function vlakZijdeTeksten(ann) {
   const zijden = vlakZijden(ann?.points);
   if (zijden.length === 0) return [];
-  const { perPt, unit } = vlakLengteSchaal(ann);
-  return zijden.map((z) => ({ ...z, tekst: formatMeasurement({ value: z.lengte * perPt, unit }) }));
+  const { perPt, unit, schaal } = vlakLengteSchaal(ann);
+  // Een andere schaal per as: elke zijde met haar eigen richting (schaal-xy.js).
+  const perAs = !(Number(ann?.measureScale) > 0) && isAnisotroop(schaal);
+  return zijden.map((z) => {
+    const waarde = perAs ? lengteInEenheden(z.x2 - z.x1, z.y2 - z.y1, schaal) : z.lengte * perPt;
+    return { ...z, tekst: formatMeasurement({ value: waarde, unit }) };
+  });
 }
 
 // Calculate perimeter of a polyline
@@ -222,7 +233,7 @@ export function calculatePerimeter(points, pageNum) {
     scale = getMeasureScale();
   }
   return {
-    value: totalPixels / scale.pixelsPerUnit,
+    value: omtrekInEenheden(points, scale),
     unit: scale.unit,
     pixels: totalPixels
   };
@@ -407,7 +418,9 @@ function recalculateMeasurementsIn(doc) {
       const pixels = ann.measurePixels || Math.sqrt(
         (ann.endX - ann.startX) ** 2 + (ann.endY - ann.startY) ** 2
       );
-      const value = pixels / scale.pixelsPerUnit;
+      const value = isAnisotroop(scale)
+        ? lengteInEenheden(ann.endX - ann.startX, ann.endY - ann.startY, scale)
+        : pixels / scale.pixelsPerUnit;
       ann.measureValue = value;
       ann.measureUnit = scale.unit;
       ann.measureScale = undefined; // Clear legacy per-annotation scale so formatMeasurement uses the scaleBar
@@ -417,7 +430,7 @@ function recalculateMeasurementsIn(doc) {
         // Use position-aware scale directly instead of calculateArea's global fallback;
         // de ringindeling (gat of extra deel) is dezelfde als in calculateArea.
         const netPixelArea = nettoVlakOppervlak(ann.points, ann.holes);
-        const scaledArea = netPixelArea / (scale.pixelsPerUnit * scale.pixelsPerUnit);
+        const scaledArea = oppervlakInEenheden(netPixelArea, scale);
         const areaUnit = scale.unit + '\u00B2';
         ann.measureValue = scaledArea;
         ann.measureUnit = areaUnit;
@@ -433,11 +446,19 @@ function recalculateMeasurementsIn(doc) {
           const dy = ann.points[i + 1].y - ann.points[i].y;
           totalPixels += Math.sqrt(dx * dx + dy * dy);
         }
-        const value = totalPixels / scale.pixelsPerUnit;
+        const value = omtrekInEenheden(ann.points, scale);
         ann.measureValue = value;
         ann.measureUnit = scale.unit;
         ann.measureScale = undefined;
         ann.measureText = formatMeasurement({ value, unit: scale.unit });
+      }
+    } else if (ann.type === 'measureAngle') {
+      // De hoek hangt van de schaal af als de assen verschillen (ook terug naar
+      // de gewone hoek als een nieuwe kalibratie de assen weer gelijk maakt).
+      if (ann.point1 && ann.vertex && ann.point2) {
+        const graden = hoekInGraden(ann.point1, ann.vertex, ann.point2, scale);
+        ann.measureValue = graden;
+        ann.measureText = graden.toFixed(1) + '\u00B0';
       }
     }
   }

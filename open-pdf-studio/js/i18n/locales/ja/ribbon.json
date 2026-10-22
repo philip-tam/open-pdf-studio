@@ -48,7 +48,9 @@
     "autoDetectTitle": "Detect scale from title block",
     "scaleDetected": "縮尺を検出しました",
     "noScaleFound": "縮尺が見つかりません",
-    "detecting": "検出中..."
+    "detecting": "検出中...",
+    "calibrateXy": "Calibrate",
+    "calibrateXyTitle": "Calibrate per axis: trace a known dimension along the x-axis and/or y-axis"
   },
   "home": {
     "document": "文書",

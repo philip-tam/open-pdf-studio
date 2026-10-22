@@ -48,7 +48,9 @@
     "autoDetectTitle": "Detect scale from title block",
     "scaleDetected": "স্কেল শনাক্ত হয়েছে",
     "noScaleFound": "কোনো স্কেল পাওয়া যায়নি",
-    "detecting": "শনাক্ত করা হচ্ছে..."
+    "detecting": "শনাক্ত করা হচ্ছে...",
+    "calibrateXy": "Calibrate",
+    "calibrateXyTitle": "Calibrate per axis: trace a known dimension along the x-axis and/or y-axis"
   },
   "home": {
     "document": "নথি",

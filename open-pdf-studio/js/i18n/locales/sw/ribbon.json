@@ -48,7 +48,9 @@
     "autoDetectTitle": "Detect scale from title block",
     "scaleDetected": "Kipimo kimegunduliwa",
     "noScaleFound": "Hakuna kipimo kilichopatikana",
-    "detecting": "Inagundua..."
+    "detecting": "Inagundua...",
+    "calibrateXy": "Calibrate",
+    "calibrateXyTitle": "Calibrate per axis: trace a known dimension along the x-axis and/or y-axis"
   },
   "home": {
     "document": "Hati",

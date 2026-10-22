@@ -122,7 +122,13 @@ export function schaalOpPuntUitBronnen(bronnen, doc, pageNum, x, y) {
 
   const docSchaal = doc.measureScale;
   if (docSchaal && docSchaal.pixelsPerUnit > 0) {
-    return { pixelsPerUnit: docSchaal.pixelsPerUnit, unit: docSchaal.unit || 'mm', method: 'document' };
+    return {
+      pixelsPerUnit: docSchaal.pixelsPerUnit,
+      unit: docSchaal.unit || 'mm',
+      method: 'document',
+      // Een aparte y-schaal (schaal-xy.js); zonder is de schaal voor beide assen gelijk.
+      ...(docSchaal.pixelsPerUnitY > 0 ? { pixelsPerUnitY: docSchaal.pixelsPerUnitY } : {}),
+    };
   }
 
   if (bronnen.schaalbalken.length) {

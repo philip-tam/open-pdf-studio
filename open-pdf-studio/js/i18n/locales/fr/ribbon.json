@@ -48,7 +48,9 @@
     "autoDetectTitle": "Detecter echelle du cartouche",
     "scaleDetected": "Echelle detectee",
     "noScaleFound": "Aucune echelle trouvee",
-    "detecting": "Detection..."
+    "detecting": "Detection...",
+    "calibrateXy": "Calibrate",
+    "calibrateXyTitle": "Calibrate per axis: trace a known dimension along the x-axis and/or y-axis"
   },
   "home": {
     "document": "Document",

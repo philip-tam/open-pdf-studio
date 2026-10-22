@@ -48,7 +48,9 @@
     "autoDetectTitle": "Detect scale from title block",
     "scaleDetected": "קנה המידה זוהה",
     "noScaleFound": "לא נמצא קנה מידה",
-    "detecting": "מזהה..."
+    "detecting": "מזהה...",
+    "calibrateXy": "Calibrate",
+    "calibrateXyTitle": "Calibrate per axis: trace a known dimension along the x-axis and/or y-axis"
   },
   "home": {
     "document": "מסמך",

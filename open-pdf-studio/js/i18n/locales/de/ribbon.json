@@ -48,7 +48,9 @@
     "autoDetectTitle": "Massstab aus Schriftfeld erkennen",
     "scaleDetected": "Massstab erkannt",
     "noScaleFound": "Kein Massstab gefunden",
-    "detecting": "Erkennung..."
+    "detecting": "Erkennung...",
+    "calibrateXy": "Calibrate",
+    "calibrateXyTitle": "Calibrate per axis: trace a known dimension along the x-axis and/or y-axis"
   },
   "home": {
     "document": "Dokument",

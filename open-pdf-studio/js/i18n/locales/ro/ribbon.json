@@ -48,7 +48,9 @@
     "autoDetectTitle": "Detect scale from title block",
     "scaleDetected": "Scară detectată",
     "noScaleFound": "Nu s-a găsit nicio scară",
-    "detecting": "Se detectează..."
+    "detecting": "Se detectează...",
+    "calibrateXy": "Calibrate",
+    "calibrateXyTitle": "Calibrate per axis: trace a known dimension along the x-axis and/or y-axis"
   },
   "home": {
     "document": "Document",

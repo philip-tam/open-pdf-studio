@@ -48,7 +48,9 @@
     "autoDetectTitle": "Detect scale from title block",
     "scaleDetected": "Skala dikesan",
     "noScaleFound": "Tiada skala ditemui",
-    "detecting": "Mengesan..."
+    "detecting": "Mengesan...",
+    "calibrateXy": "Calibrate",
+    "calibrateXyTitle": "Calibrate per axis: trace a known dimension along the x-axis and/or y-axis"
   },
   "home": {
     "document": "Dokumen",

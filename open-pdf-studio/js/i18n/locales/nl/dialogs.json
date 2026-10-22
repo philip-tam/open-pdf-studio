@@ -1173,5 +1173,23 @@
     "saved": "Beveiligde kopie opgeslagen:\n{{path}}",
     "failed": "Het document kon niet worden beveiligd: {{error}}",
     "tooShort": "Een wachtwoord moet minstens 6 tekens hebben. Gebruik liefst 12 of meer."
+  },
+  "calibrateXy": {
+    "title": "Kalibreren per as",
+    "axisX": "horizontale (x-as)",
+    "axisY": "verticale (y-as)",
+    "traceFirst": "Kalibreren: klik de twee uiteinden van een bekende maat langs de x-as of de y-as. Rechtsklikken of Esc annuleert.",
+    "tracing": "Je traceert een {{axis}} maat. Klik het tweede uiteinde.",
+    "traceOther": "Klik nu de twee uiteinden van een bekende {{axis}} maat.",
+    "sameAxis": "Dat was weer een {{axis}} maat. Trace een maat langs de andere as, of druk op Esc.",
+    "askSize": "Geef de echte maat van de {{axis}} maat die je hebt getraceerd.",
+    "actualSize": "Werkelijke maat:",
+    "unit": "Eenheid bij een los getal:",
+    "hint": "Voorbeelden: 12,5 m, 350 cm, 4200 mm, 5'6\" of 5 ft 6 in.",
+    "invalid": "Geef een maat groter dan nul, bijvoorbeeld 12,5 m of 5'6\".",
+    "askOther": "De {{done}} maat is ingesteld. Ook de {{other}} kalibreren? Kies OK om een {{other}} maat te traceren, Annuleren om voor beide assen dezelfde schaal te gebruiken.",
+    "doneOne": "Schaal ingesteld: 100 pt op de tekening is {{x}} (dezelfde schaal op beide assen).",
+    "doneBoth": "Schaal per as ingesteld: 100 pt op de tekening is {{x}} horizontaal en {{y}} verticaal. Oppervlakten, lengtes en hoeken gebruiken beide.",
+    "failed": "De schaal kon niet uit deze maten worden bepaald."
   }
 }

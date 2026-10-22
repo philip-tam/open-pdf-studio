@@ -48,7 +48,9 @@
     "viewport": "Viewport",
     "createViewport": "Teken een viewport-gebied met een eigen schaal",
     "viewportTitle": "Viewport-schaal instellen",
-    "dynamicScaling": "Markeringen automatisch schalen"
+    "dynamicScaling": "Markeringen automatisch schalen",
+    "calibrateXy": "Kalibreren",
+    "calibrateXyTitle": "Kalibreren per as: trace een bekende maat langs de x-as en/of y-as"
   },
   "home": {
     "document": "Document",

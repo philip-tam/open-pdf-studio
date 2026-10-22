@@ -48,7 +48,9 @@
     "autoDetectTitle": "Detect scale from title block",
     "scaleDetected": "Εντοπίστηκε κλίμακα",
     "noScaleFound": "Δεν βρέθηκε κλίμακα",
-    "detecting": "Εντοπισμός..."
+    "detecting": "Εντοπισμός...",
+    "calibrateXy": "Calibrate",
+    "calibrateXyTitle": "Calibrate per axis: trace a known dimension along the x-axis and/or y-axis"
   },
   "home": {
     "document": "Έγγραφο",

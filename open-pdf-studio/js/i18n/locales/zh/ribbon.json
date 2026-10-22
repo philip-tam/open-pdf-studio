@@ -48,7 +48,9 @@
     "autoDetectTitle": "Detect scale from title block",
     "scaleDetected": "已检测到比例",
     "noScaleFound": "未找到比例",
-    "detecting": "正在检测..."
+    "detecting": "正在检测...",
+    "calibrateXy": "Calibrate",
+    "calibrateXyTitle": "Calibrate per axis: trace a known dimension along the x-axis and/or y-axis"
   },
   "home": {
     "document": "文档",

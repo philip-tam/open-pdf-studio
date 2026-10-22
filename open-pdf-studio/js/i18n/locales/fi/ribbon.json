@@ -48,7 +48,9 @@
     "autoDetectTitle": "Detect scale from title block",
     "scaleDetected": "Mittakaava tunnistettu",
     "noScaleFound": "Mittakaavaa ei löytynyt",
-    "detecting": "Tunnistetaan..."
+    "detecting": "Tunnistetaan...",
+    "calibrateXy": "Calibrate",
+    "calibrateXyTitle": "Calibrate per axis: trace a known dimension along the x-axis and/or y-axis"
   },
   "home": {
     "document": "Asiakirja",

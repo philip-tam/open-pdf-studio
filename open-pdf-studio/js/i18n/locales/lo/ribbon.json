@@ -48,7 +48,9 @@
     "autoDetectTitle": "ກວດຫາມາດຕາສ່ວນຈາກຂໍ້ຄວາມໃນຕາຕະລາງແບບ",
     "scaleDetected": "ກວດພົບມາດຕາສ່ວນແລ້ວ",
     "noScaleFound": "ບໍ່ພົບມາດຕາສ່ວນ",
-    "detecting": "ກຳລັງກວດຫາ..."
+    "detecting": "ກຳລັງກວດຫາ...",
+    "calibrateXy": "Calibrate",
+    "calibrateXyTitle": "Calibrate per axis: trace a known dimension along the x-axis and/or y-axis"
   },
   "home": {
     "document": "ເອກະສານ",

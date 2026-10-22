@@ -48,7 +48,9 @@
     "autoDetectTitle": "Detect scale from title block",
     "scaleDetected": "تم اكتشاف المقياس",
     "noScaleFound": "لم يتم العثور على مقياس",
-    "detecting": "جارٍ الاكتشاف..."
+    "detecting": "جارٍ الاكتشاف...",
+    "calibrateXy": "Calibrate",
+    "calibrateXyTitle": "Calibrate per axis: trace a known dimension along the x-axis and/or y-axis"
   },
   "home": {
     "document": "المستند",

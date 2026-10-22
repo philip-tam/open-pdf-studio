@@ -48,7 +48,9 @@
     "autoDetectTitle": "Detect scale from title block",
     "scaleDetected": "ตรวจพบมาตราส่วนแล้ว",
     "noScaleFound": "ไม่พบมาตราส่วน",
-    "detecting": "กำลังตรวจหา..."
+    "detecting": "กำลังตรวจหา...",
+    "calibrateXy": "Calibrate",
+    "calibrateXyTitle": "Calibrate per axis: trace a known dimension along the x-axis and/or y-axis"
   },
   "home": {
     "document": "เอกสาร",

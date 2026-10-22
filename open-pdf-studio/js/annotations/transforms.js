@@ -1,7 +1,8 @@
 import { HANDLE_TYPES } from '../core/constants.js';
 import { state } from '../core/state.js';
 import { snapAngle } from '../utils/helpers.js';
-import { calculateDistance, calculateArea, calculatePerimeter, formatMeasurement, formatDimensionText, snapDistanceTo10, herberekenVlakMaat, syncSpotCoord } from './measurement.js';
+import { calculateDistance, calculateArea, calculatePerimeter, formatMeasurement, formatDimensionText, snapDistanceTo10, herberekenVlakMaat, syncSpotCoord, findMeasureScale } from './measurement.js';
+import { hoekInGraden } from './schaal-xy.js';
 import { isSpotCoord } from './spot-coord.js';
 import { handleAnchors, lineEndForDotTarget, resolveParams } from './stavenreeks.js';
 import { getTemplate } from '../symbols/registry.js';
@@ -680,11 +681,8 @@ export function applyResize(annotation, handleType, deltaX, deltaY, originalAnn,
         annotation.vertex = anglePoints[1];
         annotation.point2 = anglePoints[2];
         // Recalculate angle
-        const a1 = Math.atan2(annotation.point1.y - annotation.vertex.y, annotation.point1.x - annotation.vertex.x);
-        const a2 = Math.atan2(annotation.point2.y - annotation.vertex.y, annotation.point2.x - annotation.vertex.x);
-        let angleDeg = (a2 - a1) * (180 / Math.PI);
-        if (angleDeg < 0) angleDeg += 360;
-        if (angleDeg > 180) angleDeg = 360 - angleDeg;
+        const angleDeg = hoekInGraden(annotation.point1, annotation.vertex, annotation.point2,
+          findMeasureScale(annotation.page || 1, annotation.vertex.x, annotation.vertex.y));
         annotation.measureValue = angleDeg;
         annotation.measureText = angleDeg.toFixed(1) + '\u00B0';
       }
