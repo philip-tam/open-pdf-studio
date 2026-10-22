@@ -84,13 +84,19 @@ export function voetInchNaarVoet(voet, inch) {
  * Geeft { waarde, eenheid } of null. Komma of punt als decimaalteken.
  */
 export function leesLengte(tekst, standaardEenheid = 'm') {
-  const t = String(tekst ?? '').trim().toLowerCase();
+  // Typografische aanhalingstekens (een toetsenbord of tekstverwerker maakt van
+  // 5'6" vaak 5\u20196\u201D) tellen als voet en inch.
+  const t = String(tekst ?? '').trim().toLowerCase()
+    .replace(/[\u2018\u2019\u201B\u2032\u02BC\u00B4`]/g, "'")
+    .replace(/[\u201C\u201D\u201F\u2033\u02BA]|''/g, '"');
   if (!t) return null;
   const getal = '(\\d[\\d.,]*)';
-  const voetInch = t.match(new RegExp(`^${getal}\\s*(?:'|ft|feet|foot)\\s*(?:${getal}\\s*(?:"|in|inch|inches)?)?$`));
+  // Inch met een breuk, zoals op een plan: 2 1/2, 2\u00BD of 1/2.
+  const inchGetal = '(\\d[\\d.,]*(?:\\s*[\u00BC\u00BD\u00BE\u2153\u2154\u215B\u215C\u215D\u215E])?(?:\\s+\\d+\\/\\d+)?|\\d+\\/\\d+)';
+  const voetInch = t.match(new RegExp(`^${getal}\\s*(?:'|ft|feet|foot)\\s*(?:${inchGetal}\\s*(?:"|in|inch|inches)?)?$`));
   if (voetInch) {
     const voet = leesGetal(voetInch[1]);
-    const inch = voetInch[2] === undefined ? 0 : leesGetal(voetInch[2]);
+    const inch = voetInch[2] === undefined ? 0 : leesInch(voetInch[2]);
     if (!(voet >= 0) || !(inch >= 0)) return null;
     const waarde = voetInchNaarVoet(voet, inch);
     return waarde > 0 ? { waarde, eenheid: 'ft' } : null;
@@ -100,6 +106,28 @@ export function leesLengte(tekst, standaardEenheid = 'm') {
   const waarde = leesGetal(gewoon[1]);
   if (!(waarde > 0)) return null;
   return { waarde, eenheid: gewoon[2] === '"' ? 'in' : (gewoon[2] || standaardEenheid) };
+}
+
+const BREUK_TEKEN = { '\u00BC': 0.25, '\u00BD': 0.5, '\u00BE': 0.75, '\u2153': 1 / 3, '\u2154': 2 / 3, '\u215B': 0.125, '\u215C': 0.375, '\u215D': 0.625, '\u215E': 0.875 };
+
+/** Een inchmaat met een breuk: "2", "2.5", "2 1/2", "2\u00BD", "1/2". NaN als het niet klopt. */
+function leesInch(tekst) {
+  let rest = String(tekst).trim();
+  let totaal = 0;
+  const teken = rest.match(/[\u00BC\u00BD\u00BE\u2153\u2154\u215B\u215C\u215D\u215E]$/);
+  if (teken) {
+    totaal += BREUK_TEKEN[teken[0]];
+    rest = rest.slice(0, -1).trim();
+  }
+  const breuk = rest.match(/(?:^|\s)(\d+)\/(\d+)$/);
+  if (breuk) {
+    const noemer = Number(breuk[2]);
+    if (!(noemer > 0)) return NaN;
+    totaal += Number(breuk[1]) / noemer;
+    rest = rest.slice(0, breuk.index).trim();
+  }
+  if (rest) totaal += leesGetal(rest);
+  return totaal;
 }
 
 /**

@@ -74,6 +74,18 @@ test('leesLengte: metrisch en voet/inch', () => {
   assert.equal(leesLengte('0 m'), null);
 });
 
+test('leesLengte: typografische aanhalingstekens en dubbele apostrof', () => {
+  assert.deepEqual(leesLengte('16\u20196\u201D'), { waarde: 16.5, eenheid: 'ft' });
+  assert.deepEqual(leesLengte('16\u20326\u2033'), { waarde: 16.5, eenheid: 'ft' });
+  assert.deepEqual(leesLengte("16'6''"), { waarde: 16.5, eenheid: 'ft' });
+  assert.deepEqual(leesLengte('  16 \u2019 6 \u201D '), { waarde: 16.5, eenheid: 'ft' });
+  assert.deepEqual(leesLengte("15' 2 1/2\""), { waarde: 15 + 2.5 / 12, eenheid: 'ft' });
+  assert.deepEqual(leesLengte('15\u20322\u00BD\u2033'), { waarde: 15 + 2.5 / 12, eenheid: 'ft' });
+  assert.deepEqual(leesLengte("6' 1/2\""), { waarde: 6 + 0.5 / 12, eenheid: 'ft' });
+  assert.deepEqual(leesLengte("15'2.5\""), { waarde: 15 + 2.5 / 12, eenheid: 'ft' });
+  assert.equal(leesLengte("15' 2 1/0\""), null);
+});
+
 test('schaalUitAssen: alleen x geeft een gelijke schaal', () => {
   const s = schaalUitAssen({ x: { punten: 200, waarde: 10, eenheid: 'm' } });
   assert.deepEqual(s, { pixelsPerUnit: 20, unit: 'm', method: 'calibrate-xy', scaleRatio: 0 });
