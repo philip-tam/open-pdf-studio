@@ -11,6 +11,7 @@ import { leesOpslagJson, schrijfOpslagJson, verwijderOpslag } from '../core/opsl
 import { nettoVlakOppervlak } from './vlak-ringen.js';
 import { vlakZijden, lengteEenheid } from './vlak-zijden.js';
 import { isAnisotroop, lengteInEenheden, omtrekInEenheden, oppervlakInEenheden, hoekInGraden } from './schaal-xy.js';
+import { isBewaardeSchaal, leesKalibratieBestand, schrijfKalibratieBestand, verwijderKalibratieBestand } from './kalibratie-bestand.js';
 import { isSpotCoord, spotCoordTekst } from './spot-coord.js';
 import {
   recordBulkModify,
@@ -483,6 +484,28 @@ export function saveDocumentScale(doc) {
   } else {
     verwijderOpslag(scaleStorageKey(doc.filePath));
   }
+  // Een door de gebruiker gemaakte schaal ook als zijbestand naast de PDF
+  // (kalibratie-bestand.js); een automatisch gevonden schaal laat het bestand
+  // met rust. Geen zijbestand voor een naamloos document (tijdelijk bestand).
+  if (!doc.isUntitled) {
+    if (ms && isBewaardeSchaal(ms)) schrijfKalibratieBestand(doc.filePath, ms);
+    else if (!ms) verwijderKalibratieBestand(doc.filePath);
+  }
+}
+
+/**
+ * Leest het kalibratie-zijbestand naast de PDF en zet de schaal van het
+ * document daarop. Het zijbestand gaat voor de browseropslag: het reist met het
+ * bestand mee. Geeft true als de documentschaal veranderde.
+ */
+export async function loadDocumentScaleFile(doc) {
+  if (!doc) doc = getActiveDocument();
+  if (!doc || !doc.filePath || doc.isUntitled) return false;
+  const uitBestand = await leesKalibratieBestand(doc.filePath);
+  if (!uitBestand) return false;
+  if (JSON.stringify(doc.measureScale) === JSON.stringify(uitBestand)) return false;
+  doc.measureScale = uitBestand;
+  return true;
 }
 
 // Load measure scale from browser storage into the given (or active) document

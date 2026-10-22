@@ -649,9 +649,16 @@ export async function loadPDF(filePath, docIndex, preloadedData = null) {
 
     // Load persisted measure scale for this document (data-only)
     {
-      const { loadDocumentScale } = await import('../annotations/measurement.js');
+      const { loadDocumentScale, loadDocumentScaleFile, recalculateAllMeasurements } = await import('../annotations/measurement.js');
       if (isClosed()) return;
       loadDocumentScale(doc);
+      // The calibration file next to the PDF (annotations/kalibratie-bestand.js)
+      // wins over the browser storage: it travels with the file.
+      if (await loadDocumentScaleFile(doc)) {
+        if (isClosed()) return;
+        // Measurements of an already loaded page were made with the old scale.
+        if (isActive()) recalculateAllMeasurements();
+      }
     }
 
     // Auto-detect scale from title block text if no scale is already set (fire-and-forget).

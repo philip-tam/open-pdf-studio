@@ -446,3 +446,4 @@ js/ui/getal-veld.test.mjs
 js/getal-velden-bron.test.mjs
 js/pdf/protect-pdf.test.mjs
 js/annotations/schaal-xy.test.mjs
+js/annotations/kalibratie-bestand.test.mjs
