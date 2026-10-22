@@ -1184,12 +1184,16 @@
     "sameAxis": "That was a {{axis}} dimension again. Trace a dimension along the other axis, or press Esc.",
     "askSize": "Enter the real size of the {{axis}} dimension you traced.",
     "actualSize": "Actual dimension:",
-    "unit": "Unit for a plain number:",
-    "hint": "Examples: 12.5 m, 350 cm, 4200 mm, 5'6\" or 5 ft 6 in.",
-    "invalid": "Enter a size greater than zero, for example 12.5 m or 5'6\".",
+    "unit": "Unit:",
+    "hint": "Examples: 12.5 (m), 350 (cm), 4200 (mm).",
+    "invalid": "Enter a size greater than zero.",
     "askOther": "The {{done}} dimension is set. Calibrate the {{other}} too? Choose OK to trace a {{other}} dimension, Cancel to use the same scale for both axes.",
     "doneOne": "Scale set: 100 pt on the drawing is {{x}} (same scale on both axes).",
     "doneBoth": "Scale set per axis: 100 pt on the drawing is {{x}} horizontally and {{y}} vertically. Areas, lengths and angles use both.",
-    "failed": "The scale could not be set from these dimensions."
+    "failed": "The scale could not be set from these dimensions.",
+    "feetInches": "ft (feet and inches)",
+    "feet": "Feet (ft):",
+    "inches": "Inches (in):",
+    "hintFeet": "For example 16 feet and 6 inches. The inches may be a fraction: 2 1/2 or 2½."
   }
 }

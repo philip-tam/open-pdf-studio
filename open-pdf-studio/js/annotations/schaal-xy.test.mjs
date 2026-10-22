@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   pixelsPerUnitY, isAnisotroop, lengteInEenheden, omtrekInEenheden, oppervlakInEenheden, hoekInGraden,
-  dominanteAs, lengteLangsAs, voetInchNaarVoet, leesLengte, schaalUitAssen,
+  dominanteAs, lengteLangsAs, voetInchNaarVoet, leesInch, schaalUitAssen,
 } from './schaal-xy.js';
 
 const dicht = (a, b, eps = 1e-9) => Math.abs(a - b) <= eps;
@@ -59,31 +59,21 @@ test('voet en inch', () => {
   assert.ok(dicht(voetInchNaarVoet('', ''), 0));
 });
 
-test('leesLengte: metrisch en voet/inch', () => {
-  assert.deepEqual(leesLengte('12,5 m'), { waarde: 12.5, eenheid: 'm' });
-  assert.deepEqual(leesLengte('350 cm'), { waarde: 350, eenheid: 'cm' });
-  assert.deepEqual(leesLengte('7'), { waarde: 7, eenheid: 'm' });
-  assert.deepEqual(leesLengte('7', 'cm'), { waarde: 7, eenheid: 'cm' });
-  assert.deepEqual(leesLengte('5\'6"'), { waarde: 5.5, eenheid: 'ft' });
-  assert.deepEqual(leesLengte('5 ft 6 in'), { waarde: 5.5, eenheid: 'ft' });
-  assert.deepEqual(leesLengte("5' 6"), { waarde: 5.5, eenheid: 'ft' });
-  assert.deepEqual(leesLengte("12'"), { waarde: 12, eenheid: 'ft' });
-  assert.deepEqual(leesLengte('30"'), { waarde: 30, eenheid: 'in' });
-  assert.equal(leesLengte(''), null);
-  assert.equal(leesLengte('abc'), null);
-  assert.equal(leesLengte('0 m'), null);
-});
-
-test('leesLengte: typografische aanhalingstekens en dubbele apostrof', () => {
-  assert.deepEqual(leesLengte('16\u20196\u201D'), { waarde: 16.5, eenheid: 'ft' });
-  assert.deepEqual(leesLengte('16\u20326\u2033'), { waarde: 16.5, eenheid: 'ft' });
-  assert.deepEqual(leesLengte("16'6''"), { waarde: 16.5, eenheid: 'ft' });
-  assert.deepEqual(leesLengte('  16 \u2019 6 \u201D '), { waarde: 16.5, eenheid: 'ft' });
-  assert.deepEqual(leesLengte("15' 2 1/2\""), { waarde: 15 + 2.5 / 12, eenheid: 'ft' });
-  assert.deepEqual(leesLengte('15\u20322\u00BD\u2033'), { waarde: 15 + 2.5 / 12, eenheid: 'ft' });
-  assert.deepEqual(leesLengte("6' 1/2\""), { waarde: 6 + 0.5 / 12, eenheid: 'ft' });
-  assert.deepEqual(leesLengte("15'2.5\""), { waarde: 15 + 2.5 / 12, eenheid: 'ft' });
-  assert.equal(leesLengte("15' 2 1/0\""), null);
+test('leesInch: getal, breuk en inchteken', () => {
+  assert.equal(leesInch('2'), 2);
+  assert.equal(leesInch('2,5'), 2.5);
+  assert.equal(leesInch('2 1/2'), 2.5);
+  assert.equal(leesInch('2\u00BD'), 2.5);
+  assert.equal(leesInch('1/2'), 0.5);
+  assert.equal(leesInch('6"'), 6);
+  assert.equal(leesInch('6\u2033'), 6);
+  assert.equal(leesInch('3 3/4"'), 3.75);
+  assert.equal(leesInch('5 3/4'), 5.75);
+  assert.equal(leesInch('11 7/8'), 11.875);
+  assert.equal(leesInch(''), 0);
+  assert.equal(leesInch('  '), 0);
+  assert.ok(Number.isNaN(leesInch('abc')));
+  assert.ok(Number.isNaN(leesInch('2 1/0')));
 });
 
 test('schaalUitAssen: alleen x geeft een gelijke schaal', () => {
