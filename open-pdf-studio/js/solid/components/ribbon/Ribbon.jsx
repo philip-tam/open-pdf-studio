@@ -14,8 +14,7 @@ import { volgendeTab } from './ribbon-toetsenbord.js';
 import { lintRegister } from '../../../plugins/ribbon-tab-registry.js';
 import { activeTab, setActiveTab, contextualTabsVisible } from '../../stores/ribbonStore.js';
 import { imageSelected } from '../../stores/imageEditStore.js';
-import { simpleLayout, setSimpleLayout } from '../../stores/simpleLayoutStore.js';
-import { symbolInsertActive } from '../../../symbols/symbol-insert-format-store.js';
+import { opmaakVoorNieuw } from '../../stores/formatStore.js';
 import { openAppMenu } from '../../../ui/chrome/menus.js';
 import { state } from '../../../core/state.js';
 import { savePreferences } from '../../../core/preferences.js';
@@ -81,34 +80,11 @@ export default function Ribbon() {
   const commentActive = () =>
     activeTab() === 'comment' || activeTab() === 'measure';
 
-  // simpleLayout() collapses the ribbon for this launch only (opened a PDF
-  // from outside the app — see simpleLayoutStore.js) without touching the
-  // persisted preference, so it never leaks into a normal launch. The
-  // toggle button exits that session-only mode on click instead of writing
-  // a preference that wouldn't actually change what ribbonCollapsed() reads.
-  const ribbonCollapsed = () => state.preferences.ribbonCollapsed === true || simpleLayout();
+  const ribbonCollapsed = () => state.preferences.ribbonCollapsed === true;
   const toggleCollapsed = () => {
-    if (simpleLayout()) {
-      setSimpleLayout(false);
-      return;
-    }
     state.preferences.ribbonCollapsed = !ribbonCollapsed();
     savePreferences();
   };
-
-  // Clicking a tab is a clear "show me this content" signal — while
-  // collapsed, switching the active tab alone left the ribbon body hidden,
-  // so the click silently did nothing visible (looked broken). Expand
-  // first, same as clicking the collapse toggle would.
-  function selectTab(tabId) {
-    if (simpleLayout()) {
-      setSimpleLayout(false);
-    } else if (state.preferences.ribbonCollapsed === true) {
-      state.preferences.ribbonCollapsed = false;
-      savePreferences();
-    }
-    setActiveTab(tabId);
-  }
 
   return (
     <>
@@ -118,35 +94,36 @@ export default function Ribbon() {
           onClick={() => openAppMenu()} />
         <RibbonTab label={t('tabs.home')} dataTab="home"
           isActive={activeTab() === 'home'}
-          onClick={() => selectTab('home')} />
+          onClick={() => setActiveTab('home')} />
         <RibbonTab label={t('tabs.view')} dataTab="view"
           isActive={activeTab() === 'view'}
-          onClick={() => selectTab('view')} />
+          onClick={() => setActiveTab('view')} />
         <RibbonTab label={t('tabs.drawing')} dataTab="drawing"
           isActive={activeTab() === 'drawing'}
-          onClick={() => selectTab('drawing')} />
+          onClick={() => setActiveTab('drawing')} />
         <RibbonTab label={t('tabs.comment')} dataTab="comment"
           isActive={commentActive()}
-          onClick={() => selectTab('comment')} />
+          onClick={() => setActiveTab('comment')} />
         <RibbonTab label={t('tabs.organize')} dataTab="organize"
           isActive={activeTab() === 'organize'}
-          onClick={() => selectTab('organize')} />
+          onClick={() => setActiveTab('organize')} />
         <RibbonTab label={t('tabs.help')} dataTab="help"
           isActive={activeTab() === 'help'}
-          onClick={() => selectTab('help')} />
+          onClick={() => setActiveTab('help')} />
         {/* Linttabbladen van extensies (#551): na Instellingen, vóór de contextuele. */}
         <ExtensionTabStrip activeTab={activeTab} setActiveTab={setActiveTab} strookOuder={() => tablistEl} />
         <Show when={contextualTabsVisible()}>
           <span class="ribbon-tab-separator contextual-tabs visible" id="contextual-tabs-separator"></span>
           <RibbonTab label={t('tabs.format')} dataTab="format" isContextual={true} id="tab-format-btn"
             isActive={activeTab() === 'format'}
-            onClick={() => selectTab('format')} />
+            onClick={() => setActiveTab('format')} />
           {/* Schikken werkt op een selectie; tijdens het invoegen van
-              symbolen (#587) staat alleen Opmaak open. */}
-          <Show when={!symbolInsertActive()}>
+              symbolen (#587) of het tekenen met een gereedschap (#668)
+              staat alleen Opmaak open. */}
+          <Show when={!opmaakVoorNieuw()}>
             <RibbonTab label={t('tabs.arrange')} dataTab="arrange" isContextual={true} id="tab-arrange-btn"
               isActive={activeTab() === 'arrange'}
-              onClick={() => selectTab('arrange')} />
+              onClick={() => setActiveTab('arrange')} />
           </Show>
         </Show>
         <Show when={imageSelected()}>
@@ -155,7 +132,7 @@ export default function Ribbon() {
           </Show>
           <RibbonTab label={t('tabs.image')} dataTab="image" isContextual={true} id="tab-image-btn"
             isActive={activeTab() === 'image'}
-            onClick={() => selectTab('image')} />
+            onClick={() => setActiveTab('image')} />
         </Show>
         {/* Collapse/expand toggle (issue #278): hides the ribbon body so only
             the tab strip remains. State is remembered in preferences. */}

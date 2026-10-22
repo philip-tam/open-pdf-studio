@@ -24,11 +24,11 @@ import StampPickerDialog from './dialogs/StampPickerDialog.jsx';
 import CalibrationDialog from './dialogs/CalibrationDialog.jsx';
 import ScaleDialog from './dialogs/ScaleDialog.jsx';
 import CropMarginsDialog from './dialogs/CropMarginsDialog.jsx';
-import OcrLanguageDialog from './dialogs/OcrLanguageDialog.jsx';
 import StraightenDialog from './dialogs/StraightenDialog.jsx';
 import ShiftPageDialog from './dialogs/ShiftPageDialog.jsx';
 import CalibrateXyDialog from './dialogs/CalibrateXyDialog.jsx';
 import ProtectPdfDialog from './dialogs/ProtectPdfDialog.jsx';
+import OcrLanguageDialog from './dialogs/OcrLanguageDialog.jsx';
 import ResizePagesDialog from './dialogs/ResizePagesDialog.jsx';
 import CompressDialog from './dialogs/CompressDialog.jsx';
 import ScreenshotDialog from './dialogs/ScreenshotDialog.jsx';
@@ -93,11 +93,11 @@ const DIALOG_MAP = {
   'calibration': CalibrationDialog,
   'scale': ScaleDialog,
   'crop-margins': CropMarginsDialog,
-  'ocr-language': OcrLanguageDialog,
   'straighten-page': StraightenDialog,
   'shift-page': ShiftPageDialog,
   'calibrate-xy': CalibrateXyDialog,
   'protect-pdf': ProtectPdfDialog,
+  'ocr-language': OcrLanguageDialog,
   'resize-pages': ResizePagesDialog,
   'compress': CompressDialog,
   'screenshot': ScreenshotDialog,
