@@ -130,6 +130,8 @@ const [annotProps, setAnnotProps] = createStore({
   lockAspectRatio: false,
   linkedPath: '',
   tintColor: '',
+  frameWidth: 0,
+  frameColor: '#000000',
   cropLeft: 0,
   cropTop: 0,
   cropRight: 0,
@@ -442,6 +444,8 @@ export function storeShowProperties(annotation) {
     lockAspectRatio: annotation.type === 'image' ? (annotation.lockAspectRatio || false) : false,
     linkedPath: annotation.linkedPath || '',
     tintColor: annotation.tintColor || '',
+    frameWidth: annotation.type === 'image' ? (annotation.frameWidth || 0) : 0,
+    frameColor: annotation.frameColor || '#000000',
     cropLeft: annotation.type === 'image' ? Math.round((annotation.cropLeft || 0) * 100) : 0,
     cropTop: annotation.type === 'image' ? Math.round((annotation.cropTop || 0) * 100) : 0,
     cropRight: annotation.type === 'image' ? Math.round((annotation.cropRight || 0) * 100) : 0,
@@ -1286,6 +1290,8 @@ function applyPropToAnnotation(ann, key, value) {
     case 'scaleRegionUnits': ann.units = String(value || 'mm'); break;
     case 'scaleRegionLabel': ann.label = String(value || ''); break;
     case 'tintColor': ann.tintColor = value || undefined; break;
+    case 'frameWidth': ann.frameWidth = Number(value) > 0 ? Number(value) : undefined; break;
+    case 'frameColor': ann.frameColor = value || undefined; break;
     default:
       ann[key] = ((key === 'width' || key === 'height') && RECHTHOEK_VORMEN.has(ann.type))
         ? klemMaat(value) : value;
@@ -1610,6 +1616,8 @@ function applyAnnotProp(key, value) {
     case 'imageRotation': currentAnnotation.rotation = leesGeheelGetal(value) || 0; break;
     case 'linkedPath': currentAnnotation.linkedPath = value || undefined; break;
     case 'tintColor': currentAnnotation.tintColor = value || undefined; break;
+    case 'frameWidth': currentAnnotation.frameWidth = Number(value) > 0 ? Number(value) : undefined; break;
+    case 'frameColor': currentAnnotation.frameColor = value || undefined; break;
     case 'lockAspectRatio': {
       currentAnnotation.lockAspectRatio = value;
       const lockRatio = (value && currentAnnotation.type === 'image')

@@ -15,6 +15,7 @@ import { koppenVan } from '../pdf/lijnkoppen.js';
 import { drawDimension, drawMeasureAreaShape, drawCentroidLabel, drawMeasurePerimeterShape, drawVlakZijdematen } from './rendering/measurements.js';
 import { vlakZijdeTeksten } from './measurement.js';
 import { vormVan, bouwVakPad } from './rendering/textbox-vorm.js';
+import { kaderDikte, kaderKleur, kaderRechthoek } from './rendering/afbeelding-kader.js';
 import { maatlijnTekst } from './maat-label.js';
 import { maatlijnVelden } from './maatlijn-geometrie.js';
 import { tagWeergaveParams } from '../plattegrond/ruimte-koppeling.js';
@@ -1436,6 +1437,16 @@ export function drawAnnotation(ctx, annotation, snippetBitmaps = null) {
         ctx.imageSmoothingEnabled = prevSmooth;
         ctx.imageSmoothingQuality = prevQuality;
         if (_imgFilters) ctx.filter = _prevFilter;
+
+        // Kader om de afbeelding (binnen de rand; draait en spiegelt mee).
+        const kaderDik = kaderDikte(annotation);
+        if (kaderDik > 0) {
+          const kr = kaderRechthoek(annotation.width, annotation.height, kaderDik);
+          ctx.strokeStyle = kaderKleur(annotation);
+          ctx.lineWidth = kaderDik;
+          ctx.setLineDash([]);
+          ctx.strokeRect(-annotation.width / 2 + kr.x, -annotation.height / 2 + kr.y, kr.w, kr.h);
+        }
 
         ctx.restore();
       } else {

@@ -50,6 +50,7 @@ import { pasBijlagenToe } from './bijlagen.js';
 import { schrijfAnnotatieLagen, ocVoorAnnotatie } from './saver/annotatie-lagen.js';
 import { layersForSave, currentLayerId } from '../annotations/annotatie-lagen.js';
 import { vormVan, vakPadPdf } from '../annotations/rendering/textbox-vorm.js';
+import { kaderDikte, kaderKleur, kaderRechthoek } from '../annotations/rendering/afbeelding-kader.js';
 import { heeftNietWinAnsi, pdfTextString, toWinAnsiText, winAnsiLiteral, asciiPdfName } from './saver/pdf-text.js';
 import { typemachineVak, typemachineRegelBreedte } from './saver/typemachine.js';
 import { catmullRomSpline } from '../tools/tools/spline-tool.js';
@@ -1950,6 +1951,12 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
             if (ann.grayscale) imgDictObj.OPS_Grayscale = true;
             if (ann.brightness !== undefined && ann.brightness !== 1) imgDictObj.OPS_Brightness = ann.brightness;
             if (ann.contrast !== undefined && ann.contrast !== 1) imgDictObj.OPS_Contrast = ann.contrast;
+            // Kader om de afbeelding (kleur en dikte), ook terug te lezen.
+            const imgKaderDik = ann.type === 'image' ? kaderDikte(ann) : 0;
+            if (imgKaderDik > 0) {
+              imgDictObj.OPS_FrameWidth = imgKaderDik;
+              imgDictObj.OPS_FrameColor = pdfTextString(kaderKleur(ann));
+            }
 
             annotDict = context.obj(imgDictObj);
 
@@ -2010,6 +2017,12 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
                   });
                   extGStates.GS1 = context.register(tintGs);
                   apContent += `q\n/GS1 gs\n${imgPrefix}${tintR} ${tintG} ${tintB} rg\n0 0 ${visW} ${visH} re f\nQ\n`;
+                }
+                // Het kader tekent in de appearance, zodat andere lezers het ook tonen.
+                if (imgKaderDik > 0) {
+                  const [fkR, fkG, fkB] = hexToRgb(kaderKleur(ann));
+                  const kr = kaderRechthoek(visW, visH, imgKaderDik);
+                  apContent += `q\n${alpha < 1 ? '/GS0 gs\n' : ''}${imgPrefix}${fkR} ${fkG} ${fkB} RG\n${imgKaderDik} w\n${kr.x} ${kr.y} ${kr.w} ${kr.h} re S\nQ\n`;
                 }
                 if (Object.keys(extGStates).length > 0) {
                   resources.ExtGState = context.obj(extGStates);
