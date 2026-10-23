@@ -125,13 +125,12 @@
     "boxShapeRect": "Rechthoek (scherpe hoeken)",
     "boxShapeRounded": "Rechthoek (afgeronde hoeken)",
     "boxShapeEllipse": "Ellips / cirkel",
-    "boxShapeSpeech": "Tekstballon (afgerond)",
-    "boxShapeSpeechEllipse": "Tekstballon (ovaal)",
-    "tailSide": "Staart",
-    "tailBottomLeft": "Linksonder",
-    "tailBottomRight": "Rechtsonder",
-    "tailTopLeft": "Linksboven",
-    "tailTopRight": "Rechtsboven"
+    "shadow": "Schaduw",
+    "shadowNone": "Geen",
+    "shadowOn": "Schaduw rechtsonder",
+    "leaderTail": "Aanhaallijn",
+    "leaderLine": "Lijn met pijl",
+    "leaderBubbleTail": "Staart (tekstballon)"
   },
   "stylePresets": {
     "label": "Lijnstijl",

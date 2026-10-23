@@ -132,7 +132,7 @@ export const selectTool = {
           const kneeX = selAnn.x + bw + 40;
           const kneeY = selAnn.y + bh / 2;
           if (!Array.isArray(selAnn.leaders)) selAnn.leaders = [];
-          selAnn.leaders.push({ id, tipX, tipY, kneeX, kneeY, endStyle: 'arrow' });
+          selAnn.leaders.push({ id, tipX, tipY, kneeX, kneeY, endStyle: selAnn.leaderTail === true ? 'tail' : 'arrow' });
           selAnn.modifiedAt = new Date().toISOString();
           recordModify(selAnn.id, before, ctx.cloneAnnotation(selAnn));
           ctx.redraw();

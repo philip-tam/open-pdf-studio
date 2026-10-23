@@ -480,6 +480,13 @@ export async function extractAnnotationColors(pageNum, pdfDoc) {
         if (ls !== undefined) colors.opsLeaderStyle = ls;
       }
 
+      // Een staart (tekstballon) in plaats van een lijn met pijl.
+      const opsStaartRaw = annotDict.get(PDFName.of('OPS_LeaderTail'));
+      if (opsStaartRaw) {
+        const st = context.lookup(opsStaartRaw) || opsStaartRaw;
+        if (st === true || (st && st.value === true)) colors.opsLeaderTail = true;
+      }
+
       // Textbox leaders: /OPS_LeaderId + /IRT (in-reply-to parent textbox Rect)
       const opsLidRaw = annotDict.get(PDFName.of('OPS_LeaderId'));
       if (opsLidRaw) {
@@ -1443,13 +1450,12 @@ const result = {};
         if (opsVormRaw) {
           const vv = context.lookup(opsVormRaw) || opsVormRaw;
           const naam = typeof vv?.asString === 'function' ? vv.asString().replace(/^\//, '') : '';
-          if (['rounded', 'ellipse', 'speech', 'speechEllipse'].includes(naam)) colors.boxShape = naam;
+          if (['rounded', 'ellipse'].includes(naam)) colors.boxShape = naam;
         }
-        const opsStaartRaw = annotDict.get(PDFName.of('OPS_TailSide'));
-        if (opsStaartRaw) {
-          const sv = context.lookup(opsStaartRaw) || opsStaartRaw;
-          const snaam = typeof sv?.asString === 'function' ? sv.asString().replace(/^\//, '') : '';
-          if (['bottom-left', 'bottom-right', 'top-left', 'top-right'].includes(snaam)) colors.tailSide = snaam;
+        const opsSchaduwRaw = annotDict.get(PDFName.of('OPS_Shadow'));
+        if (opsSchaduwRaw) {
+          const sh = context.lookup(opsSchaduwRaw) || opsSchaduwRaw;
+          if (sh === true || (sh && sh.value === true)) colors.shadow = true;
         }
 
         // Verticale uitlijning van de tekst (midden of onder; boven is de standaard).

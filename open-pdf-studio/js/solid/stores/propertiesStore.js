@@ -111,7 +111,8 @@ const [annotProps, setAnnotProps] = createStore({
   icon: 'comment',
   borderStyle: 'solid',
   boxShape: 'rect',
-  tailSide: 'bottom-left',
+  shadow: 'no',
+  leaderTail: 'no',
   cross: false,
   text: '',
   fontSize: 16,
@@ -419,7 +420,8 @@ export function storeShowProperties(annotation) {
     icon: annotation.icon || 'comment',
     borderStyle: annotation.borderStyle || 'solid',
     boxShape: annotation.boxShape || 'rect',
-    tailSide: annotation.tailSide || 'bottom-left',
+    shadow: annotation.shadow === true ? 'yes' : 'no',
+    leaderTail: annotation.leaderTail === true ? 'yes' : 'no',
     cross: annotation.cross === true,
     hatchPattern: annotation.hatchPattern || (annotation.type === 'measureArea' ? 'diagonal-left' : 'none'),
     hatchColor: annotation.hatchColor || (annotation.type === 'measureArea' ? '#ff0000' : (annotation.strokeColor || annotation.color || '#000000')),
@@ -735,7 +737,8 @@ export function storeShowMultiSelection(selected) {
     icon: sharedValue(selected, a => a.icon || 'comment', 'mixed'),
     borderStyle: sharedBorderStyle,
     boxShape: sharedValue(selected, a => a.boxShape || 'rect', 'mixed'),
-    tailSide: sharedValue(selected, a => a.tailSide || 'bottom-left', 'mixed'),
+    shadow: sharedValue(selected, a => (a.shadow === true ? 'yes' : 'no'), 'mixed'),
+    leaderTail: sharedValue(selected, a => (a.leaderTail === true ? 'yes' : 'no'), 'mixed'),
     cross: sharedValue(selected, a => a.cross === true, 'mixed'),
     hatchPattern: sharedHatchPattern,
     hatchColor: sharedHatchColor,
@@ -1161,7 +1164,8 @@ function applyPropToAnnotation(ann, key, value) {
     case 'icon': ann.icon = value; break;
     case 'borderStyle': ann.borderStyle = value; break;
     case 'boxShape': ann.boxShape = value === 'rect' ? undefined : value; break;
-    case 'tailSide': ann.tailSide = value === 'bottom-left' ? undefined : value; break;
+    case 'shadow': ann.shadow = value === 'yes' ? true : undefined; break;
+    case 'leaderTail': ann.leaderTail = value === 'yes' ? true : undefined; if (Array.isArray(ann.leaders)) for (const l of ann.leaders) l.endStyle = value === 'yes' ? 'tail' : 'arrow'; break;
     case 'cross': ann.cross = value === true || undefined; break;
     case 'hatchPattern': ann.hatchPattern = value; break;
     case 'hatchColor': ann.hatchColor = value; break;
@@ -1573,7 +1577,8 @@ function applyAnnotProp(key, value) {
     case 'icon': currentAnnotation.icon = value; break;
     case 'borderStyle': currentAnnotation.borderStyle = value; break;
     case 'boxShape': currentAnnotation.boxShape = value === 'rect' ? undefined : value; break;
-    case 'tailSide': currentAnnotation.tailSide = value === 'bottom-left' ? undefined : value; break;
+    case 'shadow': currentAnnotation.shadow = value === 'yes' ? true : undefined; break;
+    case 'leaderTail': currentAnnotation.leaderTail = value === 'yes' ? true : undefined; if (Array.isArray(currentAnnotation.leaders)) for (const l of currentAnnotation.leaders) l.endStyle = value === 'yes' ? 'tail' : 'arrow'; break;
     case 'cross': currentAnnotation.cross = value === true || undefined; break;
     case 'hatchPattern': currentAnnotation.hatchPattern = value; break;
     case 'hatchColor': currentAnnotation.hatchColor = value; break;

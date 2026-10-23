@@ -14,7 +14,8 @@ import { calloutLeiderKoppen } from './callout-koppen.js';
 import { koppenVan } from '../pdf/lijnkoppen.js';
 import { drawDimension, drawMeasureAreaShape, drawCentroidLabel, drawMeasurePerimeterShape, drawVlakZijdematen } from './rendering/measurements.js';
 import { vlakZijdeTeksten } from './measurement.js';
-import { vormVan, bouwVakPad, staartVan } from './rendering/textbox-vorm.js';
+import { vormVan, bouwVakPad, schaduwAfstand } from './rendering/textbox-vorm.js';
+import { staartVoet } from './rendering/staart-leider.js';
 import { kaderDikte, kaderKleur, kaderRechthoek } from './rendering/afbeelding-kader.js';
 import { maatlijnTekst } from './maat-label.js';
 import { maatlijnVelden } from './maatlijn-geometrie.js';
@@ -293,7 +294,50 @@ export function pickAnchorSide(box, kx, ky) {
 
 // Draw a single leader on a textbox: anchor (auto-picked) -> knee -> tip,
 // with arrow or circle endpoint.
+// Een aanhaallijn als staart van een tekstballon (staart-leider.js): een
+// driehoek van de rand van het vak naar de punt, gevuld met het vak.
+function drawStaartLeider(ctx, annotation, leader, strokeColor, lineWidth) {
+  const voet = staartVoet(
+    { x: annotation.x, y: annotation.y, width: annotation.width || 150, height: annotation.height || 50 },
+    vormVan(annotation), { x: leader.tipX, y: leader.tipY });
+  if (!voet) return;
+  ctx.save();
+  ctx.setLineDash([]);
+  ctx.lineJoin = 'miter';
+  ctx.lineWidth = lineWidth;
+  const gevuld = hasFill(annotation.fillColor);
+  if (gevuld) {
+    ctx.fillStyle = withFillAlpha(annotation.fillColor, annotation.fillOpacity, annotation.opacity !== undefined ? annotation.opacity : 1) || annotation.fillColor;
+    ctx.beginPath();
+    ctx.moveTo(voet.p1.x, voet.p1.y);
+    ctx.lineTo(leader.tipX, leader.tipY);
+    ctx.lineTo(voet.p2.x, voet.p2.y);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.strokeStyle = strokeColor;
+  ctx.beginPath();
+  ctx.moveTo(voet.p1.x, voet.p1.y);
+  ctx.lineTo(leader.tipX, leader.tipY);
+  ctx.lineTo(voet.p2.x, voet.p2.y);
+  ctx.stroke();
+  if (gevuld) {
+    // De rand van het vak onder de voet verdwijnt: staart en vak vormen één vlak.
+    ctx.strokeStyle = annotation.fillColor;
+    ctx.lineWidth = lineWidth + 1;
+    ctx.beginPath();
+    ctx.moveTo(voet.p1.x, voet.p1.y);
+    ctx.lineTo(voet.p2.x, voet.p2.y);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
 function drawTextboxLeader(ctx, annotation, leader, strokeColor, lineWidth) {
+  if (leader.endStyle === 'tail') {
+    drawStaartLeider(ctx, annotation, leader, strokeColor, lineWidth);
+    return;
+  }
   const tipX = leader.tipX;
   const tipY = leader.tipY;
   const kneeX = leader.kneeX;
@@ -1147,16 +1191,34 @@ export function drawAnnotation(ctx, annotation, snippetBitmaps = null) {
 
       // Draw fill (wolkrand-annotaties vullen het scallop-pad i.p.v. de rect)
       const tbPuff = cloudPuffSize(annotation);
+      // Schaduw: het lichaam is het vak min de schaduwafstand (textbox-vorm.js).
+      const tbSchaduw = annotation.borderEffect === 'cloudy' ? 0 : schaduwAfstand(annotation);
+      const tbBw = tbWidth - tbSchaduw;
+      const tbBh = tbHeight - tbSchaduw;
+      if (tbSchaduw > 0) {
+        ctx.save();
+        ctx.globalAlpha *= 0.3;
+        bouwVakPad(ctx, annotation.x + tbSchaduw, annotation.y + tbSchaduw, tbBw, tbBh, vormVan(annotation));
+        if (hasFill(annotation.fillColor)) {
+          ctx.fillStyle = '#000000';
+          ctx.fill();
+        } else if (tbLineWidth > 0 && annHasStroke) {
+          ctx.strokeStyle = '#000000';
+          ctx.lineWidth = tbLineWidth;
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
       if (hasFill(annotation.fillColor)) {
         ctx.fillStyle = annFill;
         if (annotation.borderEffect === 'cloudy') {
           buildCloudPath(ctx, annotation.x, annotation.y, tbWidth, tbHeight, tbPuff);
           ctx.fill();
         } else if (vormVan(annotation) !== 'rect') {
-          bouwVakPad(ctx, annotation.x, annotation.y, tbWidth, tbHeight, vormVan(annotation), staartVan(annotation));
+          bouwVakPad(ctx, annotation.x, annotation.y, tbBw, tbBh, vormVan(annotation));
           ctx.fill();
         } else {
-          ctx.fillRect(annotation.x, annotation.y, tbWidth, tbHeight);
+          ctx.fillRect(annotation.x, annotation.y, tbBw, tbBh);
         }
       }
 
@@ -1169,10 +1231,10 @@ export function drawAnnotation(ctx, annotation, snippetBitmaps = null) {
           buildCloudPath(ctx, annotation.x, annotation.y, tbWidth, tbHeight, tbPuff);
           ctx.stroke();
         } else if (vormVan(annotation) !== 'rect') {
-          bouwVakPad(ctx, annotation.x, annotation.y, tbWidth, tbHeight, vormVan(annotation), staartVan(annotation));
+          bouwVakPad(ctx, annotation.x, annotation.y, tbBw, tbBh, vormVan(annotation));
           ctx.stroke();
         } else {
-          ctx.strokeRect(annotation.x, annotation.y, tbWidth, tbHeight);
+          ctx.strokeRect(annotation.x, annotation.y, tbBw, tbBh);
         }
         ctx.setLineDash([]);
       }

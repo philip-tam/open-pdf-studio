@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
-  vormVan, hoekStraal, vormInzet, vakPadPdf, bouwVakPad, TEKSTVAK_VORMEN,
-  isBallon, staartVan, vormZones, vakPadOpdrachten, STAART_ZIJDEN,
+  vormVan, hoekStraal, vormInzet, vakPadPdf, bouwVakPad, TEKSTVAK_VORMEN, vormZones, schaduwAfstand,
 } from './textbox-vorm.js';
 import { textboxTekstInzet, textboxTekstBreedte } from './textbox-layout.js';
 
@@ -64,53 +63,14 @@ test('bouwVakPad roept het juiste canvaspad aan', () => {
   assert.deepEqual(calls[5].slice(1), [50, 25, 50, 25, 0, 0, Math.PI * 2]);
 });
 
-test('ballonvormen: vorm, staartkant en ruimte voor de staart', () => {
-  assert.equal(vormVan({ boxShape: 'speech' }), 'speech');
-  assert.equal(vormVan({ boxShape: 'speechEllipse' }), 'speechEllipse');
-  assert.equal(isBallon('speech') && isBallon('speechEllipse'), true);
-  assert.equal(isBallon('rounded'), false);
-  assert.equal(staartVan({}), 'bottom-left');
-  assert.equal(staartVan({ tailSide: 'top-right' }), 'top-right');
-  assert.equal(staartVan({ tailSide: 'midden' }), 'bottom-left');
-  assert.deepEqual(vormZones({ height: 100 }), { boven: 0, onder: 0 });
-  const onder = vormZones({ boxShape: 'speech', height: 100 });
-  assert.ok(onder.boven === 0 && Math.abs(onder.onder - 22) < 1e-9);
-  const boven = vormZones({ boxShape: 'speechEllipse', height: 100, tailSide: 'top-left' });
-  assert.ok(boven.onder === 0 && Math.abs(boven.boven - 22) < 1e-9);
-});
-
-test('ballonpad: gesloten, binnen het vak en de staart reikt tot de rand van het vak', () => {
-  for (const vorm of ['speech', 'speechEllipse']) {
-    for (const kant of STAART_ZIJDEN) {
-      const ops = vakPadOpdrachten(200, 100, vorm, kant);
-      assert.equal(ops[0][0], 'M');
-      assert.equal(ops[ops.length - 1][0], 'Z');
-      const ys = [];
-      const xs = [];
-      // alleen de ankerpunten (het eind van elk stuk); stuurpunten van een kromme mogen net buiten het vak liggen
-      for (const [op, ...p] of ops) if (op !== 'Z') { xs.push(p[p.length - 2]); ys.push(p[p.length - 1]); }
-      assert.ok(Math.min(...xs) >= -1e-6 && Math.max(...xs) <= 200 + 1e-6, `${vorm} ${kant} x`);
-      assert.ok(Math.min(...ys) >= -1e-6 && Math.max(...ys) <= 100 + 1e-6, `${vorm} ${kant} y`);
-      // de punt van de staart raakt de boven- of onderrand
-      const raakt = kant.startsWith('top') ? Math.min(...ys) : Math.max(...ys);
-      assert.ok(Math.abs(raakt - (kant.startsWith('top') ? 0 : 100)) < 1e-6, `${vorm} ${kant} staart`);
-    }
-  }
-});
-
-test('ballon: de staart links of rechts spiegelt het pad', () => {
-  const links = vakPadOpdrachten(200, 100, 'speech', 'bottom-left');
-  const rechts = vakPadOpdrachten(200, 100, 'speech', 'bottom-right');
-  const tipL = links.find((o) => o[0] === 'L' && o[2] === 100);
-  const tipR = rechts.find((o) => o[0] === 'L' && o[2] === 100);
-  assert.ok(Math.abs(tipL[1] + tipR[1] - 200) < 1e-9);
-});
-
-test('vakPadPdf voor een ballon: begint met een m, sluit met h, y omhoog', () => {
-  const pdf = vakPadPdf(10, 20, 200, 100, 'speech', 'bottom-left');
-  assert.match(pdf.split('\n')[0], / m$/);
-  assert.ok(pdf.endsWith('h'));
-  // de staartpunt (onderkant van het vak) ligt in PDF op y = 20
-  assert.match(pdf, /\b20 l\b/);
-  assert.doesNotMatch(pdf, /e[+-]?\d/);
+test('schaduw: alleen waar aan, de afstand blijft klein en het lichaam krimpt', () => {
+  assert.equal(schaduwAfstand({ width: 150, height: 50 }), 0);
+  const d = schaduwAfstand({ shadow: true, width: 150, height: 50 });
+  assert.ok(d >= 2 && d <= 6, String(d));
+  assert.equal(schaduwAfstand({ shadow: true, width: 20, height: 20 }), 2);
+  assert.equal(schaduwAfstand({ shadow: true, width: 600, height: 400 }), 6);
+  const z = vormZones({ shadow: true, width: 150, height: 50 });
+  assert.equal(z.boven, 0);
+  assert.ok(Math.abs(z.onder - d) < 1e-9);
+  assert.ok(vormInzet({ shadow: true, width: 150, height: 50 }) > vormInzet({ width: 150, height: 50 }));
 });

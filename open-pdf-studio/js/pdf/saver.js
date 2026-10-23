@@ -49,7 +49,8 @@ import { slaPaginaLabelsOp } from './pagina-labels.js';
 import { pasBijlagenToe } from './bijlagen.js';
 import { schrijfAnnotatieLagen, ocVoorAnnotatie } from './saver/annotatie-lagen.js';
 import { layersForSave, currentLayerId } from '../annotations/annotatie-lagen.js';
-import { vormVan, vakPadPdf, vormZones, staartVan, isBallon } from '../annotations/rendering/textbox-vorm.js';
+import { staartVoet, staartOmhullende } from '../annotations/rendering/staart-leider.js';
+import { vormVan, vakPadPdf, vormZones, schaduwAfstand } from '../annotations/rendering/textbox-vorm.js';
 import { kaderDikte, kaderKleur, kaderRechthoek } from '../annotations/rendering/afbeelding-kader.js';
 import { heeftNietWinAnsi, pdfTextString, toWinAnsiText, winAnsiLiteral, asciiPdfName } from './saver/pdf-text.js';
 import { typemachineVak, typemachineRegelBreedte } from './saver/typemachine.js';
@@ -1527,7 +1528,16 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
               const pageSwapsDims = pageRot === 90 || pageRot === 270;
               const visW = pageSwapsDims ? ftH : ftW;
               const visH = pageSwapsDims ? ftW : ftH;
+              // Schaduw: het lichaam is het vak min de schaduwafstand; de schaduw ligt
+              // rechts en onder het lichaam, binnen het vak (textbox-vorm.js).
+              const ftSchaduw = ann.borderEffect === 'cloudy' ? 0 : schaduwAfstand(ann);
               const emitFtBox = (bx, by) => {
+                if (ftSchaduw > 0 && (ftFill || ftHasBorder)) {
+                  const schaduwPad = vakPadPdf(bx + ftSchaduw, by, visW - ftSchaduw, visH - ftSchaduw, vormVan(ann));
+                  ftStreamContent += 'q\n/GSsh gs\n';
+                  ftStreamContent += ftFill ? `0 g\n${schaduwPad}\nf\n` : `0 G\n${ftBorderWidth} w\n${schaduwPad}\nS\n`;
+                  ftStreamContent += 'Q\n';
+                }
                 if (ftFill) {
                   const [fr, fg, fb] = hexToRgb(ann.fillColor);
                   ftStreamContent += `${fr} ${fg} ${fb} rg\n`;
@@ -1535,7 +1545,7 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
                 if (ftHasBorder) {
                   ftStreamContent += `${ftBorderWidth} w\n${ftDashOp}${sr} ${sg} ${sb} RG\n`;
                 }
-                ftStreamContent += `${vakPadPdf(bx, by, visW, visH, vormVan(ann), staartVan(ann))}\n${ftRectOp}\n`;
+                ftStreamContent += `${vakPadPdf(bx, by + ftSchaduw, visW - ftSchaduw, visH - ftSchaduw, vormVan(ann))}\n${ftRectOp}\n`;
               };
               // Wrap in a transform whenever the content is rotated in PDF
               // space OR the page itself is rotated (then the visual box dims
@@ -1680,7 +1690,8 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
                 BBox: [x1, y1, x2, y2],
                 Matrix: [1, 0, 0, 1, -x1, -y1],
                 Resources: context.obj({
-                  Font: context.obj(ftFontResources)
+                  Font: context.obj(ftFontResources),
+                  ...(ftSchaduw > 0 ? { ExtGState: context.obj({ GSsh: context.obj({ Type: 'ExtGState', ca: 0.3, CA: 0.3 }) }) } : {}),
                 })
               };
 
@@ -1698,9 +1709,10 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
               // De vorm van het vak (afgerond of ovaal); een rechthoek is de standaard
               // en krijgt geen sleutel.
               if (vormVan(ann) !== 'rect') annotDict.set(PDFName.of('OPS_BoxShape'), PDFName.of(vormVan(ann)));
-              if (isBallon(vormVan(ann))) annotDict.set(PDFName.of('OPS_TailSide'), PDFName.of(staartVan(ann)));
               // Verticale uitlijning van de tekst; boven is de standaard en krijgt geen sleutel.
               if (ann.textVAlign === 'middle' || ann.textVAlign === 'bottom') annotDict.set(PDFName.of('OPS_TextVAlign'), PDFName.of(ann.textVAlign));
+              // Schaduw rechts en onder (textbox-vorm.js); uit is de standaard.
+              if (ann.shadow === true) annotDict.set(PDFName.of('OPS_Shadow'), context.obj(true));
             }
 
             break;
@@ -3092,13 +3104,24 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
               const d = (c.x - leader.kneeX) * (c.x - leader.kneeX) + (c.y - leader.kneeY) * (c.y - leader.kneeY);
               if (d < bestD) { bestD = d; aBest = c; }
             }
+            const staartVoetPunten = leader.endStyle === 'tail'
+              ? staartVoet({ x: ann.x, y: ann.y, width: _bw, height: _bh }, vormVan(ann), { x: leader.tipX, y: leader.tipY })
+              : null;
+            // Een staart hangt op de rand die naar de punt wijst, niet aan het midden van een zijde.
+            if (staartVoetPunten) aBest = staartVoetPunten.basis;
             const aPdf = [convertX(aBest.x), convertY(aBest.y)];
             const kPdf = [convertX(leader.kneeX), convertY(leader.kneeY)];
             const tPdf = [convertX(leader.tipX), convertY(leader.tipY)];
             const verts = [aPdf[0], aPdf[1], kPdf[0], kPdf[1], tPdf[0], tPdf[1]];
             const eindStijl = leader.endStyle === 'circle' ? 'circle' : 'arrow';
             // Met de kop erin: de appearance wordt op de Rect geknipt.
-            const ldrRect = leiderOmhullende([aPdf, kPdf, tPdf], _lwLdr, eindStijl);
+            let ldrRect = leiderOmhullende([aPdf, kPdf, tPdf], _lwLdr, eindStijl);
+            if (staartVoetPunten) {
+              const [sx1, sy1, sx2, sy2] = staartOmhullende(staartVoetPunten, { x: leader.tipX, y: leader.tipY }, _lwLdr);
+              const hoeken = [[convertX(sx1), convertY(sy1)], [convertX(sx2), convertY(sy2)]];
+              ldrRect = [Math.min(hoeken[0][0], hoeken[1][0]), Math.min(hoeken[0][1], hoeken[1][1]),
+                Math.max(hoeken[0][0], hoeken[1][0]), Math.max(hoeken[0][1], hoeken[1][1])];
+            }
             // Het scherm tekent een gevulde (gesloten) pijlkop.
             const endStyle = eindStijl === 'circle' ? 'Circle' : 'ClosedArrow';
             const ldrDict = context.obj({
@@ -3118,10 +3141,29 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
             ldrDict.set(PDFName.of('IRT'), parentAnnotRef);
             ldrDict.set(PDFName.of('BS'), buildBorderStyle(context, _lwLdr, ann.borderStyle));
             // Andere lezers tekenen een /PolyLine niet zelf (#512).
-            attachVectorAP(context, ldrDict, buildLeiderAP({
+            const ldrStrokeHex = ann.strokeColor && hasStroke(ann.strokeColor) ? ann.strokeColor : (ann.color || '#000000');
+            if (staartVoetPunten) {
+              // Een staart: gevulde driehoek in de kleur van het vak (staart-leider.js).
+              ldrDict.set(PDFName.of('OPS_LeaderTail'), context.obj(true));
+              const rgbR = (hex) => hexToRgb(hex);
+              const [sr2, sg2, sb2] = rgbR(ldrStrokeHex);
+              const P = (pt) => `${convertX(pt.x)} ${convertY(pt.y)}`;
+              const tip = { x: leader.tipX, y: leader.tipY };
+              let staartInhoud = '';
+              if (hasFill(ann.fillColor)) {
+                const [fr2, fg2, fb2] = rgbR(ann.fillColor);
+                staartInhoud += `${fr2} ${fg2} ${fb2} rg\n${P(staartVoetPunten.p1)} m ${P(tip)} l ${P(staartVoetPunten.p2)} l h f\n`;
+              }
+              staartInhoud += `${sr2} ${sg2} ${sb2} RG\n${_lwLdr} w\n0 J 0 j [] 0 d\n${P(staartVoetPunten.p1)} m ${P(tip)} l ${P(staartVoetPunten.p2)} l S\n`;
+              if (hasFill(ann.fillColor)) {
+                const [fr2, fg2, fb2] = rgbR(ann.fillColor);
+                staartInhoud += `${fr2} ${fg2} ${fb2} RG\n${_lwLdr + 1} w\n${P(staartVoetPunten.p1)} m ${P(staartVoetPunten.p2)} l S\n`;
+              }
+              attachVectorAP(context, ldrDict, { content: staartInhoud, needsFont: false }, ldrRect);
+            } else attachVectorAP(context, ldrDict, buildLeiderAP({
               points: [aBest, { x: leader.kneeX, y: leader.kneeY }, { x: leader.tipX, y: leader.tipY }],
               X: convertX, Y: convertY,
-              strokeColorHex: ann.strokeColor && hasStroke(ann.strokeColor) ? ann.strokeColor : (ann.color || '#000000'),
+              strokeColorHex: ldrStrokeHex,
               lineWidth: _lwLdr, eindStijl,
             }), ldrRect);
             zetDoorzichtigheidInAp(context, ldrDict, ann.opacity !== undefined ? ann.opacity : 1, { alsGroep: true, blendMode: ann.blendMode });

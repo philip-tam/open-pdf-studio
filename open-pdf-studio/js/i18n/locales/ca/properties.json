@@ -145,13 +145,12 @@
     "boxShapeRect": "Rectangle (sharp corners)",
     "boxShapeRounded": "Rectangle (rounded corners)",
     "boxShapeEllipse": "Ellipse / circle",
-    "boxShapeSpeech": "Speech bubble (rounded)",
-    "boxShapeSpeechEllipse": "Speech bubble (oval)",
-    "tailSide": "Tail",
-    "tailBottomLeft": "Bottom left",
-    "tailBottomRight": "Bottom right",
-    "tailTopLeft": "Top left",
-    "tailTopRight": "Top right"
+    "shadow": "Shadow",
+    "shadowNone": "None",
+    "shadowOn": "Drop shadow",
+    "leaderTail": "Leader style",
+    "leaderLine": "Line with arrow",
+    "leaderBubbleTail": "Bubble tail"
   },
   "stylePresets": {
     "label": "Estil de línia",

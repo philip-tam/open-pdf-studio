@@ -461,3 +461,4 @@ js/annotations/rendering/textbox-vorm.test.mjs
 js/annotations/rendering/textbox-vuitlijning.test.mjs
 
 js/annotations/rendering/afbeelding-kader.test.mjs
+js/annotations/rendering/staart-leider.test.mjs

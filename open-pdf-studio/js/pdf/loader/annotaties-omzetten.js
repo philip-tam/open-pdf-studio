@@ -73,6 +73,7 @@ export async function zetPaginaAnnotatiesOm(annots, pageNum, viewport, stampImag
     if (parent) {
       if (!Array.isArray(parent.leaders)) parent.leaders = [];
       parent.leaders.push(pl.leader);
+      if (pl.leader.endStyle === 'tail') parent.leaderTail = true;
     }
   }
   for (const tb of textboxByRect.values()) delete tb._pdfRectKey;
