@@ -3138,7 +3138,11 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
               OPS_LeaderId: pdfTextString(leader.id || ''),
             });
             ldrDict.set(PDFName.of('LE'), context.obj([PDFName.of('None'), PDFName.of(endStyle)]));
-            ldrDict.set(PDFName.of('IRT'), parentAnnotRef);
+            // Niet als /IRT: een annotatie die antwoordt op een andere (/IRT) toont Acrobat
+            // alleen in de opmerkingenlijst, niet op de pagina, dus de staart ontbrak daar.
+            // De koppeling met het vak loopt via zijn /Rect in een eigen sleutel.
+            const ouderRect = annotDict.get(PDFName.of('Rect'));
+            if (ouderRect) ldrDict.set(PDFName.of('OPS_ParentRect'), ouderRect);
             ldrDict.set(PDFName.of('BS'), buildBorderStyle(context, _lwLdr, ann.borderStyle));
             // Andere lezers tekenen een /PolyLine niet zelf (#512).
             const ldrStrokeHex = ann.strokeColor && hasStroke(ann.strokeColor) ? ann.strokeColor : (ann.color || '#000000');

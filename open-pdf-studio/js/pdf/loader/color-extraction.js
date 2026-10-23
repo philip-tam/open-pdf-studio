@@ -493,6 +493,15 @@ export async function extractAnnotationColors(pageNum, pdfDoc) {
         const lv = leesPdfTekst(context, opsLidRaw);
         if (lv !== undefined) colors.opsLeaderId = lv;
       }
+      // Nieuwe bestanden: de koppeling met het vak via /OPS_ParentRect (zie de saver);
+      // oudere bestanden gebruikten /IRT.
+      const ouderRectRaw = annotDict.get(PDFName.of('OPS_ParentRect'));
+      if (ouderRectRaw) {
+        const ouderRect = context.lookup(ouderRectRaw) || ouderRectRaw;
+        if (ouderRect && typeof ouderRect.size === 'function' && ouderRect.size() >= 4) {
+          colors.irtRectKey = `${pdfNum(ouderRect.get(0))},${pdfNum(ouderRect.get(1))},${pdfNum(ouderRect.get(2))},${pdfNum(ouderRect.get(3))}`;
+        }
+      }
       const irtRaw = annotDict.get(PDFName.of('IRT'));
       if (irtRaw) {
         const irt = context.lookup(irtRaw);
