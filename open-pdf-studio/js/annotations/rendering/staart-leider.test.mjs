@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { staartVoet, staartOmhullende, halveVoet } from './staart-leider.js';
+import { staartVoet, staartOmhullende, halveVoet, standaardStaart } from './staart-leider.js';
 
 const vak = { x: 100, y: 100, width: 200, height: 100 };
 
@@ -53,4 +53,14 @@ test('staartOmhullende bevat de voet, de punt en de lijndikte', () => {
   const voet = staartVoet(vak, 'rect', { x: 200, y: 260 });
   const [x1, y1, x2, y2] = staartOmhullende(voet, { x: 200, y: 260 }, 2);
   assert.ok(x1 < voet.p1.x && x2 > voet.p2.x && y1 < 200 && y2 > 260);
+});
+
+test('standaardStaart: onder het vak, links van het midden, als staart', () => {
+  const s = standaardStaart(vak, 'x1');
+  assert.equal(s.id, 'x1');
+  assert.equal(s.endStyle, 'tail');
+  assert.ok(s.tipY > vak.y + vak.height);
+  assert.ok(s.tipX > vak.x && s.tipX < vak.x + vak.width / 2);
+  assert.ok(staartVoet(vak, 'rect', { x: s.tipX, y: s.tipY }) !== null);
+  assert.ok(staartVoet(vak, 'ellipse', { x: s.tipX, y: s.tipY }) !== null);
 });

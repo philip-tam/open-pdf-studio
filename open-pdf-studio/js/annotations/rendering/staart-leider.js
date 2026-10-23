@@ -69,3 +69,23 @@ export function staartOmhullende(voet, punt, lijndikte = 0) {
   const ys = [voet.p1.y, voet.p2.y, punt.y];
   return [Math.min(...xs) - m, Math.min(...ys) - m, Math.max(...xs) + m, Math.max(...ys) + m];
 }
+
+/**
+ * Een eerste staart voor een tekstvak dat er nog geen heeft: de punt hangt
+ * onder het vak, links van het midden, zodat hij meteen te zien is en naar elk
+ * doel versleept kan worden.
+ */
+export function standaardStaart(vak, id) {
+  const b = vak.width || 150;
+  const h = vak.height || 50;
+  const tipX = vak.x + b * 0.25;
+  const tipY = vak.y + h + Math.max(24, h * 0.6);
+  return {
+    id: id || (Date.now().toString(36) + Math.random().toString(36).substr(2, 6)),
+    tipX,
+    tipY,
+    kneeX: tipX,
+    kneeY: vak.y + h + Math.max(12, h * 0.3),
+    endStyle: 'tail',
+  };
+}

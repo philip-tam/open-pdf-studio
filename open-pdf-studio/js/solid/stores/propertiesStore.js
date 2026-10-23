@@ -1,4 +1,5 @@
 import { createSignal, batch } from 'solid-js';
+import { standaardStaart } from '../../annotations/rendering/staart-leider.js';
 import { DRAFTING_RULE_TYPES, effectiveDraftingLineWidth } from '../../annotations/drafting-rules.js';
 import { createStore } from 'solid-js/store';
 import { state, getActiveDocument } from '../../core/state.js';
@@ -1165,7 +1166,13 @@ function applyPropToAnnotation(ann, key, value) {
     case 'borderStyle': ann.borderStyle = value; break;
     case 'boxShape': ann.boxShape = value === 'rect' ? undefined : value; break;
     case 'shadow': ann.shadow = value === 'yes' ? true : undefined; break;
-    case 'leaderTail': ann.leaderTail = value === 'yes' ? true : undefined; if (Array.isArray(ann.leaders)) for (const l of ann.leaders) l.endStyle = value === 'yes' ? 'tail' : 'arrow'; break;
+    case 'leaderTail':
+      ann.leaderTail = value === 'yes' ? true : undefined;
+      if (!Array.isArray(ann.leaders)) ann.leaders = [];
+      for (const l of ann.leaders) l.endStyle = value === 'yes' ? 'tail' : 'arrow';
+      // Zonder aanhaallijn is er niets te zien: meteen een eerste staart.
+      if (value === 'yes' && ann.leaders.length === 0 && ann.type === 'textbox') ann.leaders.push(standaardStaart(ann));
+      break;
     case 'cross': ann.cross = value === true || undefined; break;
     case 'hatchPattern': ann.hatchPattern = value; break;
     case 'hatchColor': ann.hatchColor = value; break;
@@ -1578,7 +1585,14 @@ function applyAnnotProp(key, value) {
     case 'borderStyle': currentAnnotation.borderStyle = value; break;
     case 'boxShape': currentAnnotation.boxShape = value === 'rect' ? undefined : value; break;
     case 'shadow': currentAnnotation.shadow = value === 'yes' ? true : undefined; break;
-    case 'leaderTail': currentAnnotation.leaderTail = value === 'yes' ? true : undefined; if (Array.isArray(currentAnnotation.leaders)) for (const l of currentAnnotation.leaders) l.endStyle = value === 'yes' ? 'tail' : 'arrow'; break;
+    case 'leaderTail':
+      currentAnnotation.leaderTail = value === 'yes' ? true : undefined;
+      if (!Array.isArray(currentAnnotation.leaders)) currentAnnotation.leaders = [];
+      for (const l of currentAnnotation.leaders) l.endStyle = value === 'yes' ? 'tail' : 'arrow';
+      if (value === 'yes' && currentAnnotation.leaders.length === 0 && currentAnnotation.type === 'textbox') {
+        currentAnnotation.leaders.push(standaardStaart(currentAnnotation));
+      }
+      break;
     case 'cross': currentAnnotation.cross = value === true || undefined; break;
     case 'hatchPattern': currentAnnotation.hatchPattern = value; break;
     case 'hatchColor': currentAnnotation.hatchColor = value; break;
