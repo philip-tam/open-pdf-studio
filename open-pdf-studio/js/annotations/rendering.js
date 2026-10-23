@@ -1363,6 +1363,11 @@ export function drawAnnotation(ctx, annotation, snippetBitmaps = null) {
     case 'image':
       // Draw image with rotation and flip
       const img = imageCache.get(annotation.imageId);
+      // Een afbeelding die nog laadt: teken opnieuw zodra hij klaar is.
+      if (img && !img.complete && !img._redrawOnLoad) {
+        img._redrawOnLoad = true;
+        img.addEventListener('load', () => { try { hertekenActieveWeergave(); } catch (_) {} }, { once: true });
+      }
       if (img && img.complete) {
         ctx.save();
 

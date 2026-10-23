@@ -35,14 +35,12 @@ async function _loadImageFromPath(filePath) {
     reader.onerror = reject;
     reader.readAsDataURL(blob);
   });
-  const url = URL.createObjectURL(blob);
+  // De bitmap komt uit de data-URL en blijft er ook aan gekoppeld. Een
+  // blob-URL werd direct na het laden ingetrokken: WebKit gooide dan de
+  // gedecodeerde pixels weg en het kader van de afbeelding bleef leeg.
   const img = new Image();
-  img.src = url;
-  try {
-    await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
-  } finally {
-    URL.revokeObjectURL(url);
-  }
+  img.src = dataUrl;
+  await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
   return { img, dataUrl };
 }
 
@@ -190,4 +188,20 @@ export async function addImageFromFile(filePath, opts = {}) {
     console.error('Failed to add image from file:', e);
     updateStatusMessage('Failed to add image');
   }
+}
+
+/**
+ * De knop "Afbeelding" in het lint: een bestand kiezen en het op de huidige
+ * pagina plaatsen (daarna verplaatsen en vergroten of verkleinen met de
+ * greepjes). Zelfde pad als een afbeelding op de pagina slepen.
+ */
+export async function kiesEnPlaatsAfbeelding() {
+  if (!getActiveDocument()?.pdfDoc) {
+    updateStatusMessage('Open a PDF first to add images');
+    return;
+  }
+  const { openFileDialog } = await import('../core/platform.js');
+  const pad = await openFileDialog(['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'svg']);
+  if (!pad || typeof pad !== 'string') return;
+  await addImageFromFile(pad);
 }
