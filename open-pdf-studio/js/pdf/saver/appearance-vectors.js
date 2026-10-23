@@ -1003,10 +1003,28 @@ export function buildLeiderAP({ points, X, Y, strokeColorHex, lineWidth, eindSti
   const lw = lineWidth ?? 1;
   let s = `${f(stroke[0])} ${f(stroke[1])} ${f(stroke[2])} RG\n${f(lw)} w\n0 J 0 j 10 M\n[] 0 d\n`;
   if (dotted) {
-    // Stippellijn met ronde punten, zoals het scherm (leider-stijl.js: stippelPatroon).
-    s = `${f(stroke[0])} ${f(stroke[1])} ${f(stroke[2])} RG\n${f(lw)} w\n1 J 0 j 10 M\n[0.01 ${f(Math.max(3, lw * 2.6))}] 0 d\n`;
+    // Stippellijn als losse ronde punten: een streeppatroon met bijna lege streepjes
+    // laat Acrobat weg, gevulde cirkels tonen elke lezer (zelfde maat als stippelPatroon).
+    const stap = Math.max(3, lw * 2.6) + 0.01;
+    const rp = Math.max(0.5, lw / 2), kp = rp * _KAPPA;
+    s = `${f(stroke[0])} ${f(stroke[1])} ${f(stroke[2])} rg\n`;
+    let rest = 0;
+    for (let i = 1; i < points.length; i++) {
+      const p0 = points[i - 1], p1 = points[i];
+      const len = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+      for (let d = rest; d <= len; d += stap) {
+        const px = p0.x + (p1.x - p0.x) * (len ? d / len : 0);
+        const py = p0.y + (p1.y - p0.y) * (len ? d / len : 0);
+        const q = (dx, dy) => `${f(X(px + dx))} ${f(Y(py + dy))}`;
+        s += `${q(rp, 0)} m ${q(rp, kp)} ${q(kp, rp)} ${q(0, rp)} c ${q(-kp, rp)} ${q(-rp, kp)} ${q(-rp, 0)} c `
+          + `${q(-rp, -kp)} ${q(-kp, -rp)} ${q(0, -rp)} c ${q(kp, -rp)} ${q(rp, -kp)} ${q(rp, 0)} c h f\n`;
+        rest = d + stap - len;
+      }
+      rest = Math.max(0, rest);
+    }
+  } else {
+    s += pathOps(points, X, Y, false) + 'S\n';
   }
-  s += pathOps(points, X, Y, false) + 'S\n[] 0 d\n0 J\n';
   const tip = points[points.length - 1];
   const knie = points[points.length - 2];
   if (eindStijl === 'circle') {
