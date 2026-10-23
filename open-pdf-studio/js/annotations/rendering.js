@@ -1204,6 +1204,20 @@ export function drawAnnotation(ctx, annotation, snippetBitmaps = null) {
         if (hasFill(annotation.fillColor)) {
           ctx.fillStyle = '#000000';
           ctx.fill();
+          // De staarten werpen ook een schaduw; het vak komt er daarna overheen.
+          for (const leader of (annotation.leaders || [])) {
+            if (leader.endStyle !== 'tail') continue;
+            const v = staartVoet(
+              { x: annotation.x, y: annotation.y, width: tbBw, height: tbBh },
+              vormVan(annotation), { x: leader.tipX, y: leader.tipY });
+            if (!v) continue;
+            ctx.beginPath();
+            ctx.moveTo(v.p1.x + tbSchaduw, v.p1.y + tbSchaduw);
+            ctx.lineTo(leader.tipX + tbSchaduw, leader.tipY + tbSchaduw);
+            ctx.lineTo(v.p2.x + tbSchaduw, v.p2.y + tbSchaduw);
+            ctx.closePath();
+            ctx.fill();
+          }
         } else if (tbLineWidth > 0 && annHasStroke) {
           ctx.strokeStyle = '#000000';
           ctx.lineWidth = tbLineWidth;

@@ -3150,6 +3150,18 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
               const P = (pt) => `${convertX(pt.x)} ${convertY(pt.y)}`;
               const tip = { x: leader.tipX, y: leader.tipY };
               let staartInhoud = '';
+              // Schaduw van de staart: buiten het vak (even-odd knip), met de alfa van /GSf.
+              const staartSchaduw = schaduwAfstand(ann);
+              if (staartSchaduw > 0 && hasFill(ann.fillColor)) {
+                const grens = [Math.min(...ldrRect.filter((_, i) => i % 2 === 0)) - staartSchaduw - 2,
+                  Math.min(...ldrRect.filter((_, i) => i % 2 === 1)) - staartSchaduw - 2,
+                  Math.max(...ldrRect.filter((_, i) => i % 2 === 0)) + staartSchaduw + 2,
+                  Math.max(...ldrRect.filter((_, i) => i % 2 === 1)) + staartSchaduw + 2];
+                const lichaamPad = vakPadPdf(convertX(ann.x), convertY(ann.y + _bh - staartSchaduw), _bw - staartSchaduw, _bh - staartSchaduw, vormVan(ann));
+                const sp = (pt) => `${convertX(pt.x + staartSchaduw)} ${convertY(pt.y + staartSchaduw)}`;
+                staartInhoud += `q\n${grens[0]} ${grens[1]} ${grens[2] - grens[0]} ${grens[3] - grens[1]} re\n${lichaamPad}\nW* n\n/GSf gs\n0 g\n`
+                  + `${sp(staartVoetPunten.p1)} m ${sp(tip)} l ${sp(staartVoetPunten.p2)} l h f\nQ\n`;
+              }
               if (hasFill(ann.fillColor)) {
                 const [fr2, fg2, fb2] = rgbR(ann.fillColor);
                 staartInhoud += `${fr2} ${fg2} ${fb2} rg\n${P(staartVoetPunten.p1)} m ${P(tip)} l ${P(staartVoetPunten.p2)} l h f\n`;
@@ -3159,7 +3171,7 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
                 const [fr2, fg2, fb2] = rgbR(ann.fillColor);
                 staartInhoud += `${fr2} ${fg2} ${fb2} RG\n${_lwLdr + 1} w\n${P(staartVoetPunten.p1)} m ${P(staartVoetPunten.p2)} l S\n`;
               }
-              attachVectorAP(context, ldrDict, { content: staartInhoud, needsFont: false }, ldrRect);
+              attachVectorAP(context, ldrDict, { content: staartInhoud, needsFont: false, ...(staartSchaduw > 0 && hasFill(ann.fillColor) ? { fillAlpha: 0.3 } : {}) }, ldrRect);
             } else attachVectorAP(context, ldrDict, buildLeiderAP({
               points: [aBest, { x: leader.kneeX, y: leader.kneeY }, { x: leader.tipX, y: leader.tipY }],
               X: convertX, Y: convertY,
