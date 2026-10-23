@@ -1,5 +1,5 @@
 import { createSignal, batch } from 'solid-js';
-import { standaardStaart } from '../../annotations/rendering/staart-leider.js';
+import { standaardLeider, leiderEigenschappen, leiderStijlVan } from '../../annotations/rendering/leider-stijl.js';
 import { DRAFTING_RULE_TYPES, effectiveDraftingLineWidth } from '../../annotations/drafting-rules.js';
 import { createStore } from 'solid-js/store';
 import { state, getActiveDocument } from '../../core/state.js';
@@ -115,7 +115,7 @@ const [annotProps, setAnnotProps] = createStore({
   borderStyle: 'solid',
   boxShape: 'rect',
   shadow: 'no',
-  leaderTail: 'no',
+  leaderLook: 'arrow',
   cross: false,
   text: '',
   fontSize: 16,
@@ -432,7 +432,7 @@ export function storeShowProperties(annotation) {
     borderStyle: annotation.borderStyle || 'solid',
     boxShape: annotation.boxShape || 'rect',
     shadow: annotation.shadow === true ? 'yes' : 'no',
-    leaderTail: annotation.leaderTail === true ? 'yes' : 'no',
+    leaderLook: leiderStijlVan(annotation),
     cross: annotation.cross === true,
     hatchPattern: annotation.hatchPattern || (annotation.type === 'measureArea' ? 'diagonal-left' : 'none'),
     hatchColor: annotation.hatchColor || (annotation.type === 'measureArea' ? '#ff0000' : (annotation.strokeColor || annotation.color || '#000000')),
@@ -762,7 +762,7 @@ export function storeShowMultiSelection(selected) {
     borderStyle: sharedBorderStyle,
     boxShape: sharedValue(selected, a => a.boxShape || 'rect', 'mixed'),
     shadow: sharedValue(selected, a => (a.shadow === true ? 'yes' : 'no'), 'mixed'),
-    leaderTail: sharedValue(selected, a => (a.leaderTail === true ? 'yes' : 'no'), 'mixed'),
+    leaderLook: sharedValue(selected, a => leiderStijlVan(a), 'mixed'),
     cross: sharedValue(selected, a => a.cross === true, 'mixed'),
     hatchPattern: sharedHatchPattern,
     hatchColor: sharedHatchColor,
@@ -1196,12 +1196,12 @@ function applyPropToAnnotation(ann, key, value) {
     case 'borderStyle': ann.borderStyle = value; break;
     case 'boxShape': ann.boxShape = value === 'rect' ? undefined : value; break;
     case 'shadow': ann.shadow = value === 'yes' ? true : undefined; break;
-    case 'leaderTail':
-      ann.leaderTail = value === 'yes' ? true : undefined;
+    case 'leaderLook':
+      ann.leaderLook = value === 'arrow' ? undefined : value;
       if (!Array.isArray(ann.leaders)) ann.leaders = [];
-      for (const l of ann.leaders) l.endStyle = value === 'yes' ? 'tail' : 'arrow';
-      // Zonder aanhaallijn is er niets te zien: meteen een eerste staart.
-      if (value === 'yes' && ann.leaders.length === 0 && ann.type === 'textbox') ann.leaders.push(standaardStaart(ann));
+      for (const l of ann.leaders) Object.assign(l, leiderEigenschappen(value));
+      // Zonder aanhaallijn is er niets te zien: meteen een eerste lijn.
+      if (value !== 'arrow' && ann.leaders.length === 0 && ann.type === 'textbox') ann.leaders.push(standaardLeider(ann, value));
       break;
     case 'cross': ann.cross = value === true || undefined; break;
     case 'hatchPattern': ann.hatchPattern = value; break;
@@ -1617,12 +1617,12 @@ function applyAnnotProp(key, value) {
     case 'borderStyle': currentAnnotation.borderStyle = value; break;
     case 'boxShape': currentAnnotation.boxShape = value === 'rect' ? undefined : value; break;
     case 'shadow': currentAnnotation.shadow = value === 'yes' ? true : undefined; break;
-    case 'leaderTail':
-      currentAnnotation.leaderTail = value === 'yes' ? true : undefined;
+    case 'leaderLook':
+      currentAnnotation.leaderLook = value === 'arrow' ? undefined : value;
       if (!Array.isArray(currentAnnotation.leaders)) currentAnnotation.leaders = [];
-      for (const l of currentAnnotation.leaders) l.endStyle = value === 'yes' ? 'tail' : 'arrow';
-      if (value === 'yes' && currentAnnotation.leaders.length === 0 && currentAnnotation.type === 'textbox') {
-        currentAnnotation.leaders.push(standaardStaart(currentAnnotation));
+      for (const l of currentAnnotation.leaders) Object.assign(l, leiderEigenschappen(value));
+      if (value !== 'arrow' && currentAnnotation.leaders.length === 0 && currentAnnotation.type === 'textbox') {
+        currentAnnotation.leaders.push(standaardLeider(currentAnnotation, value));
       }
       break;
     case 'cross': currentAnnotation.cross = value === true || undefined; break;

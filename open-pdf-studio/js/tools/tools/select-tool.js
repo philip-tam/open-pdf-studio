@@ -23,6 +23,7 @@ import i18next from '../../i18n/config.js';
 const GEVEL_RAAK_PX = 6;
 import { inSelectieVak } from '../../plattegrond/ruimte-koppeling.js';
 import { verwerkSlotKlik, slotTooltip } from '../../annotations/stramien-slot.js';
+import { leiderEigenschappen, leiderStijlVan } from '../../annotations/rendering/leider-stijl.js';
 import {
   isTextAnchored, correctionKind, expandCorrectionGroups, replaceParentOf,
 } from '../../annotations/corrections/model.js';
@@ -132,7 +133,7 @@ export const selectTool = {
           const kneeX = selAnn.x + bw + 40;
           const kneeY = selAnn.y + bh / 2;
           if (!Array.isArray(selAnn.leaders)) selAnn.leaders = [];
-          selAnn.leaders.push({ id, tipX, tipY, kneeX, kneeY, endStyle: selAnn.leaderTail === true ? 'tail' : 'arrow' });
+          selAnn.leaders.push({ id, tipX, tipY, kneeX, kneeY, ...leiderEigenschappen(leiderStijlVan(selAnn)) });
           selAnn.modifiedAt = new Date().toISOString();
           recordModify(selAnn.id, before, ctx.cloneAnnotation(selAnn));
           ctx.redraw();

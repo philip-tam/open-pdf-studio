@@ -150,8 +150,11 @@
     "shadowNone": "None",
     "shadowOn": "Drop shadow",
     "leaderTail": "Leader style",
-    "leaderLine": "Line with arrow",
-    "leaderBubbleTail": "Bubble tail"
+    "leaderLine": "Solid line",
+    "leaderArrow": "Line with arrow",
+    "leaderLineDot": "Solid line with dot",
+    "leaderDotted": "Dotted line",
+    "leaderDottedDot": "Dotted line with dot"
   },
   "stylePresets": {
     "label": "Štýl čiary",

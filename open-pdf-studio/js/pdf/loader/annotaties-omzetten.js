@@ -1,3 +1,4 @@
+import { stijlVanLeider } from '../../annotations/rendering/leider-stijl.js';
 // De pdf.js-annotaties van één pagina omzetten naar het model, inclusief de
 // koppelingen tussen annotaties onderling.
 //
@@ -73,7 +74,7 @@ export async function zetPaginaAnnotatiesOm(annots, pageNum, viewport, stampImag
     if (parent) {
       if (!Array.isArray(parent.leaders)) parent.leaders = [];
       parent.leaders.push(pl.leader);
-      if (pl.leader.endStyle === 'tail') parent.leaderTail = true;
+      parent.leaderLook = stijlVanLeider(parent.leaders[0]);
     }
   }
   for (const tb of textboxByRect.values()) delete tb._pdfRectKey;

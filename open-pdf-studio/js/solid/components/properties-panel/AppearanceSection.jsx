@@ -224,14 +224,17 @@ export default function AppearanceSection() {
         <Show when={sectionVis.boxShapeGroup}>
           <div class="property-group">
             <label>{t('appearance.leaderTail')}</label>
-            <select value={annotProps.leaderTail} disabled={isLocked()}
+            <select value={annotProps.leaderLook} disabled={isLocked()}
               onDblClick={cycleSelectNext}
-              onChange={(e) => updateAnnotProp('leaderTail', e.target.value)}>
-              <Show when={annotProps.leaderTail === 'mixed'}>
+              onChange={(e) => updateAnnotProp('leaderLook', e.target.value)}>
+              <Show when={annotProps.leaderLook === 'mixed'}>
                 <option value="mixed" disabled hidden>{tCommon('mixed')}</option>
               </Show>
-              <option value="no">{t('appearance.leaderLine')}</option>
-              <option value="yes">{t('appearance.leaderBubbleTail')}</option>
+              <option value="arrow">{t('appearance.leaderArrow')}</option>
+              <option value="line">{t('appearance.leaderLine')}</option>
+              <option value="lineDot">{t('appearance.leaderLineDot')}</option>
+              <option value="dotted">{t('appearance.leaderDotted')}</option>
+              <option value="dottedDot">{t('appearance.leaderDottedDot')}</option>
             </select>
           </div>
         </Show>

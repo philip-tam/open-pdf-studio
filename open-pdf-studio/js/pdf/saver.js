@@ -51,7 +51,6 @@ import { slaPaginaLabelsOp } from './pagina-labels.js';
 import { pasBijlagenToe } from './bijlagen.js';
 import { schrijfAnnotatieLagen, ocVoorAnnotatie } from './saver/annotatie-lagen.js';
 import { layersForSave, currentLayerId } from '../annotations/annotatie-lagen.js';
-import { staartVoet, staartOmhullende } from '../annotations/rendering/staart-leider.js';
 import { vormVan, vakPadPdf, vormZones, schaduwAfstand } from '../annotations/rendering/textbox-vorm.js';
 import { kaderDikte, kaderKleur, kaderRechthoek } from '../annotations/rendering/afbeelding-kader.js';
 import { heeftNietWinAnsi, pdfTextString, toWinAnsiText, winAnsiLiteral, asciiPdfName } from './saver/pdf-text.js';
@@ -3125,26 +3124,16 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
               const d = (c.x - leader.kneeX) * (c.x - leader.kneeX) + (c.y - leader.kneeY) * (c.y - leader.kneeY);
               if (d < bestD) { bestD = d; aBest = c; }
             }
-            const staartVoetPunten = leader.endStyle === 'tail'
-              ? staartVoet({ x: ann.x, y: ann.y, width: _bw - schaduwAfstand(ann), height: _bh - schaduwAfstand(ann) }, vormVan(ann), { x: leader.tipX, y: leader.tipY })
-              : null;
-            // Een staart hangt op de rand die naar de punt wijst, niet aan het midden van een zijde.
-            if (staartVoetPunten) aBest = staartVoetPunten.basis;
             const aPdf = [convertX(aBest.x), convertY(aBest.y)];
             const kPdf = [convertX(leader.kneeX), convertY(leader.kneeY)];
             const tPdf = [convertX(leader.tipX), convertY(leader.tipY)];
             const verts = [aPdf[0], aPdf[1], kPdf[0], kPdf[1], tPdf[0], tPdf[1]];
-            const eindStijl = leader.endStyle === 'circle' ? 'circle' : 'arrow';
+            const eindStijl = leader.endStyle === 'circle' || leader.endStyle === 'tail' ? 'circle' : leader.endStyle === 'none' ? 'none' : 'arrow';
+            const gestippeld = leader.dotted === true;
             // Met de kop erin: de appearance wordt op de Rect geknipt.
             let ldrRect = leiderOmhullende([aPdf, kPdf, tPdf], _lwLdr, eindStijl);
-            if (staartVoetPunten) {
-              const [sx1, sy1, sx2, sy2] = staartOmhullende(staartVoetPunten, { x: leader.tipX, y: leader.tipY }, _lwLdr);
-              const hoeken = [[convertX(sx1), convertY(sy1)], [convertX(sx2), convertY(sy2)]];
-              ldrRect = [Math.min(hoeken[0][0], hoeken[1][0]), Math.min(hoeken[0][1], hoeken[1][1]),
-                Math.max(hoeken[0][0], hoeken[1][0]), Math.max(hoeken[0][1], hoeken[1][1])];
-            }
             // Het scherm tekent een gevulde (gesloten) pijlkop.
-            const endStyle = eindStijl === 'circle' ? 'Circle' : 'ClosedArrow';
+            const endStyle = eindStijl === 'circle' ? 'Circle' : eindStijl === 'none' ? 'None' : 'ClosedArrow';
             const ldrDict = context.obj({
               Type: 'Annot',
               Subtype: 'PolyLine',
@@ -3158,6 +3147,7 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
               OPS_Subtype: PDFString.of('textboxLeader'),
               OPS_LeaderId: pdfTextString(leader.id || ''),
             });
+            if (gestippeld) ldrDict.set(PDFName.of('OPS_LeaderDotted'), context.obj(true));
             ldrDict.set(PDFName.of('LE'), context.obj([PDFName.of('None'), PDFName.of(endStyle)]));
             // Niet als /IRT: een annotatie die antwoordt op een andere (/IRT) toont Acrobat
             // alleen in de opmerkingenlijst, niet op de pagina, dus de staart ontbrak daar.
@@ -3167,41 +3157,11 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
             ldrDict.set(PDFName.of('BS'), buildBorderStyle(context, _lwLdr, ann.borderStyle));
             // Andere lezers tekenen een /PolyLine niet zelf (#512).
             const ldrStrokeHex = ann.strokeColor && hasStroke(ann.strokeColor) ? ann.strokeColor : (ann.color || '#000000');
-            if (staartVoetPunten) {
-              // Een staart: gevulde driehoek in de kleur van het vak (staart-leider.js).
-              ldrDict.set(PDFName.of('OPS_LeaderTail'), context.obj(true));
-              const rgbR = (hex) => hexToRgb(hex);
-              const [sr2, sg2, sb2] = rgbR(ldrStrokeHex);
-              const P = (pt) => `${convertX(pt.x)} ${convertY(pt.y)}`;
-              const tip = { x: leader.tipX, y: leader.tipY };
-              let staartInhoud = '';
-              // Schaduw van de staart: buiten het vak (even-odd knip), met de alfa van /GSf.
-              const staartSchaduw = schaduwAfstand(ann);
-              if (staartSchaduw > 0 && hasFill(ann.fillColor)) {
-                const grens = [Math.min(...ldrRect.filter((_, i) => i % 2 === 0)) - staartSchaduw - 2,
-                  Math.min(...ldrRect.filter((_, i) => i % 2 === 1)) - staartSchaduw - 2,
-                  Math.max(...ldrRect.filter((_, i) => i % 2 === 0)) + staartSchaduw + 2,
-                  Math.max(...ldrRect.filter((_, i) => i % 2 === 1)) + staartSchaduw + 2];
-                const lichaamPad = vakPadPdf(convertX(ann.x), convertY(ann.y + _bh - staartSchaduw), _bw - staartSchaduw, _bh - staartSchaduw, vormVan(ann));
-                const sp = (pt) => `${convertX(pt.x + staartSchaduw)} ${convertY(pt.y + staartSchaduw)}`;
-                staartInhoud += `q\n${grens[0]} ${grens[1]} ${grens[2] - grens[0]} ${grens[3] - grens[1]} re\n${lichaamPad}\nW* n\n/GSf gs\n0 g\n`
-                  + `${sp(staartVoetPunten.p1)} m ${sp(tip)} l ${sp(staartVoetPunten.p2)} l h f\nQ\n`;
-              }
-              if (hasFill(ann.fillColor)) {
-                const [fr2, fg2, fb2] = rgbR(ann.fillColor);
-                staartInhoud += `${fr2} ${fg2} ${fb2} rg\n${P(staartVoetPunten.p1)} m ${P(tip)} l ${P(staartVoetPunten.p2)} l h f\n`;
-              }
-              staartInhoud += `${sr2} ${sg2} ${sb2} RG\n${_lwLdr} w\n0 J 0 j [] 0 d\n${P(staartVoetPunten.p1)} m ${P(tip)} l ${P(staartVoetPunten.p2)} l S\n`;
-              if (hasFill(ann.fillColor)) {
-                const [fr2, fg2, fb2] = rgbR(ann.fillColor);
-                staartInhoud += `${fr2} ${fg2} ${fb2} RG\n${_lwLdr + 1} w\n${P(staartVoetPunten.p1)} m ${P(staartVoetPunten.p2)} l S\n`;
-              }
-              attachVectorAP(context, ldrDict, { content: staartInhoud, needsFont: false, ...(staartSchaduw > 0 && hasFill(ann.fillColor) ? { fillAlpha: 0.3 } : {}) }, ldrRect);
-            } else attachVectorAP(context, ldrDict, buildLeiderAP({
+            attachVectorAP(context, ldrDict, buildLeiderAP({
               points: [aBest, { x: leader.kneeX, y: leader.kneeY }, { x: leader.tipX, y: leader.tipY }],
               X: convertX, Y: convertY,
               strokeColorHex: ldrStrokeHex,
-              lineWidth: _lwLdr, eindStijl,
+              lineWidth: _lwLdr, eindStijl, dotted: gestippeld,
             }), ldrRect);
             zetDoorzichtigheidInAp(context, ldrDict, ann.opacity !== undefined ? ann.opacity : 1, { alsGroep: true, blendMode: ann.blendMode });
             // Een aanhaallijn hoort bij de laag van haar tekstvak (#468).

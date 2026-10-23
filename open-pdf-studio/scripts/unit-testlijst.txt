@@ -468,7 +468,7 @@ js/annotations/rendering/textbox-vorm.test.mjs
 js/annotations/rendering/textbox-vuitlijning.test.mjs
 
 js/annotations/rendering/afbeelding-kader.test.mjs
-js/annotations/rendering/staart-leider.test.mjs
+js/annotations/rendering/leider-stijl.test.mjs
 js/pdf/render-diagnostics.test.mjs
 js/pdf/unicode-export-contract.test.mjs
 js/pdf/saver/unicode-layout-guard.test.mjs

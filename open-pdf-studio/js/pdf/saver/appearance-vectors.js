@@ -997,21 +997,25 @@ export function buildLineAP({ startX, startY, endX, endY, X, Y, strokeColorHex, 
  * of size 7 or a filled circle of radius 4 centred on the tip.
  * @param {{points: {x:number,y:number}[], eindStijl: 'arrow'|'circle'}} o  points: anchor, knee, tip (app space)
  */
-export function buildLeiderAP({ points, X, Y, strokeColorHex, lineWidth, eindStijl }) {
+export function buildLeiderAP({ points, X, Y, strokeColorHex, lineWidth, eindStijl, dotted = false }) {
   if (!points || points.length < 2) return null;
   const stroke = hexToRgb(strokeColorHex || '#000000');
   const lw = lineWidth ?? 1;
   let s = `${f(stroke[0])} ${f(stroke[1])} ${f(stroke[2])} RG\n${f(lw)} w\n0 J 0 j 10 M\n[] 0 d\n`;
-  s += pathOps(points, X, Y, false) + 'S\n';
+  if (dotted) {
+    // Stippellijn met ronde punten, zoals het scherm (leider-stijl.js: stippelPatroon).
+    s = `${f(stroke[0])} ${f(stroke[1])} ${f(stroke[2])} RG\n${f(lw)} w\n1 J 0 j 10 M\n[0.01 ${f(Math.max(3, lw * 2.6))}] 0 d\n`;
+  }
+  s += pathOps(points, X, Y, false) + 'S\n[] 0 d\n0 J\n';
   const tip = points[points.length - 1];
   const knie = points[points.length - 2];
   if (eindStijl === 'circle') {
-    const r = 4, k = r * _KAPPA;
+    const r = Math.max(3, lw * 1.8), k = r * _KAPPA;
     const p = (dx, dy) => `${f(X(tip.x + dx))} ${f(Y(tip.y + dy))}`;
     s += `${f(stroke[0])} ${f(stroke[1])} ${f(stroke[2])} rg\n`
       + `${p(r, 0)} m ${p(r, k)} ${p(k, r)} ${p(0, r)} c ${p(-k, r)} ${p(-r, k)} ${p(-r, 0)} c `
       + `${p(-r, -k)} ${p(-k, -r)} ${p(0, -r)} c ${p(k, -r)} ${p(r, -k)} ${p(r, 0)} c h\nf\n`;
-  } else {
+  } else if (eindStijl !== 'none') {
     s += lineHeadOps(tip.x, tip.y, Math.atan2(tip.y - knie.y, tip.x - knie.x), 7, 'closed', stroke, stroke, lw, X, Y);
   }
   return { content: s, needsFont: false };
@@ -1022,7 +1026,7 @@ export function leiderOmhullende(pts, lineWidth, eindStijl) {
   const lw = lineWidth ?? 1;
   const [x1, y1, x2, y2] = polylijnOmhullende(pts, lw);
   const [tx, ty] = pts[pts.length - 1];
-  const kop = (eindStijl === 'circle' ? 4 : 7 / Math.cos(Math.PI / 6)) + lw;
+  const kop = (eindStijl === 'circle' ? Math.max(3, lw * 1.8) : eindStijl === 'none' ? 0 : 7 / Math.cos(Math.PI / 6)) + lw;
   return [Math.min(x1, tx - kop), Math.min(y1, ty - kop), Math.max(x2, tx + kop), Math.max(y2, ty + kop)];
 }
 

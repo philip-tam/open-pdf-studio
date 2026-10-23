@@ -15,7 +15,7 @@ import { koppenVan } from '../pdf/lijnkoppen.js';
 import { drawDimension, drawMeasureAreaShape, drawCentroidLabel, drawMeasurePerimeterShape, drawVlakZijdematen } from './rendering/measurements.js';
 import { vlakZijdeTeksten } from './measurement.js';
 import { vormVan, bouwVakPad, schaduwAfstand } from './rendering/textbox-vorm.js';
-import { staartLijst, bouwVakMetStaartenPad } from './rendering/staart-leider.js';
+import { puntStraal, stippelPatroon } from './rendering/leider-stijl.js';
 import { kaderDikte, kaderKleur, kaderRechthoek } from './rendering/afbeelding-kader.js';
 import { maatlijnTekst } from './maat-label.js';
 import { maatlijnVelden } from './maatlijn-geometrie.js';
@@ -308,8 +308,6 @@ export function pickAnchorSide(box, kx, ky) {
 // Draw a single leader on a textbox: anchor (auto-picked) -> knee -> tip,
 // with arrow or circle endpoint.
 function drawTextboxLeader(ctx, annotation, leader, strokeColor, lineWidth) {
-  // Een staart is deel van de omtrek van het vak (zie het tekstvak hierboven).
-  if (leader.endStyle === 'tail') return;
   const tipX = leader.tipX;
   const tipY = leader.tipY;
   const kneeX = leader.kneeX;
@@ -320,20 +318,28 @@ function drawTextboxLeader(ctx, annotation, leader, strokeColor, lineWidth) {
   ctx.strokeStyle = strokeColor;
   ctx.fillStyle = strokeColor;
   ctx.lineWidth = lineWidth;
-  ctx.setLineDash([]);
+  // Een stippellijn: ronde punten (leider-stijl.js); een volle lijn zonder streepjes.
+  if (leader.dotted === true) {
+    ctx.setLineDash(stippelPatroon(lineWidth));
+    ctx.lineCap = 'round';
+  } else {
+    ctx.setLineDash([]);
+  }
   ctx.beginPath();
   ctx.moveTo(anchor.x, anchor.y);
   ctx.lineTo(kneeX, kneeY);
   ctx.lineTo(tipX, tipY);
   ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.lineCap = 'butt';
 
-  const endStyle = leader.endStyle || 'arrow';
+  // Een oude staart (tekstballon) telt als bolletje.
+  const endStyle = leader.endStyle === 'tail' ? 'circle' : (leader.endStyle || 'arrow');
   if (endStyle === 'circle') {
-    const r = 4;
     ctx.beginPath();
-    ctx.arc(tipX, tipY, r, 0, Math.PI * 2);
+    ctx.arc(tipX, tipY, puntStraal(lineWidth), 0, Math.PI * 2);
     ctx.fill();
-  } else {
+  } else if (endStyle === 'arrow') {
     // arrow — filled (closed) by default for textbox leaders
     const angle = Math.atan2(tipY - kneeY, tipX - kneeX);
     drawArrowheadOnCanvas(ctx, tipX, tipY, angle, 7, 'closed');
@@ -1197,14 +1203,10 @@ export function drawAnnotation(ctx, annotation, snippetBitmaps = null) {
       const tbSchaduw = annotation.borderEffect === 'cloudy' ? 0 : schaduwAfstand(annotation);
       const tbBw = tbWidth - tbSchaduw;
       const tbBh = tbHeight - tbSchaduw;
-      // Staarten (leiders in de stijl 'tail') horen bij de omtrek van het vak: één pad.
-      const tbStaarten = annotation.borderEffect === 'cloudy' ? [] : staartLijst(
-        { x: annotation.x, y: annotation.y, width: tbBw, height: tbBh }, vormVan(annotation), annotation.leaders);
       if (tbSchaduw > 0) {
         ctx.save();
         ctx.globalAlpha *= 0.3;
-        if (tbStaarten.length > 0) bouwVakMetStaartenPad(ctx, { x: annotation.x, y: annotation.y, width: tbBw, height: tbBh }, vormVan(annotation), tbStaarten, tbSchaduw, tbSchaduw);
-        else bouwVakPad(ctx, annotation.x + tbSchaduw, annotation.y + tbSchaduw, tbBw, tbBh, vormVan(annotation));
+        bouwVakPad(ctx, annotation.x + tbSchaduw, annotation.y + tbSchaduw, tbBw, tbBh, vormVan(annotation));
         if (hasFill(annotation.fillColor)) {
           ctx.fillStyle = '#000000';
           ctx.fill();
@@ -1219,9 +1221,6 @@ export function drawAnnotation(ctx, annotation, snippetBitmaps = null) {
         ctx.fillStyle = annFill;
         if (annotation.borderEffect === 'cloudy') {
           buildCloudPath(ctx, annotation.x, annotation.y, tbWidth, tbHeight, tbPuff);
-          ctx.fill();
-        } else if (tbStaarten.length > 0) {
-          bouwVakMetStaartenPad(ctx, { x: annotation.x, y: annotation.y, width: tbBw, height: tbBh }, vormVan(annotation), tbStaarten);
           ctx.fill();
         } else if (vormVan(annotation) !== 'rect') {
           bouwVakPad(ctx, annotation.x, annotation.y, tbBw, tbBh, vormVan(annotation));
@@ -1238,10 +1237,6 @@ export function drawAnnotation(ctx, annotation, snippetBitmaps = null) {
         applyBorderStyle(ctx, tbBorderStyle);
         if (annotation.borderEffect === 'cloudy') {
           buildCloudPath(ctx, annotation.x, annotation.y, tbWidth, tbHeight, tbPuff);
-          ctx.stroke();
-        } else if (tbStaarten.length > 0) {
-          bouwVakMetStaartenPad(ctx, { x: annotation.x, y: annotation.y, width: tbBw, height: tbBh }, vormVan(annotation), tbStaarten);
-          ctx.lineJoin = 'round'; // een smalle staart krijgt anders een lange scherpe punt
           ctx.stroke();
         } else if (vormVan(annotation) !== 'rect') {
           bouwVakPad(ctx, annotation.x, annotation.y, tbBw, tbBh, vormVan(annotation));

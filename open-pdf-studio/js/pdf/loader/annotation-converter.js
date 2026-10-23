@@ -676,7 +676,7 @@ async function converteerPdfAnnotatie(annot, pageNum, viewport, stampImageMap, a
             extraColors.irtRectKey) {
           // LE entry: ['/None', '/Circle' or '/OpenArrow' etc.]
           const le = annot.lineEndings || [];
-          const endStyle = extraColors.opsLeaderTail ? 'tail' : (le[1] === 'Circle') ? 'circle' : 'arrow';
+          const endStyle = (le[1] === 'Circle' || extraColors.opsLeaderTail) ? 'circle' : (le[1] === 'None') ? 'none' : 'arrow';
           return {
             __textboxLeader: true,
             page: pageNum,
@@ -688,6 +688,7 @@ async function converteerPdfAnnotatie(annot, pageNum, viewport, stampImageMap, a
               tipX: plPoints[plPoints.length - 1].x,
               tipY: plPoints[plPoints.length - 1].y,
               endStyle,
+              dotted: extraColors.opsLeaderDotted === true,
             },
           };
         }

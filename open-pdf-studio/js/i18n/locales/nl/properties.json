@@ -130,8 +130,11 @@
     "shadowNone": "Geen",
     "shadowOn": "Schaduw rechtsonder",
     "leaderTail": "Aanhaallijn",
-    "leaderLine": "Lijn met pijl",
-    "leaderBubbleTail": "Staart (tekstballon)"
+    "leaderLine": "Lijn",
+    "leaderArrow": "Lijn met pijl",
+    "leaderLineDot": "Lijn met bolletje",
+    "leaderDotted": "Stippellijn",
+    "leaderDottedDot": "Stippellijn met bolletje"
   },
   "stylePresets": {
     "label": "Lijnstijl",

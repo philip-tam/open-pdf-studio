@@ -493,11 +493,13 @@ export async function extractAnnotationColors(pageNum, pdfDoc) {
         if (ls !== undefined) colors.opsLeaderStyle = ls;
       }
 
-      // Een staart (tekstballon) in plaats van een lijn met pijl.
-      const opsStaartRaw = annotDict.get(PDFName.of('OPS_LeaderTail'));
+      const oudeStaartRaw = annotDict.get(PDFName.of('OPS_LeaderTail'));
+      if (oudeStaartRaw) colors.opsLeaderTail = true;
+      // Een stippellijn in plaats van een volle lijn; een oude staart (OPS_LeaderTail) leest als lijn met bolletje.
+      const opsStaartRaw = annotDict.get(PDFName.of('OPS_LeaderDotted'));
       if (opsStaartRaw) {
         const st = context.lookup(opsStaartRaw) || opsStaartRaw;
-        if (st === true || (st && st.value === true)) colors.opsLeaderTail = true;
+        if (st === true || (st && st.value === true)) colors.opsLeaderDotted = true;
       }
 
       // Textbox leaders: /OPS_LeaderId + /IRT (in-reply-to parent textbox Rect)
