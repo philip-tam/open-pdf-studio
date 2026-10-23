@@ -98,6 +98,8 @@ async function extractApAlphas(context, nStream) {
     const modi = new Set();
     const fillAlphaByName = new Map();
     for (const name of used) {
+      // GSsh is de schaduw van een tekstvak (30 %), niet de doorzichtigheid van de vulling.
+      if (name === 'GSsh') continue;
       const gsRefRaw = egs.get(PDFName.of(name));
       if (!gsRefRaw) continue;
       const gs = context.lookup(gsRefRaw) || gsRefRaw;
@@ -1479,7 +1481,11 @@ const result = {};
         const opsSchaduwRaw = annotDict.get(PDFName.of('OPS_Shadow'));
         if (opsSchaduwRaw) {
           const sh = context.lookup(opsSchaduwRaw) || opsSchaduwRaw;
-          if (sh === true || (sh && sh.value === true)) colors.shadow = true;
+          if (sh === true || (sh && sh.value === true)) {
+            colors.shadow = true;
+            // Een eerdere versie las de 30 % van de schaduw als vul-doorzichtigheid en bewaarde die.
+            if (colors.fillOpacity === 0.3) { delete colors.fillOpacity; delete colors.opsFillOpacity; }
+          }
         }
 
         // Verticale uitlijning van de tekst (midden of onder; boven is de standaard).
