@@ -15,7 +15,7 @@ import { koppenVan } from '../pdf/lijnkoppen.js';
 import { drawDimension, drawMeasureAreaShape, drawCentroidLabel, drawMeasurePerimeterShape, drawVlakZijdematen } from './rendering/measurements.js';
 import { vlakZijdeTeksten } from './measurement.js';
 import { vormVan, bouwVakPad, schaduwAfstand } from './rendering/textbox-vorm.js';
-import { staartVoet } from './rendering/staart-leider.js';
+import { staartLijst, bouwVakMetStaartenPad } from './rendering/staart-leider.js';
 import { kaderDikte, kaderKleur, kaderRechthoek } from './rendering/afbeelding-kader.js';
 import { maatlijnTekst } from './maat-label.js';
 import { maatlijnVelden } from './maatlijn-geometrie.js';
@@ -294,52 +294,9 @@ export function pickAnchorSide(box, kx, ky) {
 
 // Draw a single leader on a textbox: anchor (auto-picked) -> knee -> tip,
 // with arrow or circle endpoint.
-// Een aanhaallijn als staart van een tekstballon (staart-leider.js): een
-// driehoek van de rand van het vak naar de punt, gevuld met het vak.
-function drawStaartLeider(ctx, annotation, leader, strokeColor, lineWidth) {
-  // De staart hangt aan het lichaam van het vak: zonder de schaduwstrook rechts en onder.
-  const schaduw = schaduwAfstand(annotation);
-  const voet = staartVoet(
-    { x: annotation.x, y: annotation.y, width: (annotation.width || 150) - schaduw, height: (annotation.height || 50) - schaduw },
-    vormVan(annotation), { x: leader.tipX, y: leader.tipY });
-  if (!voet) return;
-  ctx.save();
-  ctx.setLineDash([]);
-  ctx.lineJoin = 'miter';
-  ctx.lineWidth = lineWidth;
-  const gevuld = hasFill(annotation.fillColor);
-  if (gevuld) {
-    ctx.fillStyle = withFillAlpha(annotation.fillColor, annotation.fillOpacity, annotation.opacity !== undefined ? annotation.opacity : 1) || annotation.fillColor;
-    ctx.beginPath();
-    ctx.moveTo(voet.p1.x, voet.p1.y);
-    ctx.lineTo(leader.tipX, leader.tipY);
-    ctx.lineTo(voet.p2.x, voet.p2.y);
-    ctx.closePath();
-    ctx.fill();
-  }
-  ctx.strokeStyle = strokeColor;
-  ctx.beginPath();
-  ctx.moveTo(voet.p1.x, voet.p1.y);
-  ctx.lineTo(leader.tipX, leader.tipY);
-  ctx.lineTo(voet.p2.x, voet.p2.y);
-  ctx.stroke();
-  if (gevuld) {
-    // De rand van het vak onder de voet verdwijnt: staart en vak vormen één vlak.
-    ctx.strokeStyle = annotation.fillColor;
-    ctx.lineWidth = lineWidth + 1;
-    ctx.beginPath();
-    ctx.moveTo(voet.p1.x, voet.p1.y);
-    ctx.lineTo(voet.p2.x, voet.p2.y);
-    ctx.stroke();
-  }
-  ctx.restore();
-}
-
 function drawTextboxLeader(ctx, annotation, leader, strokeColor, lineWidth) {
-  if (leader.endStyle === 'tail') {
-    drawStaartLeider(ctx, annotation, leader, strokeColor, lineWidth);
-    return;
-  }
+  // Een staart is deel van de omtrek van het vak (zie het tekstvak hierboven).
+  if (leader.endStyle === 'tail') return;
   const tipX = leader.tipX;
   const tipY = leader.tipY;
   const kneeX = leader.kneeX;
@@ -1197,27 +1154,17 @@ export function drawAnnotation(ctx, annotation, snippetBitmaps = null) {
       const tbSchaduw = annotation.borderEffect === 'cloudy' ? 0 : schaduwAfstand(annotation);
       const tbBw = tbWidth - tbSchaduw;
       const tbBh = tbHeight - tbSchaduw;
+      // Staarten (leiders in de stijl 'tail') horen bij de omtrek van het vak: één pad.
+      const tbStaarten = annotation.borderEffect === 'cloudy' ? [] : staartLijst(
+        { x: annotation.x, y: annotation.y, width: tbBw, height: tbBh }, vormVan(annotation), annotation.leaders);
       if (tbSchaduw > 0) {
         ctx.save();
         ctx.globalAlpha *= 0.3;
-        bouwVakPad(ctx, annotation.x + tbSchaduw, annotation.y + tbSchaduw, tbBw, tbBh, vormVan(annotation));
+        if (tbStaarten.length > 0) bouwVakMetStaartenPad(ctx, { x: annotation.x, y: annotation.y, width: tbBw, height: tbBh }, vormVan(annotation), tbStaarten, tbSchaduw, tbSchaduw);
+        else bouwVakPad(ctx, annotation.x + tbSchaduw, annotation.y + tbSchaduw, tbBw, tbBh, vormVan(annotation));
         if (hasFill(annotation.fillColor)) {
           ctx.fillStyle = '#000000';
           ctx.fill();
-          // De staarten werpen ook een schaduw; het vak komt er daarna overheen.
-          for (const leader of (annotation.leaders || [])) {
-            if (leader.endStyle !== 'tail') continue;
-            const v = staartVoet(
-              { x: annotation.x, y: annotation.y, width: tbBw, height: tbBh },
-              vormVan(annotation), { x: leader.tipX, y: leader.tipY });
-            if (!v) continue;
-            ctx.beginPath();
-            ctx.moveTo(v.p1.x + tbSchaduw, v.p1.y + tbSchaduw);
-            ctx.lineTo(leader.tipX + tbSchaduw, leader.tipY + tbSchaduw);
-            ctx.lineTo(v.p2.x + tbSchaduw, v.p2.y + tbSchaduw);
-            ctx.closePath();
-            ctx.fill();
-          }
         } else if (tbLineWidth > 0 && annHasStroke) {
           ctx.strokeStyle = '#000000';
           ctx.lineWidth = tbLineWidth;
@@ -1229,6 +1176,9 @@ export function drawAnnotation(ctx, annotation, snippetBitmaps = null) {
         ctx.fillStyle = annFill;
         if (annotation.borderEffect === 'cloudy') {
           buildCloudPath(ctx, annotation.x, annotation.y, tbWidth, tbHeight, tbPuff);
+          ctx.fill();
+        } else if (tbStaarten.length > 0) {
+          bouwVakMetStaartenPad(ctx, { x: annotation.x, y: annotation.y, width: tbBw, height: tbBh }, vormVan(annotation), tbStaarten);
           ctx.fill();
         } else if (vormVan(annotation) !== 'rect') {
           bouwVakPad(ctx, annotation.x, annotation.y, tbBw, tbBh, vormVan(annotation));
@@ -1245,6 +1195,10 @@ export function drawAnnotation(ctx, annotation, snippetBitmaps = null) {
         applyBorderStyle(ctx, tbBorderStyle);
         if (annotation.borderEffect === 'cloudy') {
           buildCloudPath(ctx, annotation.x, annotation.y, tbWidth, tbHeight, tbPuff);
+          ctx.stroke();
+        } else if (tbStaarten.length > 0) {
+          bouwVakMetStaartenPad(ctx, { x: annotation.x, y: annotation.y, width: tbBw, height: tbBh }, vormVan(annotation), tbStaarten);
+          ctx.lineJoin = 'round'; // een smalle staart krijgt anders een lange scherpe punt
           ctx.stroke();
         } else if (vormVan(annotation) !== 'rect') {
           bouwVakPad(ctx, annotation.x, annotation.y, tbBw, tbBh, vormVan(annotation));
