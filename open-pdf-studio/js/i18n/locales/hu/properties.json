@@ -64,6 +64,7 @@
     "color": "Szín",
     "opacity": "Átlátszatlanság",
     "fillOpacity": "Kitöltés átlátszatlansága",
+    "strokeOpacity": "Körvonal átlátszatlansága",
     "lineWidth": "Vonalvastagság",
     "borderWidth": "Szegély szélesség",
     "borderStyle": "Szegélystílus",
@@ -383,7 +384,9 @@
     "csvLayer": "Réteg",
     "schedules": "Kimutatások",
     "addPage": "Oldal hozzáadása",
-    "pageLabels": "Oldalcímkék (névkészítő)"
+    "pageLabels": "Oldalcímkék (névkészítő)",
+    "portfolio": "PDF-portfólió",
+    "recognizeForm": "Űrlapmezők felismerése"
   },
   "scaleBar": {
     "title": "Aránymérték",
@@ -435,7 +438,8 @@
       "image": "Képek és bélyegzők"
     },
     "preview": "Előnézet",
-    "exportCsv": "CSV exportálása"
+    "exportCsv": "CSV exportálása",
+    "workbookBindings": "Táblázatkötések"
   },
   "wizard": {
     "title": "Kimutatásvarázsló",
@@ -617,7 +621,9 @@
       "symbolId": "Szimbólum",
       "imageName": "Fájlnév",
       "width": "Szélesség",
-      "height": "Magasság"
+      "height": "Magasság",
+      "location": "Hely",
+      "locationSource": "Hely forrása"
     },
     "type": {
       "line": "Vonal",
@@ -663,6 +669,8 @@
     "sectionTitle": "Szimbólum: {{name}}",
     "symbolLabel": "Szimbólum",
     "typeLabel": "Típus",
+    "profileType": "Szelvénytípus",
+    "profileTypeTitle": "Acélszelvény",
     "unknownSymbol": "Ismeretlen szimbólum",
     "listNew": "Új",
     "listAdd": "Hozzáadás",
@@ -716,5 +724,19 @@
   "scopedPanel": {
     "stale": "Ezt az objektumot máshol módosították. Az űrlap az aktuális értékeket mutatja; a módosításai nem lettek alkalmazva.",
     "failed": "A módosítások nem alkalmazhatók: {{error}}"
+  },
+  "location": {
+    "title": "Hely",
+    "none": "Nincs hozzárendelve",
+    "manual": "Kézi",
+    "computed": "Számított",
+    "override": "Kézi felülbírálás (üresen törli a helyet)",
+    "automatic": "Automatikus hely használata",
+    "zoneName": "Alakzat használata elnevezett zónaként",
+    "parent": "Szülőzóna",
+    "removeZone": "Zónadefiníció eltávolítása",
+    "invalid": "A hely nem frissíthető",
+    "rules": "A hozzárendelés a jelölés befoglaló téglalapjának középpontján alapul, a széleket is beleértve. A legmélyebben beágyazott zóna nyer, utána a legkisebb terület, majd a zónaazonosító. Egyenes oldalú, lyuk nélküli sokszögeket vagy elforgatás nélküli téglalapokat használjon. Az érvénytelen vagy ismétlődő zónaazonosítók kimaradnak.",
+    "loading": "Az annotációk betöltése folyamatban: a helyek még változhatnak."
   }
 }

@@ -64,6 +64,7 @@
     "color": "Warna",
     "opacity": "Kelegapan",
     "fillOpacity": "Kelegapan Isian",
+    "strokeOpacity": "Kelegapan Garis",
     "lineWidth": "Lebar Garisan",
     "borderWidth": "Lebar Sempadan",
     "borderStyle": "Gaya Sempadan",
@@ -383,7 +384,9 @@
     "csvLayer": "Lapisan",
     "schedules": "Jadual",
     "addPage": "Tambah halaman",
-    "pageLabels": "Label halaman (pembina nama)"
+    "pageLabels": "Label halaman (pembina nama)",
+    "portfolio": "Portfolio PDF",
+    "recognizeForm": "Kenal pasti medan borang"
   },
   "scaleBar": {
     "title": "Bar Skala",
@@ -435,7 +438,8 @@
       "image": "Imej & setem"
     },
     "preview": "Pratonton",
-    "exportCsv": "Eksport CSV"
+    "exportCsv": "Eksport CSV",
+    "workbookBindings": "Pengikatan hamparan"
   },
   "wizard": {
     "title": "Wizard jadual",
@@ -617,7 +621,9 @@
       "symbolId": "Simbol",
       "imageName": "Nama fail",
       "width": "Lebar",
-      "height": "Tinggi"
+      "height": "Tinggi",
+      "location": "Lokasi",
+      "locationSource": "Sumber lokasi"
     },
     "type": {
       "line": "Garisan",
@@ -663,6 +669,8 @@
     "sectionTitle": "Simbol: {{name}}",
     "symbolLabel": "Simbol",
     "typeLabel": "Jenis",
+    "profileType": "Jenis profil",
+    "profileTypeTitle": "Profil keluli",
     "unknownSymbol": "Simbol tidak diketahui",
     "listNew": "Baharu",
     "listAdd": "Tambah",
@@ -716,5 +724,19 @@
   "scopedPanel": {
     "stale": "Objek ini telah diubah di tempat lain. Borang memaparkan nilai semasa; perubahan anda tidak digunakan.",
     "failed": "Perubahan tidak dapat digunakan: {{error}}"
+  },
+  "location": {
+    "title": "Lokasi",
+    "none": "Belum ditetapkan",
+    "manual": "Secara manual",
+    "computed": "Dikira",
+    "override": "Ganti manual (kosong mengosongkan lokasi)",
+    "automatic": "Gunakan lokasi automatik",
+    "zoneName": "Gunakan bentuk ini sebagai zon bernama",
+    "parent": "Zon induk",
+    "removeZone": "Buang definisi zon",
+    "invalid": "Lokasi tidak dapat dikemas kini",
+    "rules": "Penetapan menggunakan pusat kotak sempadan penanda, termasuk tepi. Zon paling dalam menang, kemudian keluasan terkecil, kemudian ID zon. Gunakan poligon lurus tanpa lubang atau kotak tanpa putaran. Identiti zon yang tidak sah atau pendua dikecualikan.",
+    "loading": "Anotasi sedang dimuatkan: lokasi mungkin masih berubah."
   }
 }

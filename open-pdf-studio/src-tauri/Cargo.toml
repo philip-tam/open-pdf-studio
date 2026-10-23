@@ -1,6 +1,6 @@
 [package]
 name = "open-pdf-studio"
-version = "0.65.0"
+version = "0.66.0"
 description = "A free, open-source PDF annotation editor"
 authors = ["OpenAEC Foundation"]
 license = "LGPL-3.0-or-later"
@@ -163,7 +163,7 @@ rustls-native-certs = "0.8"
 [target.'cfg(target_os = "windows")'.dependencies]
 webview2-com = "0.38.2"
 windows = { version = "0.61.3", features = ["Win32_Foundation", "Win32_System_Com", "Win32_System_Com_StructuredStorage"] }
-windows-sys = { version = "0.59", features = ["Win32_Graphics_Printing", "Win32_Graphics_Gdi", "Win32_Storage_Xps", "Win32_Foundation", "Win32_System_Com", "Win32_UI_Shell", "Win32_UI_Input_KeyboardAndMouse", "Win32_UI_WindowsAndMessaging", "Win32_Security", "Win32_Security_Cryptography", "Win32_System_Registry", "Win32_System_Threading"] }
+windows-sys ={ version = "0.59", features = ["Win32_Graphics_Printing", "Win32_Graphics_Gdi", "Win32_Storage_Xps", "Win32_Foundation", "Win32_System_Com", "Win32_UI_Shell", "Win32_UI_Input_KeyboardAndMouse", "Win32_UI_WindowsAndMessaging", "Win32_Security", "Win32_Security_Cryptography", "Win32_System_Registry", "Win32_System_Threading"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 # Pinned to the exact versions wry/tao already resolve transitively (see

@@ -1,3 +1,5 @@
+import { withUnicodeLayoutGuard } from './unicode-layout-guard.js';
+import {removeOwnedOcrLayer,writeOcrReview,validOcrWords} from '../ocr-review.js';
 // Writes OCR'd words into a page's content stream as an INVISIBLE text
 // layer (PDF text-rendering-mode 3 — "add to path for clipping" is also
 // disabled, i.e. never painted) positioned over the scanned-image page, so
@@ -12,13 +14,14 @@
 // glyph coverage. Glyph shapes are irrelevant here (the text is invisible),
 // only the font's Unicode coverage/encoding matters for correct copy/search.
 import {
-  PDFOperator, PDFOperatorNames, PDFNumber,
+  PDFOperator, PDFOperatorNames, PDFNumber, PDFContentStream, PDFBool,
   pushGraphicsState, popGraphicsState, beginText, endText,
   setFontAndSize, setTextMatrix, showText,
 } from 'pdf-lib';
 import { metCffHerstel } from './cff-subset-herstel.js';
 
 const INVISIBLE_RENDER_MODE = 3;
+const characterSets = new WeakMap();
 
 function setTextRenderingMode(mode) {
   return PDFOperator.of(PDFOperatorNames.SetTextRenderingMode, [PDFNumber.of(mode)]);
@@ -86,11 +89,16 @@ export function laadFontkit() {
  * (ocr.js does it via resourceDir()/fs.readFile(); a test script can just
  * pass fs.readFileSync(...) bytes directly).
  */
-export async function embedOcrFont(pdfDocLib, fontBytes) {
+export async function embedOcrFont(pdfDocLib, fontBytes, { unicodeGuard = false } = {}) {
   // fontkit hoort bij het PDFDocument, niet bij de module: registreer hem bij
   // elk document. Alleen het laden van de module wordt gedeeld; anders mislukt
   // elke volgende opslag in dezelfde sessie met "no fontkit instance was found".
-  pdfDocLib.registerFontkit(await laadFontkit());
+  // De Unicode-bewaking (#678) alleen op verzoek: de OCR-laag slaat zo een
+  // woord over dat het font niet terug naar Unicode kan brengen. Zichtbare
+  // tekst (CJK-tekstvakken, MCP-tekst) houdt zijn lege vakjes voor tekens die
+  // geen font heeft; een fout daar zou de hele opslag laten mislukken.
+  const fontkit = await laadFontkit();
+  pdfDocLib.registerFontkit(unicodeGuard ? withUnicodeLayoutGuard(fontkit) : fontkit);
   return pdfDocLib.embedFont(fontBytes, { subset: true });
 }
 
@@ -113,7 +121,10 @@ export async function embedOcrFont(pdfDocLib, fontBytes) {
  * space render_page_to_rgba/app annotation coordinates already use).
  */
 export function writeOcrTextLayer(page, words, font) {
-  if (!words || words.length === 0) return;
+  if (!words) return;
+  words = validOcrWords(words);
+  // Build the replacement before unlinking the old owned layer.
+
 
   const cropBox = page.getCropBox();
   const viewLeft = cropBox.x;
@@ -128,6 +139,10 @@ export function writeOcrTextLayer(page, words, font) {
   for (const word of words) {
     const text = (word.text || '').trim();
     if (!text) continue;
+    if (word.review && typeof font.getCharacterSet === 'function') {
+      if (!characterSets.has(font)) characterSets.set(font, new Set(font.getCharacterSet()));
+      if ([...text].some(ch => !characterSets.get(font).has(ch.codePointAt(0)))) throw new Error('OCR_REVIEW_TEXT_NOT_ENCODABLE');
+    }
 
     // Font size ~= the OCR box height so the invisible selection rectangle
     // a PDF viewer draws roughly matches the word's real footprint.
@@ -136,9 +151,15 @@ export function writeOcrTextLayer(page, words, font) {
     try {
       naturalWidth = font.widthOfTextAtSize(text, fontSize);
     } catch {
-      continue; // font can't encode this text (e.g. a stray glyph) — skip the word, keep the rest
+      // Het font kan dit woord niet (terug)coderen, bv. een teken zonder glyph
+      // of een gevormde glyph zonder Unicode (UnicodeLayoutError). Een
+      // nagekeken woord mag niet stil verdwijnen; een ongecontroleerd woord
+      // slaan we over en de rest van de laag blijft, in plaats van de opslag
+      // te laten mislukken.
+      if (word.review) throw new Error('OCR_REVIEW_TEXT_NOT_ENCODABLE');
+      continue;
     }
-    if (!(naturalWidth > 0)) continue;
+    if (!(naturalWidth > 0)) { if (word.review) throw new Error('OCR_REVIEW_TEXT_NOT_ENCODABLE'); continue; }
 
     // Stretch/compress horizontally so the glyphs' total advance matches the
     // OCR-measured word width exactly, regardless of how the CJK font's
@@ -152,6 +173,7 @@ export function writeOcrTextLayer(page, words, font) {
     try {
       hexText = font.encodeText(text);
     } catch {
+      if (word.review) throw new Error('OCR_REVIEW_TEXT_NOT_ENCODABLE');
       continue;
     }
 
@@ -166,5 +188,9 @@ export function writeOcrTextLayer(page, words, font) {
   }
 
   ops.push(popGraphicsState());
-  page.pushOperators(...ops);
+  const stream = PDFContentStream.of(page.doc.context.obj({OPS_OCRLayer: PDFBool.True}), ops);
+  const ref = page.doc.context.register(stream);
+  removeOwnedOcrLayer(page);
+  page.node.addContentStream(ref);
+  writeOcrReview(page, words);
 }

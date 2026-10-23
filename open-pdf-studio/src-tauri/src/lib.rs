@@ -1,7 +1,7 @@
 // The MCP `tools/list` descriptor table in mcp_server.rs is one large
 // `serde_json::json!` literal; its recursive macro expansion exceeds the
-// default limit of 128 once the tool count grew past ~30.
-#![recursion_limit = "256"]
+// default limit of 128. The 89-tool public catalog requires a limit of 512.
+#![recursion_limit = "512"]
 
 mod accounts;
 mod pdf_beveiliging;
@@ -12,6 +12,7 @@ pub mod cad_import;
 pub mod crashlog;
 pub mod datamap;
 mod email;
+pub mod export_policy;
 pub mod extensie_installatie;
 pub mod linux_runtime;
 pub mod logboek;
@@ -28,6 +29,7 @@ pub mod pdfx_cmyk;
 pub mod handtekening;
 pub mod headless;
 pub mod herstel;
+pub mod laagweergave;
 pub mod instantie;
 pub mod print_formulieren;
 pub mod print_instelling;
@@ -273,6 +275,50 @@ async fn write_file_atomic(request: tauri::ipc::Request<'_>) -> Result<(), Strin
     };
     tauri::async_runtime::spawn_blocking(move || {
         atomic_file::write(std::path::Path::new(&path), &bytes).map_err(|e| e.to_string())
+    }).await.map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+async fn write_file_new(request: tauri::ipc::Request<'_>) -> Result<(), String> {
+    let header = request.headers().get("x-opds-path")
+        .ok_or("Missing destination path")?.to_str().map_err(|e| e.to_string())?;
+    let path = urlencoding::decode(header).map_err(|e| e.to_string())?.into_owned();
+    let bytes = match request.body() {
+        tauri::ipc::InvokeBody::Raw(bytes) => bytes.clone(),
+        // Android cannot transport a raw IPC body.
+        tauri::ipc::InvokeBody::Json(value) => {
+            serde_json::from_value::<Vec<u8>>(value.get("data").cloned().ok_or("Missing file data")?)
+                .map_err(|e| e.to_string())?
+        }
+    };
+    tauri::async_runtime::spawn_blocking(move || {
+        atomic_file::write_new(std::path::Path::new(&path), &bytes).map_err(|e| e.to_string())
+    }).await.map_err(|e| e.to_string())?
+}
+
+// A component extracted from a PDF collection: untrusted bytes. Never replaces
+// a file, refuses autostart folders (and, with x-opds-restrict, programs and
+// scripts) and marks the result as downloaded content on Windows.
+#[tauri::command]
+async fn write_downloaded_file_new(request: tauri::ipc::Request<'_>) -> Result<(), String> {
+    let header = request.headers().get("x-opds-path")
+        .ok_or("Missing destination path")?.to_str().map_err(|e| e.to_string())?;
+    let path = urlencoding::decode(header).map_err(|e| e.to_string())?.into_owned();
+    let restrict = request.headers().get("x-opds-restrict").map_or(true, |v| v.as_bytes() != b"0");
+    if let Some(code) = export_policy::problem(&path, restrict) {
+        return Err(code.to_string());
+    }
+    let bytes = match request.body() {
+        tauri::ipc::InvokeBody::Raw(bytes) => bytes.clone(),
+        tauri::ipc::InvokeBody::Json(value) => {
+            serde_json::from_value::<Vec<u8>>(value.get("data").cloned().ok_or("Missing file data")?)
+                .map_err(|e| e.to_string())?
+        }
+    };
+    tauri::async_runtime::spawn_blocking(move || {
+        let target = std::path::Path::new(&path);
+        atomic_file::write_new(target, &bytes).map_err(|e| e.to_string())?;
+        export_policy::mark_of_the_web(target).map_err(|e| e.to_string())
     }).await.map_err(|e| e.to_string())?
 }
 
@@ -1630,6 +1676,36 @@ fn list_pdf_files(dir: String) -> Result<Vec<String>, String> {
     Ok(pdf_files)
 }
 
+/// PDF files directly in `dir` with size and modification time, so a folder
+/// watch can skip unchanged files without reading them.
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct PdfFileStat {
+    path: String,
+    size: u64,
+    mtime_ms: f64,
+}
+
+#[tauri::command]
+fn list_pdf_file_stats(dir: String) -> Result<Vec<PdfFileStat>, String> {
+    let entries = fs::read_dir(&dir).map_err(|e| format!("Failed to read directory: {}", e))?;
+    let mut files: Vec<PdfFileStat> = Vec::new();
+    for entry in entries.flatten() {
+        let path = entry.path();
+        let is_pdf = path.extension().map_or(false, |e| e.to_string_lossy().eq_ignore_ascii_case("pdf"));
+        let Ok(meta) = fs::metadata(&path) else { continue };
+        if !is_pdf || !meta.is_file() {
+            continue;
+        }
+        let mtime_ms = meta.modified().ok()
+            .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+            .map_or(0.0, |d| d.as_secs_f64() * 1000.0);
+        files.push(PdfFileStat { path: path.to_string_lossy().to_string(), size: meta.len(), mtime_ms });
+    }
+    files.sort_by(|a, b| a.path.cmp(&b.path));
+    Ok(files)
+}
+
 #[tauri::command]
 fn play_alert_sound() {
     #[cfg(target_os = "windows")]
@@ -1883,6 +1959,8 @@ fn render_pdf_page_skia(
     bytes_cache: tauri::State<PdfBytesCache>,
     handle_cache: tauri::State<DocHandleCache>,
 ) -> Result<tauri::ipc::Response, String> {
+    // Geschakelde lagen (#684): teken uit de weergavekopie.
+    let path = laagweergave::tekenpad(&path);
     let extra_rot = rotation.unwrap_or(0);
     let doc = get_or_load_doc(&path, &bytes_cache, &handle_cache)?;
     let rendered = doc.render_page(page_index as usize, scale, extra_rot)
@@ -1961,6 +2039,8 @@ async fn render_pdf_page(
     pixmap_cache: tauri::State<'_, pdfium_renderer::PixmapCacheState>,
     pool: tauri::State<'_, std::sync::Arc<tokio::sync::OnceCell<worker_pool::WorkerPool>>>,
 ) -> Result<tauri::ipc::Response, String> {
+    // Geschakelde lagen (#684): teken uit de weergavekopie.
+    let path = laagweergave::tekenpad(&path);
     let extra_rot = rotation.unwrap_or(0);
     let thin_lines = thin_lines.unwrap_or(false);
     let cache_key = pdfium_renderer::pixmap_key(&path, page_index, scale, extra_rot, thin_lines);
@@ -2037,6 +2117,7 @@ async fn render_pdf_page(
         scale,
         extra_rot,
         thin_lines,
+        pdfium_renderer::INPROC_SCREEN_RGBA_BYTES,
     )?;
 
     let rgba_arc = std::sync::Arc::new(rgba);
@@ -2131,6 +2212,8 @@ async fn render_pdf_page_region(
     pdfium_cache: tauri::State<'_, pdfium_renderer::PdfiumDocCache>,
     pool: tauri::State<'_, std::sync::Arc<tokio::sync::OnceCell<worker_pool::WorkerPool>>>,
 ) -> Result<tauri::ipc::Response, String> {
+    // Geschakelde lagen (#684): teken uit de weergavekopie.
+    let path = laagweergave::tekenpad(&path);
     let extra_rot = rotation.unwrap_or(0);
     let thin_lines = thin_lines.unwrap_or(false);
 
@@ -2223,6 +2306,8 @@ async fn render_tile_scene_region(
     handle_cache: tauri::State<'_, DocHandleCache>,
     scene_cache: tauri::State<'_, TileSceneCache>,
 ) -> Result<tauri::ipc::Response, String> {
+    // Geschakelde lagen (#684): teken uit de weergavekopie.
+    let path = laagweergave::tekenpad(&path);
     let extra_rot = rotation.unwrap_or(0);
     let thin_lines = thin_lines.unwrap_or(false);
     let meta = std::fs::metadata(&path).map_err(|e| format!("stat: {}", e))?;
@@ -2374,6 +2459,8 @@ fn render_thumbnail(
     pdfium_cache: tauri::State<pdfium_renderer::PdfiumDocCache>,
     thumb_cache: tauri::State<ThumbnailCache>,
 ) -> Result<String, String> {
+    // Geschakelde lagen (#684): teken uit de weergavekopie.
+    let path = laagweergave::tekenpad(&path);
     let extra_rot = rotation.unwrap_or(0);
     // skip_images: PDFium renders form-data on by default but doesn't
     // expose a "drop image XObjects" knob — accept the option for API
@@ -2502,6 +2589,8 @@ fn extract_draw_commands(
     bytes_cache: tauri::State<PdfBytesCache>,
     handle_cache: tauri::State<DocHandleCache>,
 ) -> Result<Vec<u8>, String> {
+    // Geschakelde lagen (#684): teken uit de weergavekopie.
+    let path = laagweergave::tekenpad(&path);
     let doc = get_or_load_doc(&path, &bytes_cache, &handle_cache)?;
     let extra_rot = rotation.unwrap_or(0);
     let cmds = doc.extract_draw_commands(page_index as usize, extra_rot).map_err(|e| format!("{}", e))?;
@@ -2534,6 +2623,8 @@ fn extract_draw_commands_batch(
     bytes_cache: tauri::State<PdfBytesCache>,
     handle_cache: tauri::State<DocHandleCache>,
 ) -> Result<Vec<Vec<u8>>, String> {
+    // Geschakelde lagen (#684): teken uit de weergavekopie.
+    let path = laagweergave::tekenpad(&path);
     let doc = get_or_load_doc(&path, &bytes_cache, &handle_cache)?;
     let rots = rotations.unwrap_or_default();
     let pairs: Vec<(usize, i32)> = page_indices.iter().enumerate().map(|(i, &p)| {
@@ -2568,6 +2659,14 @@ fn invalidate_pdf_cache(
     Ok(true)
 }
 
+/// Lagen schakelen (#684): meldt de weergavekopie van een document aan
+/// (`view`) of af (`None`). Vanaf nu tekenen de render-opdrachten voor `path`
+/// uit die kopie. Geeft de vorige kopie terug.
+#[tauri::command]
+fn set_layer_view(path: String, view: Option<String>) -> Option<String> {
+    laagweergave::zet(&path, view)
+}
+
 /// Alles loslaten wat het proces voor een gesloten document vasthoudt: ruwe
 /// bytes, geparsede handles (lopdf én PDFium), thumbnails, paginatypen en
 /// pixmaps. Alleen aanroepen als geen ander open tabblad hetzelfde pad
@@ -2583,6 +2682,7 @@ fn release_pdf_document(
     pdfium_cache: tauri::State<pdfium_renderer::PdfiumDocCache>,
     pixmap_cache: tauri::State<pdfium_renderer::PixmapCacheState>,
 ) -> Result<bool, String> {
+    laagweergave::vergeet(&path);
     bytes_cache.0.lock().map_err(|e| format!("Bytes cache lock: {}", e))?.remove(&path);
     handle_cache.0.lock().map_err(|e| format!("Handle cache lock: {}", e))?.remove(&path);
     if let Ok(mut tc) = thumb_cache.0.lock() {
@@ -3138,6 +3238,8 @@ pub fn run(opts: StartupOpts) {
             read_file,
             write_file,
             write_file_atomic,
+            write_file_new,
+            write_downloaded_file_new,
             file_exists,
             open_url,
             is_dev_mode,
@@ -3173,6 +3275,7 @@ pub fn run(opts: StartupOpts) {
             remove_pdf_restrictions,
             pdf_beveiliging::protect_pdf_file,
             list_pdf_files,
+            list_pdf_file_stats,
             save_preferences,
             load_preferences,
             save_catalog,
@@ -3201,6 +3304,7 @@ pub fn run(opts: StartupOpts) {
             handtekening::verifieer::pdf_signature_list,
             handtekening::verifieer::pdf_signed_revision,
             release_pdf_document,
+            set_layer_view,
             clear_pdf_cache,
             analyze_page_type,
             analyze_page_type_batch,

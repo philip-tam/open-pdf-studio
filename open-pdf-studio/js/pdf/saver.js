@@ -31,13 +31,15 @@ import { metOpslagSlot } from '../plugins/opslag-wissel-slot.js';
 import { createPluginPdfAnnotation, renderPluginAnnotationPng, readPluginPdfAnnotation } from '../plugins/plugin-pdf.js';
 import i18next from '../i18n/config.js';
 import { showMessage } from '../bridge.js';
-import { opslaanGeweigerd } from './wachtwoord-pdf.js';
+import { opslaanGeweigerd, isHostAlleenLezen } from './wachtwoord-pdf.js';
 import { meldOpgeslagen } from '../herstel/haken.js';
+import { opslaanVraagtOpslaanAls } from './handtekeningen/opslaan.js';
 
 // Sub-modules
 import { hexToRgb, buildBorderStyle, computeAnnotFlags, mapFontToPdfName,
   ensureAcroFormFonts, stripPdfAMetadata, generateAppearanceStream, zetDoorzichtigheidInAp, tekstvakFontDict, boogHoekenNaRotatie,
-  randSleutelZonderRand, markeerZonderRand, onzichtbaarVlak, vlakRect } from './saver/utils.js';
+  randSleutelZonderRand, markeerZonderRand, onzichtbaarVlak, vlakRect, metVulGs } from './saver/utils.js';
+import { eigenVulDekking } from '../annotations/vul-dekking.js';
 import { saveTextEditsToPages } from './saver/text-edits.js';
 import { runsToText, dsMargeUitInzet, verticaleVerschuiving } from '../annotations/rendering/textbox-layout.js';
 import { saveWatermarksToPages } from './saver/watermarks.js';
@@ -252,12 +254,18 @@ export async function savePDF(saveAsPath = null, opties = {}, activeDoc = getAct
   // Met een wachtwoord geopend: alleen-lezen, nooit opslaan (ook niet als
   // kopie), zodat het origineel beveiligd blijft (wachtwoord-pdf.js).
   if (weigerOpslaanBeveiligd(activeDoc)) return false;
+  // Door de gastsite alleen-lezen geopend (#704): niet terugschrijven naar de
+  // site; "Opslaan als" (een download) mag wel, zo gaat er niets verloren.
+  if (!saveAsPath && isHostAlleenLezen(activeDoc)) {
+    showMessage(i18next.t('hostReadOnlySave'));
+    return false;
+  }
   const currentPath = activeDoc?.filePath;
   // Redirect to "Save As" for untitled docs. These now have a temp-file
   // `filePath` (so they render via the real pipeline), so we ALSO check the
   // `isUntitled` flag — otherwise "Save" would silently overwrite the temp
   // file and the user would never be asked where to keep their document.
-  if ((!currentPath || activeDoc?.isUntitled) && !saveAsPath) {
+  if (opslaanVraagtOpslaanAls(activeDoc) && !saveAsPath) {
     return await savePDFAs(activeDoc);
   }
 
@@ -1238,8 +1246,9 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
                 const ongedraaid = grondvorm.map((pt) => naarPagina(pt.x, pt.y));
                 const ops = hatchFillOps({ points: ongedraaid, holes: null, ...polyArcering,
                   hatchColorRgb: hexToRgb(polyArcering.hatchColorHex), X: convertX, Y: convertY });
-                pgContent += polyRotatie
-                  ? `q\n${draaiCm(convertX(polyMidden.x), convertY(polyMidden.y), polyRotatie)}${ops}Q\n` : ops;
+                // Bij een eigen vul-dekking onder /GSv, zoals de vulling (#685).
+                pgContent += metVulGs(ann, polyRotatie
+                  ? `q\n${draaiCm(convertX(polyMidden.x), convertY(polyMidden.y), polyRotatie)}${ops}Q\n` : ops);
               }
               if (pgStroke) {
                 const [psr, psg, psb] = hexToRgb(ann.strokeColor || ann.color || '#000000');
@@ -1278,6 +1287,8 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
                   lineWidth: borderWidth, borderStyle: ann.borderStyle,
                   heeftRand: !randSleutelZonderRand(ann),
                   ...(polyArcering || {}),
+                  // Arcering onder de vul-dekking (#685), zie metVulGs.
+                  arceringOps: (ops) => metVulGs(ann, ops),
                 });
                 // Gedraaid: de ongedraaide wolk met één cm om het midden.
                 if (wolkAp && polyRotatie) {
@@ -3030,7 +3041,11 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
         if (annotDict && typeof annotDict.get === 'function') {
           // Een pijl als geheel, zoals het scherm (overlap van schacht en kop).
           // Met de mengmodus (#614) in dezelfde graphics-state.
-          zetDoorzichtigheidInAp(context, annotDict, opacity, { alsGroep: ann.type === 'arrow', blendMode: ann.blendMode });
+          // Een vorm met aparte dekking voor lijn en vulling (#685) krijgt /ca
+          // op de vul-dekking in dezelfde graphics-state.
+          zetDoorzichtigheidInAp(context, annotDict, opacity, {
+            alsGroep: ann.type === 'arrow', blendMode: ann.blendMode, vulOpacity: eigenVulDekking(ann),
+          });
         }
 
         // Add annotation to page
@@ -3041,6 +3056,12 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
           if (fillOpacity !== undefined && fillOpacity !== null && fillOpacity !== opacity
               && typeof annotDict.set === 'function') {
             annotDict.set(PDFName.of('OPS_FillOpacity'), context.obj(fillOpacity));
+          }
+          // Aparte vul-dekking van een vorm (#685) ook als /ca (PDF 2.0): de
+          // dekking van de vulling als een lezer de appearance zelf opbouwt.
+          const eigenVul = eigenVulDekking(ann);
+          if (eigenVul !== null && typeof annotDict.set === 'function') {
+            annotDict.set(PDFName.of('ca'), context.obj(eigenVul));
           }
           // Vorm zonder rand (#431): geen randkleur, /BS /W 0 en /OPS_NoStroke —
           // ook één plek voor alle soorten. De appearance is hierboven al
@@ -3208,6 +3229,7 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
     // watermerken, bladwijzers, stijlen, paginalabels en bijlagen blijven in
     // het model en gaan pas bij het echte opslaan het bestand in.
     let watermerkUitkomst = null;
+    let ocrWritten = false;
     if (!alleenAnnotaties) {
       // Burn text edits into the PDF (cover-and-replace)
       await saveTextEditsToPages(pdfDocLib, pages, activeDoc);
@@ -3218,8 +3240,9 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
         // geslaagde opslag; de herkende tekst blijft in het document staan.
         let ocrFont = null;
         try {
-          ocrFont = await embedOcrFont(pdfDocLib, await loadDefaultOcrFontBytes());
+          ocrFont = await embedOcrFont(pdfDocLib, await loadDefaultOcrFontBytes(), { unicodeGuard: true });
         } catch (err) {
+          if (Object.values(activeDoc.ocrResults).some(words => words.some(word => word.review))) throw err;
           console.warn(`[save] OCR text layer skipped: font not available (${err?.message || err})`);
         }
         for (const [pageNumStr, words] of Object.entries(ocrFont ? activeDoc.ocrResults : {})) {
@@ -3227,6 +3250,7 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
           const page = pages[pageIndex];
           if (page && words && words.length > 0) {
             writeOcrTextLayer(page, words, ocrFont);
+            ocrWritten = true;
           }
         }
       }
@@ -3374,7 +3398,7 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
     // gebakken text-edit-records zijn daarna overbodig — pixels én tekst
     // zitten in het bestand — en de tekstlaag toont de nieuwe tekst als
     // gewone paginatekst, direct opnieuw bewerkbaar.
-    if (textEditsGebakken && activeDoc) {
+    if ((textEditsGebakken || ocrWritten) && activeDoc) {
       try {
         if (saveAsPath) activeDoc.saveTargetPath = saveAsPath;
         const { reloadFromBytes } = await import('./page-manager.js');
@@ -3394,7 +3418,7 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
         // nieuwe tekst dan nog steeds over de oude render heen, in plaats
         // van dat de bewerking uit beeld verdwijnt terwijl ze wél in het
         // bestand staat. (#345)
-        activeDoc.textEdits = [];
+        if (textEditsGebakken) activeDoc.textEdits = [];
         // reloadFromBytes is voor structurele edits en markeert het document
         // als gewijzigd; deze save heeft alles net weggeschreven.
         markDocumentSaved(activeDoc);

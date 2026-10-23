@@ -52,6 +52,8 @@ import { klemMaat, toonMaat, veiligeVerhouding, RECHTHOEK_VORMEN } from '../../a
 import { nieuweAfbeeldingsMaat } from '../../annotations/papiermaat-eenheid.js';
 import { papierEenheid } from './papierEenheidStore.js';
 import { kanZonderRand } from '../../annotations/fill-utils.js';
+import { heeftVulDekking, zetLijnDekking } from '../../annotations/vul-dekking.js';
+import { isWisselbaarProfiel, profielTypen, wisselProfielType } from '../../symbols/profieltype.js';
 import { schaalgebiedStijl } from '../../annotations/scale-region-style.js';
 import { leesGetalBegin, leesGeheelGetal } from '../../core/getal-invoer.js';
 
@@ -172,6 +174,10 @@ const [annotProps, setAnnotProps] = createStore({
   srLegLength: 24,
   srLabelSide: 'end',
   symbolId: '',
+  // Staalprofiel (#697): het profieltype (sjabloon-id, of 'mixed') en de
+  // typen waar het naartoe kan wisselen ([{ id, name, nameEn }]).
+  profielType: '',
+  profielTypen: [],
   params: {},
   // Gevelelement: het geselecteerde onderdeel (stijl/paneel) of null.
   gevelSub: null,
@@ -208,6 +214,9 @@ const [sectionVis, setSectionVis] = createStore({
   fontSizeGroup: false,
   opacityGroup: true,
   fillOpacityGroup: false,
+  // Aparte dekking voor lijn en vulling (#685): de dekking heet dan
+  // lijndekking en de vul-dekking staat ernaast.
+  aparteDekking: false,
   rotationGroup: false,
 });
 
@@ -308,7 +317,8 @@ function computeSectionVisibility(type) {
     textGroup: isTextContent,
     fontSizeGroup: type === 'text',
     opacityGroup: !isScaleBar,
-    fillOpacityGroup: isScaleRegion,
+    fillOpacityGroup: isScaleRegion || heeftVulDekking(type),
+    aparteDekking: heeftVulDekking(type),
     rotationGroup: hasRotation,
   });
 }
@@ -521,6 +531,8 @@ export function storeShowProperties(annotation) {
     srFontSize: annotation.fontSize ?? STAVENREEKS_DEFAULTS.fontSize,
     srLabelSide: annotation.labelSide || 'end',
     symbolId: annotation.symbolId || '',
+    profielType: isWisselbaarProfiel(annotation) ? annotation.symbolId : '',
+    profielTypen: isWisselbaarProfiel(annotation) ? profielTypen(annotation.symbolId) : [],
     // Een ruimtetag toont naam, nummer en oppervlakte van zijn ruimte.
     params: annotation.params
       ? { ...(tagWeergaveParams(annotation, getActiveDocument()?.annotations) || annotation.params) }
@@ -645,6 +657,7 @@ export function storeHideProperties() {
     fontSizeGroup: false,
     opacityGroup: false,
     fillOpacityGroup: false,
+    aparteDekking: false,
     rotationGroup: false,
   });
 
@@ -656,6 +669,16 @@ export function storeClosePanel() {
   currentAnnotation = null;
   fireSelectionChange(null);
   setPanelVisible(false);
+}
+
+// Staalprofiel (#697) bij een meervoudige selectie: alleen als ALLE
+// geselecteerde profielen uit dezelfde profielgroep komen.
+function _gedeeldProfielType(selected) {
+  if (!selected.length || !selected.every(isWisselbaarProfiel)) return { profielType: '', profielTypen: [] };
+  const typen = profielTypen(selected[0].symbolId);
+  const ids = new Set(typen.map(t => t.id));
+  if (!selected.every(a => ids.has(a.symbolId))) return { profielType: '', profielTypen: [] };
+  return { profielType: sharedValue(selected, a => a.symbolId, 'mixed'), profielTypen: typen };
 }
 
 // Helper: return the shared value if all items agree, otherwise fallback
@@ -772,6 +795,7 @@ export function storeShowMultiSelection(selected) {
     arrowLength: '',
     replies: [],
     multiCount: selected.length,
+    ..._gedeeldProfielType(selected),
   });
 
   // Helper: check if ALL selected annotations satisfy a predicate on their type
@@ -814,7 +838,8 @@ export function storeShowMultiSelection(selected) {
     textGroup: allSameType && (sharedType === 'text' || sharedType === 'comment'),
     fontSizeGroup: allSameType && sharedType === 'text',
     opacityGroup: true,
-    fillOpacityGroup: allMatch(t => t === 'scaleRegion'),
+    fillOpacityGroup: allMatch(t => t === 'scaleRegion') || allMatch(heeftVulDekking),
+    aparteDekking: allMatch(heeftVulDekking),
     rotationGroup: allMatch(t => rotationTypes.has(t)),
   });
 
@@ -916,6 +941,7 @@ export function storeShowTextEditProperties(info) {
     fontSizeGroup: false,
     opacityGroup: false,
     fillOpacityGroup: false,
+    aparteDekking: false,
     rotationGroup: false,
   });
 
@@ -1153,6 +1179,9 @@ function applyPropToAnnotation(ann, key, value) {
       break;
     case 'fillColor': ann.fillColor = value; break;
     case 'fillOpacity': ann.fillOpacity = _vulDoorzichtigheidUitPct(value); break;
+    // Staalprofiel (#697): een ander profieltype; wat geen wisselbaar profiel
+    // is (of een andere groep), blijft ongemoeid.
+    case 'profielType': wisselProfielType(ann, value); break;
     case 'strokeColor': ann.strokeColor = value; break;
     case 'lineWidth':
       zetRanddikte(ann, leesGetalBegin(value));
@@ -1161,7 +1190,8 @@ function applyPropToAnnotation(ann, key, value) {
       // stampSvg meekrijgt.
       if (ann.type === 'stamp') applyStampLineWidth(ann);
       break;
-    case 'opacity': ann.opacity = leesGeheelGetal(value) / 100; break;
+    // Bij een vorm met aparte vul-dekking houdt de vulling haar dekking (#685).
+    case 'opacity': zetLijnDekking(ann, leesGeheelGetal(value) / 100); break;
     case 'icon': ann.icon = value; break;
     case 'borderStyle': ann.borderStyle = value; break;
     case 'boxShape': ann.boxShape = value === 'rect' ? undefined : value; break;
@@ -1419,6 +1449,7 @@ function applyAnnotProp(key, value) {
     // After toggling lock, refresh the panel to update locked state. Bij
     // schaalgebieden volgt de getoonde vulling de kleur/doorzichtigheid (#611).
     if (key === 'locked'
+        || key === 'profielType'
         || (_SCHAALGEBIED_VULSLEUTELS.has(key) && selected.some(a => a.type === 'scaleRegion'))) {
       storeShowMultiSelection(selected);
     }
@@ -1579,7 +1610,8 @@ function applyAnnotProp(key, value) {
       if (currentAnnotation.type === 'stamp') applyStampLineWidth(currentAnnotation);
       break;
     case 'opacity':
-      currentAnnotation.opacity = leesGeheelGetal(value) / 100;
+      // Bij een vorm met aparte vul-dekking houdt de vulling haar dekking (#685).
+      zetLijnDekking(currentAnnotation, leesGeheelGetal(value) / 100);
       break;
     case 'icon': currentAnnotation.icon = value; break;
     case 'borderStyle': currentAnnotation.borderStyle = value; break;
@@ -1832,6 +1864,12 @@ function applyAnnotProp(key, value) {
       recalculateAllMeasurements();
       break;
     }
+    case 'profielType':
+      // Staalprofiel (#697): ander type, dichtstbijzijnde maat, kader op ware
+      // grootte. Eén ongedaan-stap (recordPropertyChange hierboven); het
+      // paneel toont daarna de velden van het nieuwe sjabloon.
+      if (wisselProfielType(currentAnnotation, value)) storeShowProperties(currentAnnotation);
+      break;
     case 'params': {
       // Parametric symbol params (from ParametricSymbolSection). Dynamic-block
       // behaviour: templates with a real-world size (steel profiles) resize

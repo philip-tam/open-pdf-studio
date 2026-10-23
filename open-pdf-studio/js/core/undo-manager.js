@@ -120,8 +120,9 @@ function pagesForCommand(cmd) {
   // Watermark/bookmark commands don't carry a page and don't affect the page
   // thumbnail composite — skip them entirely (empty set = no refresh).
   const skipTypes = new Set([
+    'ocrWord', 'ocrPage',
     'addWatermark', 'removeWatermark', 'modifyWatermark',
-    'addBookmark', 'removeBookmark', 'modifyBookmark',
+    'addBookmark', 'removeBookmark', 'modifyBookmark', 'setBookmarks',
     // pageStructure (insert/delete/reorder pages) shifts page numbers and is
     // handled by restorePageState → clearThumbnailCache + generateThumbnails,
     // which regenerates every thumbnail. A per-page hook here would be wrong.
@@ -446,6 +447,8 @@ function applyUndo(cmd, lookup) {
   if (!lookup) lookup = annotationsById(doc);
 
   switch (cmd.type) {
+    case 'ocrWord': doc.ocrResults[cmd.page][cmd.index] = clonePlainValue(cmd.oldWord); break;
+    case 'ocrPage': doc.ocrResults[cmd.page] = clonePlainValue(cmd.oldWords); break;
     case 'addAnnotation': {
       const idx = doc.annotations.findIndex(a => a.id === cmd.annotation.id);
       if (idx !== -1) doc.annotations.splice(idx, 1);
@@ -624,6 +627,12 @@ function applyUndo(cmd, lookup) {
       if (idx !== -1) Object.assign(doc.bookmarks[idx], cmd.oldState);
       break;
     }
+    case 'setBookmarks': {
+      // Hele bladwijzerlijst terug (stijl, verplaatsen, nesten, meervoudig
+      // verwijderen: één stap). Eén toewijzing: het document kopieert.
+      doc.bookmarks = cmd.oldBookmarks.map(b => ({ ...b }));
+      break;
+    }
   }
 }
 
@@ -634,6 +643,8 @@ function applyRedo(cmd, lookup) {
   if (!lookup) lookup = annotationsById(doc);
 
   switch (cmd.type) {
+    case 'ocrWord': doc.ocrResults[cmd.page][cmd.index] = clonePlainValue(cmd.newWord); break;
+    case 'ocrPage': doc.ocrResults[cmd.page] = clonePlainValue(cmd.newWords); break;
     case 'addAnnotation': {
       doc.annotations.push(cloneAnnotation(cmd.annotation));
       lookup.reset();
@@ -742,6 +753,10 @@ function applyRedo(cmd, lookup) {
       if (!doc.bookmarks) doc.bookmarks = [];
       const idx = doc.bookmarks.findIndex(b => b.id === cmd.id);
       if (idx !== -1) Object.assign(doc.bookmarks[idx], cmd.newState);
+      break;
+    }
+    case 'setBookmarks': {
+      doc.bookmarks = cmd.newBookmarks.map(b => ({ ...b }));
       break;
     }
   }
@@ -1039,6 +1054,16 @@ export function recordModifyBookmark(id, oldState, newState) {
   execute({ type: 'modifyBookmark', id, oldState: { ...oldState }, newState: { ...newState } });
 }
 
+// Eén undo-stap voor een wijziging aan meerdere bladwijzers tegelijk: de hele
+// lijst ervoor en erna (#689 stijl op een selectie, #690 verplaatsen/nesten).
+export function recordBookmarksChange(oldBookmarks, newBookmarks) {
+  execute({
+    type: 'setBookmarks',
+    oldBookmarks: (oldBookmarks || []).map(b => ({ ...b })),
+    newBookmarks: (newBookmarks || []).map(b => ({ ...b })),
+  });
+}
+
 // Record a page structure change (insert, delete, reorder) for undo/redo.
 // `extra.ocrShift` ({pages, dx, dy}) is set by Shift Page: the pending OCR word
 // boxes of those pages moved with the content and move back on undo.
@@ -1060,4 +1085,16 @@ export function recordPageStructure(oldBytes, oldAnnotations, oldRotations, oldP
       new: extra.bookmarks.new.map((b) => ({ ...b })),
     } } : {}),
   });
+}
+
+
+// OCR can finish in a background tab. Never push its command onto the active tab.
+export function recordOcrPage(doc,page,oldWords,newWords) {
+  const cmd={type:'ocrPage',page,oldWords:clonePlainValue(oldWords),newWords:clonePlainValue(newWords)};
+  if (getActiveDocument() === doc) { execute(cmd); return; }
+  doc.undoStack.push(cmd);
+  if (doc.undoStack.length > MAX_UNDO_STACK) doc.undoStack.shift();
+  doc.redoStack=[];
+  doc.savedUndoStackLength=-1;
+  verhoogInhoudRevisie(doc);
 }

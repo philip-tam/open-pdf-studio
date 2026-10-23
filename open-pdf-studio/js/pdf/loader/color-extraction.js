@@ -275,6 +275,15 @@ export async function extractAnnotationColors(pageNum, pdfDoc) {
           if (fo !== null && fo >= 0 && fo <= 1) colors.fillOpacity = fo;
         }
       }
+      // /ca op de annotatie (PDF 2.0): de vul-dekking als een lezer de
+      // appearance zelf opbouwt (#685). Ook alleen terugval.
+      if (colors.fillOpacity === undefined) {
+        const caVulRaw = annotDict.get(PDFName.of('ca'));
+        if (caVulRaw !== undefined) {
+          const caVul = pdfNum(context.lookup(caVulRaw) || caVulRaw);
+          if (caVul !== null && caVul >= 0 && caVul <= 1 && caVul !== colors.opacity) colors.fillOpacity = caVul;
+        }
+      }
 
       // Annotatielaag (#468): /OC naar een eigen OCG (herkenbaar aan
       // /OPS_LayerId, zie saver/annotatie-lagen.js). Een OCG van een ander
@@ -396,6 +405,10 @@ export async function extractAnnotationColors(pageNum, pdfDoc) {
       if (subj) colors.subj = subj;
       const altTekst = leesPdfTekst(context, annotDict.get(PDFName.of('OPS_AltText')));
       if (altTekst) colors.opsAltText = altTekst;
+      const zoneText = leesPdfTekst(context, annotDict.get(PDFName.of('OPS_SpatialZone')));
+      if (zoneText && zoneText.length < 2000) { try { colors.spatialZone = JSON.parse(zoneText); } catch {} }
+      const locationOverride = leesPdfTekst(context, annotDict.get(PDFName.of('OPS_LocationOverride')));
+      if (typeof locationOverride === 'string') colors.locationOverride = locationOverride.slice(0, 1000);
 
       // Boog: middelpunt, straal en hoeken in de app-ruimte van de ongedraaide
       // pagina (zie de 'arc'-tak van saver.js). /Vertices is de benadering
