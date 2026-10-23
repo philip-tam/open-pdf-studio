@@ -208,21 +208,6 @@ export default function AppearanceSection() {
 
         <Show when={sectionVis.boxShapeGroup}>
           <div class="property-group">
-            <label>{t('appearance.shadow')}</label>
-            <select value={annotProps.shadow} disabled={isLocked()}
-              onDblClick={cycleSelectNext}
-              onChange={(e) => updateAnnotProp('shadow', e.target.value)}>
-              <Show when={annotProps.shadow === 'mixed'}>
-                <option value="mixed" disabled hidden>{tCommon('mixed')}</option>
-              </Show>
-              <option value="no">{t('appearance.shadowNone')}</option>
-              <option value="yes">{t('appearance.shadowOn')}</option>
-            </select>
-          </div>
-        </Show>
-
-        <Show when={sectionVis.boxShapeGroup}>
-          <div class="property-group">
             <label>{t('appearance.leaderTail')}</label>
             <select value={annotProps.leaderLook} disabled={isLocked()}
               onDblClick={cycleSelectNext}

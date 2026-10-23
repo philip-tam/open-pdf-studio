@@ -17,13 +17,12 @@ const BEZIER_K = 0.5522847498;
 
 /**
  * Hoever de schaduw van een tekstvak naar rechts en beneden valt, in punten
- * (0 = geen schaduw). De schaduw ligt BINNEN het vak: het lichaam is het vak
+ * (altijd 0: geen schaduw meer). De schaduw lag BINNEN het vak: het lichaam is het vak
  * min deze afstand, zodat /Rect en de appearance kloppen.
  */
 export function schaduwAfstand(ann) {
-  if (ann?.shadow !== true) return 0;
-  const korte = Math.min(ann.width || 150, ann.height || 50);
-  return Math.max(2, Math.min(6, korte * 0.05));
+  // Slagschaduw is verwijderd: ook bestanden met een oude schaduw tonen er geen meer.
+  return 0;
 }
 
 /** De vorm van een annotatie; onbekend of leeg is een rechthoek. */

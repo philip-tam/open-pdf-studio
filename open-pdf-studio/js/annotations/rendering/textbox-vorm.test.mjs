@@ -63,14 +63,8 @@ test('bouwVakPad roept het juiste canvaspad aan', () => {
   assert.deepEqual(calls[5].slice(1), [50, 25, 50, 25, 0, 0, Math.PI * 2]);
 });
 
-test('schaduw: alleen waar aan, de afstand blijft klein en het lichaam krimpt', () => {
+test('schaduw: er is geen slagschaduw meer, ook niet voor oude bestanden', () => {
   assert.equal(schaduwAfstand({ width: 150, height: 50 }), 0);
-  const d = schaduwAfstand({ shadow: true, width: 150, height: 50 });
-  assert.ok(d >= 2 && d <= 6, String(d));
-  assert.equal(schaduwAfstand({ shadow: true, width: 20, height: 20 }), 2);
-  assert.equal(schaduwAfstand({ shadow: true, width: 600, height: 400 }), 6);
-  const z = vormZones({ shadow: true, width: 150, height: 50 });
-  assert.equal(z.boven, 0);
-  assert.ok(Math.abs(z.onder - d) < 1e-9);
-  assert.ok(vormInzet({ shadow: true, width: 150, height: 50 }) > vormInzet({ width: 150, height: 50 }));
+  assert.equal(schaduwAfstand({ shadow: true, width: 150, height: 50 }), 0);
+  assert.deepEqual(vormZones({ shadow: true, width: 150, height: 50 }), { boven: 0, onder: 0 });
 });
