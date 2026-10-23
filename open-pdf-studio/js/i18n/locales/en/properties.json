@@ -124,7 +124,14 @@
     "boxShape": "Shape",
     "boxShapeRect": "Rectangle (sharp corners)",
     "boxShapeRounded": "Rectangle (rounded corners)",
-    "boxShapeEllipse": "Ellipse / circle"
+    "boxShapeEllipse": "Ellipse / circle",
+    "boxShapeSpeech": "Speech bubble (rounded)",
+    "boxShapeSpeechEllipse": "Speech bubble (oval)",
+    "tailSide": "Tail",
+    "tailBottomLeft": "Bottom left",
+    "tailBottomRight": "Bottom right",
+    "tailTopLeft": "Top left",
+    "tailTopRight": "Top right"
   },
   "stylePresets": {
     "label": "Line style",

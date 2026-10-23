@@ -1456,6 +1456,7 @@ async function converteerPdfAnnotatie(annot, pageNum, viewport, stampImageMap, a
         height: ftHeight,
         rotation: ftRotation,
         ...(extraColors.boxShape ? { boxShape: extraColors.boxShape } : {}),
+        ...(extraColors.tailSide ? { tailSide: extraColors.tailSide } : {}),
         ...(extraColors.textVAlign ? { textVAlign: extraColors.textVAlign } : {}),
         text: text,
         ...(textRuns ? { textRuns } : {}),

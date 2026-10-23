@@ -1,3 +1,4 @@
+import { vormZones } from './textbox-vorm.js';
 import { layoutTextboxLines, textboxTekstInzet, verticaleVerschuiving } from './textbox-layout.js';
 import { klemMaat, MIN_VORM_MAAT_PT } from '../minimummaat.js';
 // First strong-directional character decides the base direction of a text run,
@@ -361,7 +362,9 @@ export function drawTextboxContent(ctx, annotation, padding) {
   // the nominal font-size. Using fontSize here moved edit-mode text upward by
   // several pixels for fonts whose ascender + descender exceeds the em size.
   const halfLeading = (lineHeight - ascent - descent) / 2;
-  let y = annotation.y + padding + halfLeading + ascent;
+  // Een tekstballon: de tekst staat in het lichaam, niet in de staart.
+  const zones = vormZones(annotation);
+  let y = annotation.y + zones.boven + padding + halfLeading + ascent;
 
   // Regelafbraak met inline opmaak: chunks per regel met eigen vet/cursief
   // (zie textbox-layout.js). Zonder runs is dit identiek aan het oude
@@ -371,7 +374,7 @@ export function drawTextboxContent(ctx, annotation, padding) {
   const baseFill = ctx.fillStyle;
   const lines = layoutTextboxLines(annotation, maxWidth, measure);
   // Verticale uitlijning (boven, midden, onder) van het hele tekstblok.
-  y += verticaleVerschuiving(annotation.textVAlign, height - 2 * padding, lines.length * lineHeight);
+  y += verticaleVerschuiving(annotation.textVAlign, height - zones.boven - zones.onder - 2 * padding, lines.length * lineHeight);
 
   for (const ln of lines) {
     if (y >= annotation.y + height) break;

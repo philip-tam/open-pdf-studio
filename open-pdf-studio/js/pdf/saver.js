@@ -49,7 +49,7 @@ import { slaPaginaLabelsOp } from './pagina-labels.js';
 import { pasBijlagenToe } from './bijlagen.js';
 import { schrijfAnnotatieLagen, ocVoorAnnotatie } from './saver/annotatie-lagen.js';
 import { layersForSave, currentLayerId } from '../annotations/annotatie-lagen.js';
-import { vormVan, vakPadPdf } from '../annotations/rendering/textbox-vorm.js';
+import { vormVan, vakPadPdf, vormZones, staartVan, isBallon } from '../annotations/rendering/textbox-vorm.js';
 import { kaderDikte, kaderKleur, kaderRechthoek } from '../annotations/rendering/afbeelding-kader.js';
 import { heeftNietWinAnsi, pdfTextString, toWinAnsiText, winAnsiLiteral, asciiPdfName } from './saver/pdf-text.js';
 import { typemachineVak, typemachineRegelBreedte } from './saver/typemachine.js';
@@ -1535,7 +1535,7 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
                 if (ftHasBorder) {
                   ftStreamContent += `${ftBorderWidth} w\n${ftDashOp}${sr} ${sg} ${sb} RG\n`;
                 }
-                ftStreamContent += `${vakPadPdf(bx, by, visW, visH, vormVan(ann))}\n${ftRectOp}\n`;
+                ftStreamContent += `${vakPadPdf(bx, by, visW, visH, vormVan(ann), staartVan(ann))}\n${ftRectOp}\n`;
               };
               // Wrap in a transform whenever the content is rotated in PDF
               // space OR the page itself is rotated (then the visual box dims
@@ -1591,9 +1591,10 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
                 const boxLeft = needsRotationInAP ? 0 : tbX1;
                 const boxTop = needsRotationInAP ? visH : tbY2;
                 const bottomLimit = needsRotationInAP ? 0 : tbY1;
-                let textY = boxTop - pad - layout.halfLeading - layout.ascent;
+                const vormRuimte = vormZones(ann);
+                let textY = boxTop - vormRuimte.boven - pad - layout.halfLeading - layout.ascent;
                 // Verticale uitlijning (boven, midden, onder) van het tekstblok.
-                textY -= verticaleVerschuiving(ann.textVAlign, visH - 2 * pad, layout.lines.length * lineHeight);
+                textY -= verticaleVerschuiving(ann.textVAlign, visH - vormRuimte.boven - vormRuimte.onder - 2 * pad, layout.lines.length * lineHeight);
 
                 ftStreamContent += 'BT\n';
                 const basisKleur = ann.textColor ? `${tr} ${tg} ${tb}` : '0 0 0';
@@ -1697,6 +1698,7 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
               // De vorm van het vak (afgerond of ovaal); een rechthoek is de standaard
               // en krijgt geen sleutel.
               if (vormVan(ann) !== 'rect') annotDict.set(PDFName.of('OPS_BoxShape'), PDFName.of(vormVan(ann)));
+              if (isBallon(vormVan(ann))) annotDict.set(PDFName.of('OPS_TailSide'), PDFName.of(staartVan(ann)));
               // Verticale uitlijning van de tekst; boven is de standaard en krijgt geen sleutel.
               if (ann.textVAlign === 'middle' || ann.textVAlign === 'bottom') annotDict.set(PDFName.of('OPS_TextVAlign'), PDFName.of(ann.textVAlign));
             }

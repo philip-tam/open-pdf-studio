@@ -191,8 +191,23 @@ export default function AppearanceSection() {
               <option value="rect">{t('appearance.boxShapeRect')}</option>
               <option value="rounded">{t('appearance.boxShapeRounded')}</option>
               <option value="ellipse">{t('appearance.boxShapeEllipse')}</option>
+              <option value="speech">{t('appearance.boxShapeSpeech')}</option>
+              <option value="speechEllipse">{t('appearance.boxShapeSpeechEllipse')}</option>
             </select>
           </div>
+          <Show when={annotProps.boxShape === 'speech' || annotProps.boxShape === 'speechEllipse'}>
+            <div class="property-group">
+              <label>{t('appearance.tailSide')}</label>
+              <select value={annotProps.tailSide} disabled={isLocked()}
+                onDblClick={cycleSelectNext}
+                onChange={(e) => updateAnnotProp('tailSide', e.target.value)}>
+                <option value="bottom-left">{t('appearance.tailBottomLeft')}</option>
+                <option value="bottom-right">{t('appearance.tailBottomRight')}</option>
+                <option value="top-left">{t('appearance.tailTopLeft')}</option>
+                <option value="top-right">{t('appearance.tailTopRight')}</option>
+              </select>
+            </div>
+          </Show>
         </Show>
 
         <Show when={sectionVis.borderStyleGroup}>

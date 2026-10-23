@@ -124,7 +124,14 @@
     "boxShape": "Vorm",
     "boxShapeRect": "Rechthoek (scherpe hoeken)",
     "boxShapeRounded": "Rechthoek (afgeronde hoeken)",
-    "boxShapeEllipse": "Ellips / cirkel"
+    "boxShapeEllipse": "Ellips / cirkel",
+    "boxShapeSpeech": "Tekstballon (afgerond)",
+    "boxShapeSpeechEllipse": "Tekstballon (ovaal)",
+    "tailSide": "Staart",
+    "tailBottomLeft": "Linksonder",
+    "tailBottomRight": "Rechtsonder",
+    "tailTopLeft": "Linksboven",
+    "tailTopRight": "Rechtsboven"
   },
   "stylePresets": {
     "label": "Lijnstijl",

@@ -1443,7 +1443,13 @@ const result = {};
         if (opsVormRaw) {
           const vv = context.lookup(opsVormRaw) || opsVormRaw;
           const naam = typeof vv?.asString === 'function' ? vv.asString().replace(/^\//, '') : '';
-          if (naam === 'rounded' || naam === 'ellipse') colors.boxShape = naam;
+          if (['rounded', 'ellipse', 'speech', 'speechEllipse'].includes(naam)) colors.boxShape = naam;
+        }
+        const opsStaartRaw = annotDict.get(PDFName.of('OPS_TailSide'));
+        if (opsStaartRaw) {
+          const sv = context.lookup(opsStaartRaw) || opsStaartRaw;
+          const snaam = typeof sv?.asString === 'function' ? sv.asString().replace(/^\//, '') : '';
+          if (['bottom-left', 'bottom-right', 'top-left', 'top-right'].includes(snaam)) colors.tailSide = snaam;
         }
 
         // Verticale uitlijning van de tekst (midden of onder; boven is de standaard).
