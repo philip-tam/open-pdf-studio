@@ -298,7 +298,8 @@ export async function extractAnnotationColors(pageNum, pdfDoc) {
       const ofoRaw = annotDict.get(PDFName.of('OPS_FillOpacity'));
       if (ofoRaw !== undefined) {
         const ofo = pdfNum(context.lookup(ofoRaw) || ofoRaw);
-        if (ofo !== null && ofo >= 0 && ofo <= 1) {
+        // Een tekstvak dat met een schaduw is bewaard kreeg ten onrechte 30 % vul-doorzichtigheid (versie 0.67-0.68).
+        if (ofo === 0.3 && subtypeName === '/FreeText') { /* genegeerd */ } else if (ofo !== null && ofo >= 0 && ofo <= 1) {
           colors.fillOpacity = ofo;
           // Uitdrukkelijk door de app bewaard: een schaalgebied (#611) neemt
           // alleen deze over, niet de alfa die uit zijn appearance volgt.

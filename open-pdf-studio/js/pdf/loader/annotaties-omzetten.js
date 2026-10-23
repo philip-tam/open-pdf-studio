@@ -70,7 +70,7 @@ export async function zetPaginaAnnotatiesOm(annots, pageNum, viewport, stampImag
     }
   }
   for (const pl of pendingLeaders) {
-    const parent = textboxByRect.get(pl.irtRectKey);
+    const parent = vindVakBijRect(textboxByRect, pl.irtRectKey);
     if (parent) {
       if (!Array.isArray(parent.leaders)) parent.leaders = [];
       parent.leaders.push(pl.leader);
@@ -88,4 +88,17 @@ export async function zetPaginaAnnotatiesOm(annots, pageNum, viewport, stampImag
   // koppelAntwoorden: deze koppeling wint.
   resolveGroupLinks(groepen, byPdfId);
   return nieuw;
+}
+
+// De rechthoek van het vak komt als drijvende komma uit twee bronnen (pdf-lib en PDF.js) en
+// wijkt in de laatste decimalen af: vergelijk met een kleine marge, niet exact.
+function vindVakBijRect(textboxByRect, sleutel) {
+  const exact = textboxByRect.get(sleutel);
+  if (exact || !sleutel) return exact;
+  const a = sleutel.split(',').map(Number);
+  for (const [k, vak] of textboxByRect) {
+    const b = k.split(',').map(Number);
+    if (a.length === 4 && b.length === 4 && a.every((v, i) => Math.abs(v - b[i]) < 0.05)) return vak;
+  }
+  return undefined;
 }
