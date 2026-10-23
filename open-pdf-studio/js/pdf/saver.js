@@ -39,7 +39,7 @@ import { hexToRgb, buildBorderStyle, computeAnnotFlags, mapFontToPdfName,
   ensureAcroFormFonts, stripPdfAMetadata, generateAppearanceStream, zetDoorzichtigheidInAp, tekstvakFontDict, boogHoekenNaRotatie,
   randSleutelZonderRand, markeerZonderRand, onzichtbaarVlak, vlakRect } from './saver/utils.js';
 import { saveTextEditsToPages } from './saver/text-edits.js';
-import { runsToText, dsMargeUitInzet } from '../annotations/rendering/textbox-layout.js';
+import { runsToText, dsMargeUitInzet, verticaleVerschuiving } from '../annotations/rendering/textbox-layout.js';
 import { saveWatermarksToPages } from './saver/watermarks.js';
 import { writeOcrTextLayer, embedOcrFont, loadDefaultOcrFontBytes } from './saver/ocr-text-layer.js';
 import { maakCjkFontKeten } from './saver/cjk-fonts.js';
@@ -1591,6 +1591,8 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
                 const boxTop = needsRotationInAP ? visH : tbY2;
                 const bottomLimit = needsRotationInAP ? 0 : tbY1;
                 let textY = boxTop - pad - layout.halfLeading - layout.ascent;
+                // Verticale uitlijning (boven, midden, onder) van het tekstblok.
+                textY -= verticaleVerschuiving(ann.textVAlign, visH - 2 * pad, layout.lines.length * lineHeight);
 
                 ftStreamContent += 'BT\n';
                 const basisKleur = ann.textColor ? `${tr} ${tg} ${tb}` : '0 0 0';
@@ -1694,6 +1696,8 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
               // De vorm van het vak (afgerond of ovaal); een rechthoek is de standaard
               // en krijgt geen sleutel.
               if (vormVan(ann) !== 'rect') annotDict.set(PDFName.of('OPS_BoxShape'), PDFName.of(vormVan(ann)));
+              // Verticale uitlijning van de tekst; boven is de standaard en krijgt geen sleutel.
+              if (ann.textVAlign === 'middle' || ann.textVAlign === 'bottom') annotDict.set(PDFName.of('OPS_TextVAlign'), PDFName.of(ann.textVAlign));
             }
 
             break;
