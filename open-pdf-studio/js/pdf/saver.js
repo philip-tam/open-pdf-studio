@@ -3105,7 +3105,7 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
               if (d < bestD) { bestD = d; aBest = c; }
             }
             const staartVoetPunten = leader.endStyle === 'tail'
-              ? staartVoet({ x: ann.x, y: ann.y, width: _bw, height: _bh }, vormVan(ann), { x: leader.tipX, y: leader.tipY })
+              ? staartVoet({ x: ann.x, y: ann.y, width: _bw - schaduwAfstand(ann), height: _bh - schaduwAfstand(ann) }, vormVan(ann), { x: leader.tipX, y: leader.tipY })
               : null;
             // Een staart hangt op de rand die naar de punt wijst, niet aan het midden van een zijde.
             if (staartVoetPunten) aBest = staartVoetPunten.basis;

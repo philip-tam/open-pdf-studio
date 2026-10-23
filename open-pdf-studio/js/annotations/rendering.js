@@ -297,8 +297,10 @@ export function pickAnchorSide(box, kx, ky) {
 // Een aanhaallijn als staart van een tekstballon (staart-leider.js): een
 // driehoek van de rand van het vak naar de punt, gevuld met het vak.
 function drawStaartLeider(ctx, annotation, leader, strokeColor, lineWidth) {
+  // De staart hangt aan het lichaam van het vak: zonder de schaduwstrook rechts en onder.
+  const schaduw = schaduwAfstand(annotation);
   const voet = staartVoet(
-    { x: annotation.x, y: annotation.y, width: annotation.width || 150, height: annotation.height || 50 },
+    { x: annotation.x, y: annotation.y, width: (annotation.width || 150) - schaduw, height: (annotation.height || 50) - schaduw },
     vormVan(annotation), { x: leader.tipX, y: leader.tipY });
   if (!voet) return;
   ctx.save();
