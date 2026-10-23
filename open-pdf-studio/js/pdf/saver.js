@@ -49,6 +49,7 @@ import { slaPaginaLabelsOp } from './pagina-labels.js';
 import { pasBijlagenToe } from './bijlagen.js';
 import { schrijfAnnotatieLagen, ocVoorAnnotatie } from './saver/annotatie-lagen.js';
 import { layersForSave, currentLayerId } from '../annotations/annotatie-lagen.js';
+import { vormVan, vakPadPdf } from '../annotations/rendering/textbox-vorm.js';
 import { heeftNietWinAnsi, pdfTextString, toWinAnsiText, winAnsiLiteral, asciiPdfName } from './saver/pdf-text.js';
 import { typemachineVak, typemachineRegelBreedte } from './saver/typemachine.js';
 import { catmullRomSpline } from '../tools/tools/spline-tool.js';
@@ -1533,7 +1534,7 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
                 if (ftHasBorder) {
                   ftStreamContent += `${ftBorderWidth} w\n${ftDashOp}${sr} ${sg} ${sb} RG\n`;
                 }
-                ftStreamContent += `${bx} ${by} ${visW} ${visH} re ${ftRectOp}\n`;
+                ftStreamContent += `${vakPadPdf(bx, by, visW, visH, vormVan(ann))}\n${ftRectOp}\n`;
               };
               // Wrap in a transform whenever the content is rotated in PDF
               // space OR the page itself is rotated (then the visual box dims
@@ -1690,6 +1691,9 @@ async function _savePDFNu(saveAsPath, activeDoc, { alleenAnnotaties = false, mom
               // without an explicit key the loader's matrix heuristic would
               // misread that compensation as annotation rotation.
               annotDict.set(PDFName.of('OPS_Rotation'), context.obj(ftRotation));
+              // De vorm van het vak (afgerond of ovaal); een rechthoek is de standaard
+              // en krijgt geen sleutel.
+              if (vormVan(ann) !== 'rect') annotDict.set(PDFName.of('OPS_BoxShape'), PDFName.of(vormVan(ann)));
             }
 
             break;

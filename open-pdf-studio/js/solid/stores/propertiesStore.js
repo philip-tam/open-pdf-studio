@@ -110,6 +110,7 @@ const [annotProps, setAnnotProps] = createStore({
   fillOpacity: 100,
   icon: 'comment',
   borderStyle: 'solid',
+  boxShape: 'rect',
   cross: false,
   text: '',
   fontSize: 16,
@@ -196,6 +197,7 @@ const [sectionVis, setSectionVis] = createStore({
   colorGroup: false,
   lineWidthGroup: false,
   borderStyleGroup: false,
+  boxShapeGroup: false,
   textGroup: false,
   fontSizeGroup: false,
   opacityGroup: true,
@@ -294,6 +296,7 @@ function computeSectionVisibility(type) {
     colorGroup: !hideColor || isTextMarkup,
     lineWidthGroup: !hideLineWidth,
     borderStyleGroup: hasBorderStyle,
+    boxShapeGroup: type === 'textbox',
     hatchPatternGroup: hasHatchPattern,
     crossGroup: ondersteuntKruis(type),
     textGroup: isTextContent,
@@ -411,6 +414,7 @@ export function storeShowProperties(annotation) {
     opacity: annotation.opacity !== undefined ? Math.round(annotation.opacity * 100) : 100,
     icon: annotation.icon || 'comment',
     borderStyle: annotation.borderStyle || 'solid',
+    boxShape: annotation.boxShape || 'rect',
     cross: annotation.cross === true,
     hatchPattern: annotation.hatchPattern || (annotation.type === 'measureArea' ? 'diagonal-left' : 'none'),
     hatchColor: annotation.hatchColor || (annotation.type === 'measureArea' ? '#ff0000' : (annotation.strokeColor || annotation.color || '#000000')),
@@ -625,6 +629,7 @@ export function storeHideProperties() {
     colorGroup: false,
     lineWidthGroup: false,
     borderStyleGroup: false,
+    boxShapeGroup: false,
     textGroup: false,
     fontSizeGroup: false,
     opacityGroup: false,
@@ -721,6 +726,7 @@ export function storeShowMultiSelection(selected) {
     fillOpacity: sharedFillOpacity,
     icon: sharedValue(selected, a => a.icon || 'comment', 'mixed'),
     borderStyle: sharedBorderStyle,
+    boxShape: sharedValue(selected, a => a.boxShape || 'rect', 'mixed'),
     cross: sharedValue(selected, a => a.cross === true, 'mixed'),
     hatchPattern: sharedHatchPattern,
     hatchColor: sharedHatchColor,
@@ -788,6 +794,7 @@ export function storeShowMultiSelection(selected) {
     colorGroup: allMatch(t => !hideColorTypes.has(t) || isTextAnchored({ type: t })),
     lineWidthGroup: allMatch(t => !hideLineWidthTypes.has(t)),
     borderStyleGroup: allMatch(t => borderStyleTypes.has(t)),
+    boxShapeGroup: allMatch(t => t === 'textbox'),
     hatchPatternGroup: allMatch(t => hatchPatternTypes.has(t)),
     crossGroup: kruisZichtbaarVoorSelectie(selected),
     textGroup: allSameType && (sharedType === 'text' || sharedType === 'comment'),
@@ -890,6 +897,7 @@ export function storeShowTextEditProperties(info) {
     colorGroup: false,
     lineWidthGroup: false,
     borderStyleGroup: false,
+    boxShapeGroup: false,
     textGroup: false,
     fontSizeGroup: false,
     opacityGroup: false,
@@ -1142,6 +1150,7 @@ function applyPropToAnnotation(ann, key, value) {
     case 'opacity': ann.opacity = leesGeheelGetal(value) / 100; break;
     case 'icon': ann.icon = value; break;
     case 'borderStyle': ann.borderStyle = value; break;
+    case 'boxShape': ann.boxShape = value === 'rect' ? undefined : value; break;
     case 'cross': ann.cross = value === true || undefined; break;
     case 'hatchPattern': ann.hatchPattern = value; break;
     case 'hatchColor': ann.hatchColor = value; break;
@@ -1549,6 +1558,7 @@ function applyAnnotProp(key, value) {
       break;
     case 'icon': currentAnnotation.icon = value; break;
     case 'borderStyle': currentAnnotation.borderStyle = value; break;
+    case 'boxShape': currentAnnotation.boxShape = value === 'rect' ? undefined : value; break;
     case 'cross': currentAnnotation.cross = value === true || undefined; break;
     case 'hatchPattern': currentAnnotation.hatchPattern = value; break;
     case 'hatchColor': currentAnnotation.hatchColor = value; break;
