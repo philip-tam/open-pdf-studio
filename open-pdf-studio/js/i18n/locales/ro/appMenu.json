@@ -71,6 +71,12 @@
     "site": "Pe acest site",
     "noSiteDocuments": "Niciun document pe acest site",
     "siteListError": "Documentele acestui site nu au putut fi încărcate",
+    "versions": "Versiuni",
+    "versionNumber": "Versiunea {{version}}",
+    "currentVersion": "curentă",
+    "noVersions": "Nicio versiune",
+    "versionsError": "Versiunile nu au putut fi încărcate",
+    "olderVersionsHint": "Versiunile mai vechi se deschid doar pentru citire; Salvare ca descarcă o copie.",
     "save": "Salvare"
   },
   "importPanel": {
@@ -117,6 +123,8 @@
     "pdfxNote": "Adaugă un profil de ieșire, TrimBox și metadate PDF/X. Cu un profil de tipar CMYK, culorile RGB, imaginile și degradeurile sunt convertite în CMYK, iar acel profil devine profilul de ieșire; cu sRGB nu se convertește nimic. Fonturile standard neîncorporate rămân o limitare.",
     "exportCad": "Desen CAD (DXF, DWG)",
     "exportCadDesc": "Exportă desenul vectorial în DXF sau DWG, cu straturi, scară și zonă",
+    "exportIfcx": "Exportă în IFCX (beta)",
+    "exportIfcxDesc": "Planșe, vectori, text, imagini și adnotări într-un fișier JSON IFC5",
     "exportOdt": "OpenDocument (ODT)",
     "exportExcel": "Excel (XLSX)",
     "exportOdtDesc": "Text și tabele editabile, cu imagini opționale ale paginilor",

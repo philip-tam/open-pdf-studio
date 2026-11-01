@@ -17,12 +17,30 @@
 //  - Antwoord: { werkplek: 1, antwoord: <id>, ok: true,  waarde: … }
 //              { werkplek: 1, antwoord: <id>, ok: false, fout: '<melding>'[, code] }
 //  - Handdruk: elke 250 ms soort "hallo" tot de gastpagina antwoordt (die mag
-//    later laden dan het iframe); na 60 s opgeven.
+//    later laden dan het iframe); na 60 s opgeven. Het antwoord mag
+//    `waarde: { soorten: [...] }` meegeven: de optionele soorten die de
+//    gastpagina kent. Alleen met "opslaan_als" daarin krijgt het contract
+//    storage.saveAs (#726); anders blijft Opslaan als een download.
 //  - Soorten:
-//      open { bestand }            -> { bestand, naam, versie, alleen_lezen, bytes }
-//                                     (bytes: overgedragen ArrayBuffer)
+//      open { bestand, versie? }   -> { bestand, naam, versie, alleen_lezen, bytes }
+//                                     (bytes: overgedragen ArrayBuffer); met
+//                                     `versie` (een volgnummer uit versies) die
+//                                     versie, altijd alleen-lezen en zonder
+//                                     slot (#712). Opslaan weigert dan met code
+//                                     versie_alleen_lezen; een ongeldig
+//                                     nummer geeft versie_ongeldig.
 //      opslaan { bestand, bytes }  -> { bestand, naam, versie, conflict, melding, vergrendeld }
-//      lijst {}                    -> [{ id, name, modified }]
+//      lijst { map? }              -> [{ id, name, modified, soort?, schrijfbaar? }]
+//                                     soort "map" is een map (#726); zonder
+//                                     `map` de map van het geopende document
+//      opslaan_als { naam, map?, bytes } (optioneel, #726)
+//                                  -> { bestand, naam, versie, hernoemd }
+//                                     een NIEUW bestand (alleen .pdf); bestaat
+//                                     de naam al, dan een kopie met een andere
+//                                     naam en hernoemd: true, nooit
+//                                     overschrijven. Weigeren met een `code`:
+//                                     alleen_lezen, ongeldige_naam, te_groot,
+//                                     quotum (of de Engelse namen uit #726).
 //      versies { bestand }         -> [{ version, modified, author }]
 //      geopend { bestand }         -> true (ter informatie)
 //      melding { tekst, toon }     -> true (de gastpagina toont hem)
@@ -57,6 +75,45 @@ export const AI_FOUTCODES = Object.freeze([
   'ongeldige_vraag', 'te_groot', 'geen_tegoed', 'plafond_bereikt', 'te_druk',
   'te_veel_vragen', 'al_bezig', 'opnieuw_inloggen', 'dienst_onbereikbaar',
 ]);
+
+/**
+ * Foutcodes van de gastpagina met een eigen, vertaalde melding (#712); de
+ * `fout`-tekst van de gastpagina is de terugval.
+ */
+export const HOST_FOUTCODES = Object.freeze({
+  versie_alleen_lezen: 'hostVersionReadOnlyRefused',
+  versie_ongeldig: 'hostVersionInvalid',
+});
+
+/** De vertaalsleutel voor een fout van de gastpagina, of null. */
+export function hostFoutSleutel(fout) {
+  const code = fout && typeof fout === 'object' ? fout.hostCode : null;
+  return typeof code === 'string' && Object.hasOwn(HOST_FOUTCODES, code) ? HOST_FOUTCODES[code] : null;
+}
+
+/**
+ * De melding voor de gebruiker bij een fout van de gastpagina met een
+ * bekende code: vertaald, met de tekst van de gastpagina als terugval. Null
+ * als de code onbekend is.
+ * @param {(sleutel: string, opties?: object) => string} t
+ */
+export function hostFoutMelding(fout, t) {
+  const sleutel = hostFoutSleutel(fout);
+  if (!sleutel) return null;
+  const terugval = typeof fout?.message === 'string' && fout.message ? fout.message : sleutel;
+  const tekst = t(sleutel, { defaultValue: terugval });
+  return typeof tekst === 'string' && tekst && tekst !== sleutel ? tekst : terugval;
+}
+
+/**
+ * Een versienummer voor `open { versie }`: een geheel getal blijft een getal
+ * (ook als tekst, zoals de versielijst ze heeft); al het andere gaat zoals
+ * het is, en de gastpagina weigert het met versie_ongeldig.
+ */
+export function versieVoorOpen(versie) {
+  if (typeof versie === 'string' && /^\s*\d+\s*$/.test(versie)) return Number(versie);
+  return versie;
+}
 
 /** Een fout van de brug, met een code voor de koppeling. */
 export class BrugFout extends Error {
@@ -155,17 +212,53 @@ function bytesUit(waarde) {
 const STANDAARD_TEKSTEN = {
   hostOpenFailed: 'The file could not be read from storage. Try again.',
   hostNoContact: 'The page around Open PDF Studio does not respond, so files cannot be opened or saved. Reload the page and try again.',
+  hostVersionInvalid: 'This version of the file cannot be opened: the version number is not valid.',
+  hostVersionReadOnlyRefused: 'The site did not save the file: an older version of it is open read-only. Open the current version again to save, or use Save As to download a copy.',
 };
-const standaardTekst = (sleutel) => STANDAARD_TEKSTEN[sleutel] || sleutel;
+const standaardTekst = (sleutel, opties) => STANDAARD_TEKSTEN[sleutel] || opties?.defaultValue || sleutel;
 
 const tekst = (v) => (v === undefined || v === null ? undefined : String(v));
 
-/** Een lijst van de gastpagina in de vorm van het contract ({ id, name, modified }). */
+const MAP_SOORTEN = new Set(['map', 'folder', 'directory']);
+
+/**
+ * Een lijst van de gastpagina in de vorm van het contract ({ id, name,
+ * modified, kind?, writable? }); `soort: "map"` wordt kind 'folder' (#726).
+ */
 function normaliseerLijst(waarde) {
   if (!Array.isArray(waarde)) return [];
   return waarde
     .filter((d) => d && typeof d === 'object' && d.id !== undefined && d.id !== null)
-    .map((d) => ({ ...d, id: String(d.id), name: tekst(d.name ?? d.naam) }));
+    .map((d) => {
+      const item = { ...d, id: String(d.id), name: tekst(d.name ?? d.naam) };
+      const soort = tekst(d.kind ?? d.soort);
+      if (soort !== undefined) item.kind = MAP_SOORTEN.has(soort.toLowerCase()) ? 'folder' : 'file';
+      const schrijfbaar = d.writable ?? d.schrijfbaar;
+      if (typeof schrijfbaar === 'boolean') item.writable = schrijfbaar;
+      return item;
+    });
+}
+
+/** Het antwoord op `opslaan_als` in de vorm van het contract ({ id, name, version, renamed }). */
+export function normaliseerOpslaanAlsAntwoord(waarde, gevraagd) {
+  const w = waarde && typeof waarde === 'object' ? waarde : {};
+  const id = w.bestand ?? w.id;
+  if (id === undefined || id === null || String(id) === '') {
+    throw new BrugFout('antwoord', 'The host page returned no id for the new file');
+  }
+  const name = tekst(w.naam ?? w.name) || String(gevraagd ?? '');
+  return {
+    id: String(id),
+    name,
+    version: w.versie ?? w.version ?? null,
+    renamed: w.hernoemd === true || w.renamed === true || (!!gevraagd && name !== gevraagd),
+  };
+}
+
+/** De optionele soorten uit het antwoord op hallo. */
+function soortenUit(waarde) {
+  const lijst = waarde && typeof waarde === 'object' ? waarde.soorten : null;
+  return new Set(Array.isArray(lijst) ? lijst.filter((s) => typeof s === 'string') : []);
 }
 
 /** Versies van de gastpagina in de vorm van het contract ({ version, modified, author }). */
@@ -241,6 +334,7 @@ export function maakHostBrug({
   const verzoekTimeout = limieten.verzoek ?? VERZOEK_TIMEOUT_MS;
 
   let volgendId = 1;
+  let soorten = new Set(); // optionele soorten van de gastpagina (uit hallo)
   const wachtend = new Map(); // id -> { klaar, mis, timer }
   const halloIds = new Set();
   let toestand = 'nieuw'; // nieuw | wacht | verbonden | opgegeven | gestopt
@@ -299,6 +393,9 @@ export function maakHostBrug({
       if (data.ok === true) {
         toestand = 'verbonden';
         stopHanddruk();
+        // Wat de gastpagina optioneel kent; pas dan bestaat de aanroep (#726).
+        soorten = soortenUit(data.waarde);
+        if (soorten.has('opslaan_als')) opslag.saveAs = opslaanAls;
         verbindingKlaar();
       } else {
         geefOp(new BrugFout('geweigerd', typeof data.fout === 'string' ? data.fout : 'The host refused the connection'));
@@ -373,23 +470,34 @@ export function maakHostBrug({
 
   /** Het opslagcontract van #546, over de brug. */
   const opslag = {
-    /** @returns {Promise<{ name: string, data: Uint8Array, versie: unknown, alleenLezen: boolean, bestand: string }>} */
-    async open(bestand) {
+    /**
+     * Met `versie`: die versie van het bestand, alleen-lezen en zonder slot (#712).
+     * @returns {Promise<{ name: string, data: Uint8Array, versie: unknown, alleenLezen: boolean, bestand: string }>}
+     */
+    async open(bestand, versie = undefined) {
       try {
-        const waarde = await verzoek('open', { bestand: String(bestand) });
+        const velden = { bestand: String(bestand) };
+        if (versie !== undefined && versie !== null) velden.versie = versieVoorOpen(versie);
+        const waarde = await verzoek('open', velden);
         const data = waarde && typeof waarde === 'object' ? bytesUit(waarde.bytes) : null;
         if (!data) throw new BrugFout('antwoord', 'The host page returned no bytes for the file');
         return {
           name: tekst(waarde.naam) || 'document.pdf',
           data,
           versie: waarde.versie ?? null,
-          alleenLezen: waarde.alleen_lezen === true,
+          // Een oudere versie is altijd alleen-lezen, ook als de gastpagina
+          // het veld vergeet.
+          alleenLezen: waarde.alleen_lezen === true || 'versie' in velden,
           bestand: tekst(waarde.bestand) ?? String(bestand),
         };
       } catch (e) {
         // Wat de gebruiker ziet bij een mislukte open (pdf/host-document.js);
         // de technische oorzaak blijft in de melding voor de console.
-        if (e && typeof e === 'object' && !e.gemeld) e.gebruikersMelding = vertaal('hostOpenFailed');
+        // Een fout met een bekende code (versie_ongeldig) krijgt zijn eigen
+        // melding, met de tekst van de gastpagina als terugval.
+        if (e && typeof e === 'object' && !e.gemeld) {
+          e.gebruikersMelding = hostFoutMelding(e, vertaal) || vertaal('hostOpenFailed');
+        }
         throw e;
       }
     },
@@ -402,13 +510,30 @@ export function maakHostBrug({
       }
       return uitkomst;
     },
-    async list() {
-      return normaliseerLijst(await verzoek('lijst', {}));
+    /** Zonder `map` de map van het geopende document; met `map` die map (#726). */
+    async list(map = undefined) {
+      const velden = map === undefined || map === null || map === '' ? {} : { map: String(map) };
+      return normaliseerLijst(await verzoek('lijst', velden));
     },
     async versions(bestand) {
       return normaliseerVersies(await verzoek('versies', { bestand: String(bestand) }));
     },
   };
+
+  /**
+   * Een nieuw bestand op de site (#726). Alleen als de gastpagina
+   * "opslaan_als" in de handdruk noemde, staat dit als storage.saveAs in het
+   * contract. Een weigering draagt de `code` van de gastpagina als hostCode.
+   * @returns {Promise<{ id: string, name: string, version: unknown, renamed: boolean }>}
+   */
+  async function opslaanAls(bytes, { name, folder } = {}) {
+    const naam = String(name ?? '').trim();
+    if (!naam) throw new BrugFout('antwoord', 'The new file has no name', 'ongeldige_naam');
+    const buffer = eigenBuffer(bytes);
+    const velden = { naam, bytes: buffer };
+    if (folder !== undefined && folder !== null && folder !== '') velden.map = String(folder);
+    return normaliseerOpslaanAlsAntwoord(await verzoek('opslaan_als', velden, [buffer]), naam);
+  }
 
   /** De app meldt het document dat open staat (alleen ter informatie). */
   async function geopend(bestand) {
@@ -453,6 +578,8 @@ export function maakHostBrug({
     ai,
     /** Belofte die vervult zodra de gastpagina de handdruk beantwoordt. */
     verbinding,
+    /** Kent de gastpagina deze optionele soort (uit het antwoord op hallo)? */
+    kent(soort) { return soorten.has(soort); },
     get toestand() { return toestand; },
   };
 }

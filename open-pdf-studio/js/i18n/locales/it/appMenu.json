@@ -71,6 +71,12 @@
     "site": "Su questo sito",
     "noSiteDocuments": "Nessun documento su questo sito",
     "siteListError": "Impossibile caricare i documenti di questo sito",
+    "versions": "Versioni",
+    "versionNumber": "Versione {{version}}",
+    "currentVersion": "attuale",
+    "noVersions": "Nessuna versione",
+    "versionsError": "Impossibile caricare le versioni",
+    "olderVersionsHint": "Le versioni precedenti si aprono in sola lettura; Salva con nome scarica una copia.",
     "save": "Salva"
   },
   "importPanel": {
@@ -117,6 +123,8 @@
     "pdfxNote": "Aggiunge un output intent, TrimBox e metadati PDF/X. Con un profilo di stampa CMYK, i colori RGB, le immagini e le sfumature vengono convertiti in CMYK e quel profilo diventa l'output intent; con sRGB non viene convertito nulla. I font standard non incorporati restano una limitazione.",
     "exportCad": "Disegno CAD (DXF, DWG)",
     "exportCadDesc": "Esporta il disegno vettoriale in DXF o DWG, con livelli, scala e area",
+    "exportIfcx": "Esporta in IFCX (beta)",
+    "exportIfcxDesc": "Tavole, vettori, testo, immagini e annotazioni in un file JSON IFC5",
     "exportOdt": "OpenDocument (ODT)",
     "exportExcel": "Excel (XLSX)",
     "exportOdtDesc": "Testo e tabelle modificabili con immagini di pagina facoltative",

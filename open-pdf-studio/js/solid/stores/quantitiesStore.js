@@ -1,15 +1,17 @@
-import { collectZones, locationFor } from '../../annotations/spatial-zones.js';
-import { getAnnotationBounds } from '../../core/state.js';
 // Hoeveelheden — config-store. Solid-signals voor de schedule-config + memo's
 // die de pure engine aanroepen. Visibility blijft in scheduleStore (re-exported).
 import { createSignal, createMemo } from 'solid-js';
-import { getActiveDocument } from '../../core/state.js';
+import { getActiveDocument, getAnnotationBounds } from '../../core/state.js';
 import { buildSchedule } from '../../quantities/engine.js';
+import { scheduleUsesLocation } from '../../quantities/categories.js';
+import { collectZones, locationFor } from '../../annotations/spatial-zones.js';
 // Koppelt de label-hook van quantities/categories.js aan i18next (side-effect).
 import '../../quantities/label-i18n.js';
 import { getMeasureScale } from '../../annotations/measurement.js';
 import { metSchaalBronnen } from '../../annotations/schaal-bronnen.js';
 import { countTallies } from './countStore.js';
+import { wapeningsElementen } from '../../quantities/wapening.js';
+import { getTemplate } from '../../symbols/registry.js';
 import { scheduleVisible, setScheduleVisible, toggleSchedule } from './scheduleStore.js';
 
 // Lijnvormige annotatietypes zónder eigen measureValue: hun lengte moet uit de
@@ -97,8 +99,15 @@ function collectElements() {
     return a;
   }));
   const bi = selectedCategories().includes('text-built-in') ? builtInText() : [];
+  // Wapening: buigstaat-regels uit stavenreeksen en wapeningssymbolen.
+  const rebar = selectedCategories().includes('reinforcement')
+    ? wapeningsElementen(doc?.annotations || [], getTemplate) : [];
+  const elements = [...anns, ...bi, ...rebar];
+  // De Locatie-kolommen kosten per element een zone-opzoeking: alleen als de
+  // staat ze toont, erop filtert of erop sorteert.
+  if (!scheduleUsesLocation({ fields: scheduledFields(), filters: filters(), sort: sortLevels() })) return elements;
   const zones = collectZones(doc?.annotations);
-  return [...anns, ...bi].map(a => ({...a, __location: locationFor(a, zones, getAnnotationBounds(a))}));
+  return elements.map(a => ({ ...a, __location: locationFor(a, zones, getAnnotationBounds(a)) }));
 }
 
 function computeSchedule() {

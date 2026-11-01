@@ -1,5 +1,15 @@
 {
   "newDoc": {
+    "frameStyles": {
+      "grootformaat": "大判",
+      "detailblad": "詳細図面",
+      "voorblad": "表紙"
+    },
+    "framePreview": "{{style}}, {{paper}} {{orientation}}, {{width}} x {{height}} mm",
+    "frameOrientation": {
+      "portrait": "縦向き",
+      "landscape": "横向き"
+    },
     "title": "新規ドキュメント",
     "paperSize": "用紙サイズ：",
     "widthMm": "幅 (mm)：",
@@ -23,7 +33,7 @@
   "printQueue": {
     "toolbarLabel": "印刷ジョブの操作",
     "openInStudio": "Studio で開く",
-    "openInStudioTip": "選択したジョブを PT PDF Studio で開きます（Enter またはダブルクリック）。複数のジョブを選択すると、1 つの結合ドキュメントとして開きます。",
+    "openInStudioTip": "選択したジョブを Open PDF Studio で開きます（Enter またはダブルクリック）。複数のジョブを選択すると、1 つの結合ドキュメントとして開きます。",
     "mergeSelected": "選択を結合…",
     "mergeSelectedTip": "選択したジョブをリストの順に 1 つの PDF に結合して保存します",
     "saveAs": "名前を付けて保存…",
@@ -63,11 +73,11 @@
     "adding": "PDF ファイルを追加しています…",
     "saving": "保存中…",
     "merging": "結合中 {{done}} / {{count}}…",
-    "opening": "PT PDF Studio で開いています…",
+    "opening": "Open PDF Studio で開いています…",
     "deleting": "削除中…",
     "saved": "{{name}} として保存しました",
     "merged": "結合して {{name}} として保存しました",
-    "opened": "PT PDF Studio で開きました",
+    "opened": "Open PDF Studio で開きました",
     "deleted": "削除しました：{{count}}",
     "failed": "失敗しました：{{message}}",
     "mergedFileName": "結合済み",
@@ -128,11 +138,15 @@
     "pageBorder": "ページの境界線を印刷",
     "perSheetNote": "各ページはセルに収まるように拡大縮小されるため、上のページの拡大縮小設定は適用されません。",
     "poster": "ポスター（タイル）",
+    "posterOverview": "ポスター全体のプレビュー",
+    "posterOverlapLegend": "色付きの部分は隣接する用紙に重複して印刷されます",
     "posterScale": "タイルの倍率",
     "posterOverlap": "重なり",
     "posterCutMarks": "トンボ（裁断マーク）",
     "posterLabels": "ラベル（ファイル、ページ、タイル）",
     "posterOnlyLarge": "大きいページのみ分割",
+    "posterEdgeCrop": "外周をわずかに切り取る",
+    "posterEdgeCropHint": "今回の印刷のみ、各外周から最大 {{max}} mm 切り取ります。オフの場合はすべての内容を保持します。",
     "posterTileInfo": "{{page}} ページ: タイル {{row}},{{col}}（行, 列）/ {{rows}} × {{cols}}",
     "posterNotTiled": "{{page}} ページは 1 枚の用紙に収まるため分割されません。",
     "posterAssumedPaper": "用紙サイズが不明です: タイルは {{paper}} に配置されます。",
@@ -177,6 +191,10 @@
     "documentAndMarkups": "ドキュメントと注釈",
     "document": "ドキュメント",
     "printAsImage": "画像として印刷",
+    "colorMode": "カラーモード：",
+    "colorModeColor": "カラー",
+    "colorModeGrayscale": "グレースケール",
+    "colorModeBlackWhite": "白黒",
     "pagesToPrint": "ページを印刷",
     "noPrinterSelected": "プリンターが選択されていません。",
     "noPagesToPrint": "印刷するページがありません。",
@@ -346,7 +364,13 @@
     "chooseImage": "画像を選択...",
     "scale": "スケール：",
     "selectImageFirst": "先に画像を選択してください。",
-    "defaultText": "下書き"
+    "defaultText": "下書き",
+    "autoFit": "ページに自動フィット",
+    "autoFitHint": "各ページに合わせてテキストを調整します。表示されるサイズは現在のページのものです。",
+    "increaseFontSize": "フォントサイズを大きくする",
+    "decreaseFontSize": "フォントサイズを小さくする",
+    "textHistory": "以前に使用したテキスト",
+    "removeFromHistory": "履歴から削除"
   },
   "headerFooter": {
     "addTitle": "ヘッダー/フッターを追加",
@@ -405,7 +429,7 @@
   },
   "update": {
     "title": "ソフトウェアの更新",
-    "newVersionAvailable": "PT PDF Studio の新しいバージョンが利用可能です。",
+    "newVersionAvailable": "Open PDF Studio の新しいバージョンが利用可能です。",
     "currentVersion": "現在のバージョン：",
     "newVersion": "新しいバージョン：",
     "releaseNotes": "リリースノート：",
@@ -430,7 +454,8 @@
     "styleLabel": "スタイル：",
     "nestTitle": "新しいしおりの下に入れる",
     "deleteTitle": "しおりの削除",
-    "deleteConfirm": "選択した {{count}} 件のしおりと、その下のすべてを削除しますか？"
+    "deleteConfirm": "選択した {{count}} 件のしおりと、その下のすべてを削除しますか？",
+    "replaceAll": "すべてのブックマークを置き換える"
   },
   "formValidation": {
     "title": "入力エラー"
@@ -555,7 +580,7 @@
   },
   "defaultPdfApp": {
     "title": "既定の PDF アプリ",
-    "message": "PT PDF Studio は PDF ファイルを開く既定のアプリケーションとして設定されていません。既定のアプリケーションに設定しますか？",
+    "message": "Open PDF Studio は PDF ファイルを開く既定のアプリケーションとして設定されていません。既定のアプリケーションに設定しますか？",
     "setAsDefault": "既定に設定",
     "dontAskAgain": "今後は表示しない",
     "notNow": "今はしない"
@@ -563,6 +588,30 @@
   "ifcExport": {
     "saveTitle": "IFC レポートとして保存",
     "failed": "IFC レポートの保存に失敗しました：{{error}}"
+  },
+  "ifcxExport": {
+    "title": "IFCX にエクスポート（ベータ）",
+    "betaNote": "ベータ版: IFCX（IFC5）はまだ開発中です。結果を利用する前に確認してください。",
+    "pages": "ページ:",
+    "allPages": "すべてのページ",
+    "currentPage": "現在のページ",
+    "customPages": "ページ範囲",
+    "rangePlaceholder": "例: 1-3, 5",
+    "includeRaster": "画像を含める",
+    "includeText": "テキストを含める",
+    "includeAnnotations": "注釈を別レイヤーに",
+    "export": "エクスポート",
+    "progress": "{{total}} ページ中 {{done}} ページ目をエクスポート中…",
+    "done": "書き込み完了: {{file}}（シート {{sheets}}、パス {{paths}}、テキスト {{texts}}、画像 {{images}}、注釈 {{annotations}}）",
+    "capPaths": "{{page}} ページ: パス {{total}} 個のうち {{kept}} 個をエクスポートしました。残りは上限を超えています。",
+    "capTexts": "{{page}} ページ: テキスト行 {{total}} 個のうち {{kept}} 個をエクスポートしました。残りは上限を超えています。",
+    "capImages": "{{page}} ページ: 画像 {{total}} 個のうち {{kept}} 個をエクスポートしました。残りは上限を超えています。",
+    "imagesOmitted": "ピクセルデータのない画像（未対応またはサイズ超過）: {{count}}。位置は保持されます。",
+    "sizeLimit": "{{page}} ページ以降はエクスポートされませんでした。ファイルがサイズの上限に達しました。",
+    "noPages": "ページが選択されていません。",
+    "noBytes": "この文書の PDF データを利用できません。文書を保存してから再試行してください。",
+    "failed": "IFCX のエクスポートに失敗しました: {{error}}",
+    "unsavedNote": "ページ内容の未保存の変更は含まれません。注釈は含まれます。"
   },
   "styleType": {
     "lineTypes": "線種",
@@ -1128,7 +1177,7 @@
   },
   "recovery": {
     "title": "保存されていない作業の復元",
-    "intro": "前回、PT PDF Studio は正常に終了しませんでした。次のドキュメントの保存されていない作業が保持されています:",
+    "intro": "前回、Open PDF Studio は正常に終了しませんでした。次のドキュメントの保存されていない作業が保持されています:",
     "savedAt": "保持日時: {{time}}",
     "pages": "ページ数: {{count}}",
     "untitled": "無題のドキュメント",
@@ -1149,7 +1198,7 @@
     "deleteFailed": "削除できませんでした: {{error}}",
     "tabLabel": "復元済み",
     "tabTip": "予期しない終了の後に復元されました。保存すると元のファイルに書き込まれます。",
-    "reloadStopped": "PT PDF Studio のウィンドウが続けて何度か停止したため、自動での再読み込みは行われなくなりました。作業を保存してアプリを再起動してください。"
+    "reloadStopped": "Open PDF Studio のウィンドウが続けて何度か停止したため、自動での再読み込みは行われなくなりました。作業を保存してアプリを再起動してください。"
   },
   "protectPdf": {
     "title": "パスワードで保護",
@@ -1246,7 +1295,9 @@
     "empty": "確認対象の候補はありません。先に OCR を実行するか、しきい値を上げてください。確認用メタデータのない古い PDF は、OCR を再実行する必要があります。",
     "error": "確認結果を更新できませんでした。ドキュメントが変更された場合は、キューを更新してください。",
     "accepted": "承認済み",
-    "corrected": "修正済み"
+    "corrected": "修正済み",
+    "notEncodable": "検索可能な OCR テキストにはこれらの文字を含めることができません: {{characters}}。別の文字で単語を修正してください。",
+    "archived": "確認結果はファイルに保存されています。変更するには、このページで OCR を再実行してください。"
   },
   "portfolio": {
     "title": "PDF コレクション ポートフォリオ",
@@ -1596,6 +1647,57 @@
       "cancel": "キャンセル",
       "supersede": "置き換え",
       "expire": "期限切れ"
+    }
+  },
+  "pageOrganizer": {
+    "title": "ページの編集",
+    "hint": "ページをドラッグして移動します。PDF ファイルをドロップするとそのページを挿入します。Ctrl+クリック、Shift+クリック、またはチェックボックスで複数ページを選択します。「適用」するまで何も変更されません。",
+    "moveLeft": "左へ移動",
+    "moveRight": "右へ移動",
+    "moveToStart": "先頭へ移動",
+    "moveToEnd": "末尾へ移動",
+    "selection": "{{total}} ページ中 {{selected}} ページを選択",
+    "rotateLeft": "左に回転",
+    "rotateRight": "右に回転",
+    "split": "分割",
+    "splitTitle": "選択したページの前後に分割マークを置きます: 各範囲が別のファイルになります",
+    "splitHere": "ここで分割 (分割マークの配置/解除)",
+    "extractTitle": "選択したページを新しいファイルに抽出",
+    "blankPage": "空白ページ",
+    "pagesFromFile": "ファイルからページ…",
+    "insertHere": "ここにページを挿入",
+    "select": "ページを選択",
+    "zoom": "ズーム",
+    "parts": "適用時に {{count}} 個のファイルに分割",
+    "chooseFolder": "分割したファイルの保存先フォルダーを選択",
+    "fileFailed": "{{name}} を読み込めませんでした: {{error}}",
+    "applyFailed": "ページの編集を適用できませんでした: {{error}}",
+    "extractFailed": "ページを抽出できませんでした: {{error}}",
+    "blankSetup": "空白ページの設定",
+    "sameAsAdjacent": "隣接ページと同じ",
+    "width": "幅：",
+    "height": "高さ：",
+    "unit": "単位："
+  },
+  "accessibilityReport": {
+    "title": "アクセシビリティ チェック",
+    "starting": "チェック中...",
+    "checking": "{{total}} ページ中 {{done}} ページ目をチェック中...",
+    "noIssues": "問題は見つかりませんでした。",
+    "summary": "{{count}} 件の問題が見つかりました。項目をダブルクリックするとそのページへ移動します。",
+    "failed": "この文書ではチェックを実行できませんでした。",
+    "recheck": "再チェック",
+    "close": "閉じる",
+    "goTo": "ダブルクリックでページへ移動",
+    "page": "{{page}} ページ",
+    "kind": {
+      "notTagged": "文書にタグがありません。構造ツリーがないため、支援技術は読み上げ順序をたどれません。",
+      "notMarked": "文書がタグ付きとしてマークされていません (/MarkInfo /Marked)。",
+      "noLanguage": "文書の言語が設定されていません。",
+      "figureNoAlt": "代替テキストのない {{role}}",
+      "pageNotTagged": "このページにはタグ付きコンテンツがありません (テキスト項目 {{count}} 件)",
+      "untaggedContent": "タグ外のテキスト項目 {{count}} 件",
+      "annotationNoText": "説明のない注釈 ({{type}})"
     }
   },
   "calibrateXy": {

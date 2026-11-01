@@ -140,6 +140,7 @@
     "prepareOcr": "Obre per a l'OCR…"
   },
   "symbolSearch": "Cerca símbols",
+  "findMoreOptions": "Més opcions de cerca",
   "watchActive": "Supervisant {{folder}}",
   "watchFailed": "Error de supervisió: {{folder}}",
   "watchTitle": "El flux de treball de documents supervisa {{input}} i escriu a {{output}}. Feu clic per deixar de supervisar.",
@@ -147,5 +148,14 @@
     "title": "Ves a la següent incidència de renderització. No tenir incidències no garanteix una renderització completa.",
     "count": "Incidències de renderització: {{count}}",
     "detail": "Pàgina {{page}}: {{code}}. Proveu un zoom més baix o torneu a obrir el document; la completesa no està garantida."
+  },
+  "mcpSignal": {
+    "label": "Connexió d'IA (MCP)",
+    "connected": "Assistent d'IA connectat",
+    "idle": "Servidor MCP engegat, en repòs",
+    "off": "Servidor MCP aturat",
+    "port": "Port: {{port}}",
+    "lastTool": "Última eina: {{tool}} a les {{time}}",
+    "noTool": "Encara no hi ha crides a eines"
   }
 }

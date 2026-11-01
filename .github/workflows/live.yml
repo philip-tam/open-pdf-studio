@@ -1,0 +1,36 @@
+name: Deploy site
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-site
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    uses: OpenAEC-Foundation/github/.github/workflows/deploy-site.yml@main
+    with:
+      deploy_host: ${{ vars.DEPLOY_HOST }}
+      deploy_port: ${{ vars.DEPLOY_PORT }}
+      deploy_user: ${{ vars.DEPLOY_USER }}
+      deploy_path: /var/www/open-pdf-studio.open-aec.com
+      node_version: "22"
+      install_command: cd open-pdf-studio && npm ci
+      # Rechtstreeks vite: `npm run build` draait via prebuild ook
+      # `cargo build -p pdfium-worker`, en die vindt geen Cargo.toml omdat de
+      # deploy alleen de map open-pdf-studio uitcheckt. De website heeft die
+      # native worker niet nodig. OPDS_WEB_BUILD=1 markeert het als webbouw:
+      # desktopmodules zoals de sleepplugin vallen eruit (#776,
+      # open-pdf-studio/scripts/web-bouw.mjs).
+      build_command: cd open-pdf-studio && OPDS_WEB_BUILD=1 npx vite build && node scripts/web-statistics.mjs
+      checkout_sparse: |
+        open-pdf-studio
+    secrets:
+      deploy_ssh_key: ${{ secrets.DEPLOY_SSH_KEY }}

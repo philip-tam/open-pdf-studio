@@ -1,6 +1,7 @@
 export interface Preferences {
   // Theme
   theme: string;
+  uiScale: number;
 
   // Weergavemodus waarmee een document opent: 'continuous' (doorlopend,
   // de standaard voor nieuwe installaties) of 'single' (één pagina).
@@ -29,6 +30,8 @@ export interface Preferences {
   snapToEndpoints: boolean;
   snapToMidpoints: boolean;
   snapToCenters: boolean;
+  snapToVertices: boolean;
+  snapToStartPoints: boolean;
   snapToEdges: boolean;
   snapToIntersections: boolean;
   snapToPerpendicular: boolean;
@@ -39,6 +42,9 @@ export interface Preferences {
   objectSnapRadius: number;
   snapToPdfContent: boolean;
   enableImageAlignSnap: boolean;
+  moveInferenceTracking: boolean;
+  moveInferenceExtension: boolean;
+  moveInferenceParallel: boolean;
   keepToolActive: boolean;
   lineContinue: boolean;
   ribbonCollapsed: boolean;
@@ -57,6 +63,7 @@ export interface Preferences {
   textboxBorderStyle: string;
   textboxOpacity: number;
   textboxFontSize: number;
+  textboxFontFamily?: string;
 
   // Callout defaults
   calloutFillColor: string;
@@ -66,6 +73,7 @@ export interface Preferences {
   calloutBorderStyle: string;
   calloutOpacity: number;
   calloutFontSize: number;
+  calloutFontFamily?: string;
 
   // Rectangle defaults
   rectFillColor: string;
@@ -98,6 +106,10 @@ export interface Preferences {
   drawStrokeColor: string;
   drawLineWidth: number;
   drawOpacity: number;
+  drawPressure: boolean;
+  drawPressureMinWidth: number;
+  drawSmoothing: number;
+  drawPenOnly: boolean;
 
   // Wipeout Brush defaults
   wipeoutBrushRadiusMm: number;
@@ -204,6 +216,8 @@ export interface Preferences {
   autoSelectAfterCreate: boolean;
   confirmBeforeDelete: boolean;
   wheelZoomWithoutCtrl: boolean;
+  middleDoubleClickFit: boolean;
+  ribbonWheelSwitchesTabs: boolean;
 
   // Startup
   restoreLastSession: boolean;
@@ -234,12 +248,19 @@ export interface Preferences {
 
   // View
   thinLines: boolean;
+  readAloudVoice: string;
+  readAloudRate: number;
+  readAloudAllowOnline: boolean;
   showScrollbars: boolean;
+  // '' = default, or '#rrggbb' (#859).
+  pageBackgroundColor: string;
   progressiveRender: boolean;
   screenCalibration: Record<string, number>;
   zoomDpi: number;
   pageSharpen: number;
   paperSizeUnit: string;
+  // Keyboard shortcuts changed by the user (#714): command id -> combinations.
+  keyboardShortcuts: Record<string, string[]>;
 
   // Panels
   propertiesPanelVisible: boolean;
@@ -312,4 +333,5 @@ export interface PrintSettings {
   autoCenter: boolean;
   content: 'doc-and-markups' | 'doc-only';
   asImage: boolean;
+  colorMode?: 'color' | 'grayscale' | 'bw';
 }

@@ -26,119 +26,147 @@ export function tokenizeContentStream(src) {
   const n = src.length;
   let i = 0;
   while (i < n) {
-    const ch = src[i];
-    if (WHITESPACE.has(ch)) { i++; continue; }
-    if (ch === '%') { // commentaar tot regel-einde
-      while (i < n && src[i] !== '\n' && src[i] !== '\r') i++;
-      continue;
-    }
-    const start = i;
-    if (ch === '(') { // literal string
-      const bytes = [];
-      let depth = 1;
-      i++;
-      while (i < n && depth > 0) {
-        const c = src[i];
-        if (c === '\\') {
-          const e = src[i + 1];
-          if (e === 'n') { bytes.push(10); i += 2; }
-          else if (e === 'r') { bytes.push(13); i += 2; }
-          else if (e === 't') { bytes.push(9); i += 2; }
-          else if (e === 'b') { bytes.push(8); i += 2; }
-          else if (e === 'f') { bytes.push(12); i += 2; }
-          else if (e === '(' || e === ')' || e === '\\') { bytes.push(e.charCodeAt(0)); i += 2; }
-          else if (e >= '0' && e <= '7') { // octaal, 1-3 cijfers
-            let oct = e; i += 2;
-            for (let k = 0; k < 2 && i < n && src[i] >= '0' && src[i] <= '7'; k++) { oct += src[i]; i++; }
-            bytes.push(parseInt(oct, 8) & 0xFF);
-          } else if (e === '\r') { i += 2; if (src[i] === '\n') i++; } // regelvervolg
-          else if (e === '\n') { i += 2; }
-          else { bytes.push(e ? e.charCodeAt(0) : 0); i += 2; } // \x → x
-        } else if (c === '(') { depth++; bytes.push(40); i++; }
-        else if (c === ')') { depth--; if (depth > 0) bytes.push(41); i++; }
-        else { bytes.push(c.charCodeAt(0)); i++; }
-      }
-      tokens.push({ t: 'str', v: bytes, s: start, e: i });
-      continue;
-    }
-    if (ch === '<') {
-      if (src[i + 1] === '<') { tokens.push({ t: 'dict<<', s: i, e: i + 2 }); i += 2; continue; }
-      // hex string
-      i++;
-      let hex = '';
-      while (i < n && src[i] !== '>') {
-        if (!WHITESPACE.has(src[i])) hex += src[i];
-        i++;
-      }
-      i++; // '>'
-      if (hex.length % 2 === 1) hex += '0';
-      const bytes = [];
-      for (let k = 0; k < hex.length; k += 2) bytes.push(parseInt(hex.slice(k, k + 2), 16) & 0xFF);
-      tokens.push({ t: 'str', v: bytes, s: start, e: i });
-      continue;
-    }
-    if (ch === '>') {
-      if (src[i + 1] === '>') { tokens.push({ t: 'dict>>', s: i, e: i + 2 }); i += 2; continue; }
-      i++; continue; // losstaand '>' — ongeldig, overslaan
-    }
-    if (ch === '[') { tokens.push({ t: 'arr[', s: i, e: i + 1 }); i++; continue; }
-    if (ch === ']') { tokens.push({ t: 'arr]', s: i, e: i + 1 }); i++; continue; }
-    if (ch === '{') { tokens.push({ t: 'proc{', s: i, e: i + 1 }); i++; continue; }
-    if (ch === '}') { tokens.push({ t: 'proc}', s: i, e: i + 1 }); i++; continue; }
-    if (ch === '/') { // naam
-      i++;
-      let name = '';
-      while (i < n && isRegular(src[i])) {
-        if (src[i] === '#' && /^[0-9a-fA-F]{2}$/.test(src.slice(i + 1, i + 3))) {
-          name += String.fromCharCode(parseInt(src.slice(i + 1, i + 3), 16));
-          i += 3;
-        } else { name += src[i]; i++; }
-      }
-      tokens.push({ t: 'name', v: name, s: start, e: i });
-      continue;
-    }
-    if (/[0-9+\-.]/.test(ch)) { // getal
-      i++;
-      while (i < n && /[0-9.]/.test(src[i])) i++;
-      const raw = src.slice(start, i);
-      const num = parseFloat(raw);
-      if (Number.isFinite(num)) { tokens.push({ t: 'num', v: num, s: start, e: i }); continue; }
-      // geen geldig getal (bv. losse '-'): als operator-achtig token behandelen
-      tokens.push({ t: 'op', v: raw, s: start, e: i });
-      continue;
-    }
-    // bareword: operator of true/false/null
-    i++;
-    while (i < n && isRegular(src[i])) i++;
-    const word = src.slice(start, i);
-    if (word === 'true' || word === 'false') tokens.push({ t: 'bool', v: word === 'true', s: start, e: i });
-    else if (word === 'null') tokens.push({ t: 'null', v: null, s: start, e: i });
-    else if (word === 'BI') {
-      // Inline image: dict-tokens tot 'ID', daarna binaire data tot 'EI'.
-      // De binaire data mag niet door de tokenizer — zoek het einde ruw op.
-      let j = i;
-      // zoek 'ID' als los token
-      while (j < n) {
-        if (src[j] === 'I' && src[j + 1] === 'D'
-            && (j === 0 || !isRegular(src[j - 1]))
-            && (j + 2 >= n || !isRegular(src[j + 2]))) { j += 2; break; }
-        j++;
-      }
-      // sla binaire data over tot whitespace-'EI'-(whitespace|einde)
-      while (j < n) {
-        if (src[j] === 'E' && src[j + 1] === 'I'
-            && WHITESPACE.has(src[j - 1] || ' ')
-            && (j + 2 >= n || WHITESPACE.has(src[j + 2]) || DELIMITERS.has(src[j + 2]))) {
-          j += 2; break;
-        }
-        j++;
-      }
-      tokens.push({ t: 'op', v: 'BI..EI', s: start, e: j });
-      i = j;
-    }
-    else tokens.push({ t: 'op', v: word, s: start, e: i });
+    const token = leesToken(src, i, n);
+    i = volgendePositie;
+    if (token) tokens.push(token);
   }
   return tokens;
+}
+
+// Dezelfde tokens, één voor één (generator). Voor wie een hele pagina doorloopt
+// zonder alle tokens tegelijk in het geheugen te willen houden (zware
+// CAD-pagina's, ifcx-inhoud.js). tokenizeContentStream blijft een gewone lus:
+// een generator is op zware pagina's merkbaar trager, en die functie zit in
+// het teken- en printpad.
+export function* iterContentTokens(src) {
+  const n = src.length;
+  let i = 0;
+  while (i < n) {
+    const token = leesToken(src, i, n);
+    i = volgendePositie;
+    if (token) yield token;
+  }
+}
+
+// Positie na het laatst gelezen token (of overgeslagen witruimte/commentaar).
+// Synchroon gezet en direct gelezen door de twee lussen hierboven.
+let volgendePositie = 0;
+
+// Leest het token dat op `i` begint; null voor witruimte, commentaar en een
+// losstaande '>'. Zet volgendePositie op de plek erna.
+function leesToken(src, i, n) {
+  const ch = src[i];
+  if (WHITESPACE.has(ch)) { volgendePositie = i + 1; return null; }
+  if (ch === '%') { // commentaar tot regel-einde
+    while (i < n && src[i] !== '\n' && src[i] !== '\r') i++;
+    volgendePositie = i;
+    return null;
+  }
+  const start = i;
+  if (ch === '(') { // literal string
+    const bytes = [];
+    let depth = 1;
+    i++;
+    while (i < n && depth > 0) {
+      const c = src[i];
+      if (c === '\\') {
+        const e = src[i + 1];
+        if (e === 'n') { bytes.push(10); i += 2; }
+        else if (e === 'r') { bytes.push(13); i += 2; }
+        else if (e === 't') { bytes.push(9); i += 2; }
+        else if (e === 'b') { bytes.push(8); i += 2; }
+        else if (e === 'f') { bytes.push(12); i += 2; }
+        else if (e === '(' || e === ')' || e === '\\') { bytes.push(e.charCodeAt(0)); i += 2; }
+        else if (e >= '0' && e <= '7') { // octaal, 1-3 cijfers
+          let oct = e; i += 2;
+          for (let k = 0; k < 2 && i < n && src[i] >= '0' && src[i] <= '7'; k++) { oct += src[i]; i++; }
+          bytes.push(parseInt(oct, 8) & 0xFF);
+        } else if (e === '\r') { i += 2; if (src[i] === '\n') i++; } // regelvervolg
+        else if (e === '\n') { i += 2; }
+        else { bytes.push(e ? e.charCodeAt(0) : 0); i += 2; } // \x → x
+      } else if (c === '(') { depth++; bytes.push(40); i++; }
+      else if (c === ')') { depth--; if (depth > 0) bytes.push(41); i++; }
+      else { bytes.push(c.charCodeAt(0)); i++; }
+    }
+    volgendePositie = i;
+    return { t: 'str', v: bytes, s: start, e: i };
+  }
+  if (ch === '<') {
+    if (src[i + 1] === '<') { volgendePositie = i + 2; return { t: 'dict<<', s: i, e: i + 2 }; }
+    // hex string
+    i++;
+    let hex = '';
+    while (i < n && src[i] !== '>') {
+      if (!WHITESPACE.has(src[i])) hex += src[i];
+      i++;
+    }
+    i++; // '>'
+    if (hex.length % 2 === 1) hex += '0';
+    const bytes = [];
+    for (let k = 0; k < hex.length; k += 2) bytes.push(parseInt(hex.slice(k, k + 2), 16) & 0xFF);
+    volgendePositie = i;
+    return { t: 'str', v: bytes, s: start, e: i };
+  }
+  if (ch === '>') {
+    if (src[i + 1] === '>') { volgendePositie = i + 2; return { t: 'dict>>', s: i, e: i + 2 }; }
+    volgendePositie = i + 1; return null; // losstaand '>' — ongeldig, overslaan
+  }
+  if (ch === '[') { volgendePositie = i + 1; return { t: 'arr[', s: i, e: i + 1 }; }
+  if (ch === ']') { volgendePositie = i + 1; return { t: 'arr]', s: i, e: i + 1 }; }
+  if (ch === '{') { volgendePositie = i + 1; return { t: 'proc{', s: i, e: i + 1 }; }
+  if (ch === '}') { volgendePositie = i + 1; return { t: 'proc}', s: i, e: i + 1 }; }
+  if (ch === '/') { // naam
+    i++;
+    let name = '';
+    while (i < n && isRegular(src[i])) {
+      if (src[i] === '#' && /^[0-9a-fA-F]{2}$/.test(src.slice(i + 1, i + 3))) {
+        name += String.fromCharCode(parseInt(src.slice(i + 1, i + 3), 16));
+        i += 3;
+      } else { name += src[i]; i++; }
+    }
+    volgendePositie = i;
+    return { t: 'name', v: name, s: start, e: i };
+  }
+  if (/[0-9+\-.]/.test(ch)) { // getal
+    i++;
+    while (i < n && /[0-9.]/.test(src[i])) i++;
+    const raw = src.slice(start, i);
+    const num = parseFloat(raw);
+    if (Number.isFinite(num)) { volgendePositie = i; return { t: 'num', v: num, s: start, e: i }; }
+    // geen geldig getal (bv. losse '-'): als operator-achtig token behandelen
+    volgendePositie = i;
+    return { t: 'op', v: raw, s: start, e: i };
+  }
+  // bareword: operator of true/false/null
+  i++;
+  while (i < n && isRegular(src[i])) i++;
+  const word = src.slice(start, i);
+  if (word === 'true' || word === 'false') { volgendePositie = i; return { t: 'bool', v: word === 'true', s: start, e: i }; }
+  else if (word === 'null') { volgendePositie = i; return { t: 'null', v: null, s: start, e: i }; }
+  else if (word === 'BI') {
+    // Inline image: dict-tokens tot 'ID', daarna binaire data tot 'EI'.
+    // De binaire data mag niet door de tokenizer — zoek het einde ruw op.
+    let j = i;
+    // zoek 'ID' als los token
+    while (j < n) {
+      if (src[j] === 'I' && src[j + 1] === 'D'
+          && (j === 0 || !isRegular(src[j - 1]))
+          && (j + 2 >= n || !isRegular(src[j + 2]))) { j += 2; break; }
+      j++;
+    }
+    // sla binaire data over tot whitespace-'EI'-(whitespace|einde)
+    while (j < n) {
+      if (src[j] === 'E' && src[j + 1] === 'I'
+          && WHITESPACE.has(src[j - 1] || ' ')
+          && (j + 2 >= n || WHITESPACE.has(src[j + 2]) || DELIMITERS.has(src[j + 2]))) {
+        j += 2; break;
+      }
+      j++;
+    }
+    volgendePositie = j;
+    return { t: 'op', v: 'BI..EI', s: start, e: j };
+  }
+  else { volgendePositie = i; return { t: 'op', v: word, s: start, e: i }; }
 }
 
 // ── Matrix-hulpen (rij-vector-conventie: punt · M) ──
@@ -146,7 +174,7 @@ export function tokenizeContentStream(src) {
 const IDENTITY = [1, 0, 0, 1, 0, 0];
 
 // A daarna B toepassen: resultaat = A·B.
-function matMul(A, B) {
+export function matMul(A, B) {
   return [
     A[0] * B[0] + A[1] * B[2],
     A[0] * B[1] + A[1] * B[3],
@@ -177,23 +205,29 @@ function matMul(A, B) {
 //   behouden).
 //
 // Het resultaat-array draagt daarnaast een `xobjects`-eigenschap:
-// [{ si, name, ctm }] voor elke Do-operator, met de CTM op dat moment. De
-// aanroeper kan hiermee bepalen of een afbeelding (bv. een scan-achtergrond)
-// onder een tekstrun ligt — dan moet het afdekvlak blijven, ook al is de
-// vector-tekst geknipt.
-export function interpretContentStreams(streams) {
+// [{ si, s, name, ctm, tekstState }] voor elke Do-operator, met de CTM en de
+// tekst-state op dat moment. De aanroeper kan hiermee bepalen of een
+// afbeelding (bv. een scan-achtergrond) onder een tekstrun ligt — dan moet
+// het afdekvlak blijven, ook al is de vector-tekst geknipt — en de inhoud
+// van een Form XObject interpreteren zoals hij getekend wordt.
+//
+// start: begintoestand, voor de inhoud van een Form XObject: { ctm } (Matrix
+// × CTM bij de Do) en de tekst-state bij de Do ({ font, size, tl, tc, tw,
+// tz, tr }); die hoort bij de grafische state en geldt ook in het formulier.
+export function interpretContentStreams(streams, start = {}) {
   const ops = [];
   const xobjects = [];
-  let ctm = IDENTITY.slice();
+  let ctm = Array.isArray(start.ctm) && start.ctm.length === 6 ? start.ctm.slice() : IDENTITY.slice();
   const ctmStack = [];
   let tm = null;
   let lm = null;
-  let font = null;
-  let size = 0;
-  let tl = 0;
-  let tc = 0;   // Tc: character spacing (pt, ongescaled tekstruimte)
-  let tw = 0;   // Tw: word spacing (pt)
-  let tz = 100; // Tz: horizontale schaal (%)
+  let font = start.font ?? null;
+  let size = Number(start.size) || 0;
+  let tl = Number(start.tl) || 0;
+  let tc = Number(start.tc) || 0;   // Tc: character spacing (pt, ongescaled tekstruimte)
+  let tw = Number(start.tw) || 0;   // Tw: word spacing (pt)
+  let tz = Number.isFinite(Number(start.tz)) && start.tz != null ? Number(start.tz) : 100; // Tz: horizontale schaal (%)
+  let tr = Number(start.tr) || 0;    // Tr: render-modus (3 = onzichtbaar, bv. een OCR-laag)
   let chain = 0;
   let chainHasShow = false;
 
@@ -225,6 +259,7 @@ export function interpretContentStreams(streams) {
       tc,
       tw,
       tz,
+      tr,
     });
     chainHasShow = true;
   };
@@ -238,8 +273,12 @@ export function interpretContentStreams(streams) {
       const nums = operands.filter(t => t.t === 'num').map(t => t.v);
       const strs = operands.filter(t => t.t === 'str');
       switch (opName) {
-        case 'q': ctmStack.push(ctm.slice()); break;
-        case 'Q': if (ctmStack.length) ctm = ctmStack.pop(); break;
+        // De tekst-state (font, Tc, Tw, Tz, TL, Tr) hoort bij de grafische
+        // state en komt met Q terug, net als de CTM.
+        case 'q': ctmStack.push({ ctm: ctm.slice(), font, size, tl, tc, tw, tz, tr }); break;
+        case 'Q':
+          if (ctmStack.length) ({ ctm, font, size, tl, tc, tw, tz, tr } = ctmStack.pop());
+          break;
         case 'cm':
           if (nums.length >= 6) ctm = matMul(nums.slice(-6), ctm);
           break;
@@ -263,6 +302,7 @@ export function interpretContentStreams(streams) {
         case 'Tc': if (nums.length) tc = nums[nums.length - 1]; break;
         case 'Tw': if (nums.length) tw = nums[nums.length - 1]; break;
         case 'Tz': if (nums.length) tz = nums[nums.length - 1]; break;
+        case 'Tr': if (nums.length) tr = nums[nums.length - 1]; break;
         case 'Tj':
           record(si, operands, tok, 'Tj', strs.length ? [strs[strs.length - 1].v] : []);
           break;
@@ -284,7 +324,12 @@ export function interpretContentStreams(streams) {
         }
         case 'Do': {
           const nameTok = operands.filter(t => t.t === 'name').pop();
-          if (nameTok) xobjects.push({ si, name: nameTok.v, ctm: ctm.slice() });
+          if (nameTok) {
+            xobjects.push({
+              si, s: tok.s, name: nameTok.v, ctm: ctm.slice(),
+              tekstState: { font, size, tl, tc, tw, tz, tr },
+            });
+          }
           break;
         }
         default: break; // overige operatoren: geen tekst-state-effect dat wij volgen

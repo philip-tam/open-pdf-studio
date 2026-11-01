@@ -1,5 +1,7 @@
 import { createSignal, createEffect, onMount, onCleanup, children as resolveChildren, Show } from 'solid-js';
 import { useTranslation } from '../../../i18n/useTranslation.js';
+import { naLettertypen } from './na-lettertypen.js';
+import { uiSchaalFactor, UI_SCHAAL_EVENT } from '../../../core/ui-scale.js';
 
 /**
  * AdaptiveGroups
@@ -136,7 +138,8 @@ export default function AdaptiveGroups(props) {
     if (total <= containerW) {
       cutoff = nodes.length; // everything fits
     } else {
-      const budget = Math.max(0, containerW - OVERFLOW_RESERVE_PX);
+      // The "More" button grows with the interface size (#883).
+      const budget = Math.max(0, containerW - OVERFLOW_RESERVE_PX * uiSchaalFactor());
       let used = 0;
       cutoff = nodes.length;
       for (let i = 0; i < nodes.length; i++) {
@@ -186,14 +189,23 @@ export default function AdaptiveGroups(props) {
     // re-fires, so that premature result would stick. Re-measure once the DOM
     // has painted (double rAF) and again once web fonts are ready, so any
     // early miscount self-corrects.
+    //
+    // The first measure runs in the next frame, not in a microtask: reading
+    // layout here (or even reading document.fonts.ready) forced a full style
+    // and layout pass in the middle of the startup task (#707). The frame
+    // runs that layout anyway, before the first paint.
     let disposed = false;
-    queueMicrotask(measure);
+    scheduleMeasure();
     requestAnimationFrame(() => requestAnimationFrame(() => { if (!disposed) measure(); }));
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => { if (!disposed) measure(); });
-    }
+    const stopFonts = naLettertypen(() => { if (!disposed) measure(); });
+    // Another interface size (#883): group widths change while the container
+    // width may not. Measure after the labels have been shrunk again.
+    const naSchaal = () => requestAnimationFrame(() => requestAnimationFrame(() => { if (!disposed) measure(); }));
+    window.addEventListener(UI_SCHAAL_EVENT, naSchaal);
     onCleanup(() => {
       disposed = true;
+      stopFonts();
+      window.removeEventListener(UI_SCHAAL_EVENT, naSchaal);
       ro.disconnect();
       mo.disconnect();
       document.removeEventListener('mousedown', onDocClick, true);

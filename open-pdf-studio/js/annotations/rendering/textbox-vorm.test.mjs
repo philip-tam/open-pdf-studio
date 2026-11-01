@@ -1,8 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {
-  vormVan, hoekStraal, vormInzet, vakPadPdf, bouwVakPad, TEKSTVAK_VORMEN, vormZones, schaduwAfstand,
-} from './textbox-vorm.js';
+import { vormVan, hoekStraal, vormInzet, vakPadPdf, bouwVakPad, TEKSTVAK_VORMEN } from './textbox-vorm.js';
 import { textboxTekstInzet, textboxTekstBreedte } from './textbox-layout.js';
 
 test('vormVan: onbekend of leeg is een rechthoek', () => {
@@ -61,10 +59,4 @@ test('bouwVakPad roept het juiste canvaspad aan', () => {
   assert.deepEqual(calls.map((c) => c[0]), ['beginPath', 'rect', 'beginPath', 'roundRect', 'beginPath', 'ellipse']);
   assert.deepEqual(calls[3].slice(1), [0, 0, 100, 50, 10]);
   assert.deepEqual(calls[5].slice(1), [50, 25, 50, 25, 0, 0, Math.PI * 2]);
-});
-
-test('schaduw: er is geen slagschaduw meer, ook niet voor oude bestanden', () => {
-  assert.equal(schaduwAfstand({ width: 150, height: 50 }), 0);
-  assert.equal(schaduwAfstand({ shadow: true, width: 150, height: 50 }), 0);
-  assert.deepEqual(vormZones({ shadow: true, width: 150, height: 50 }), { boven: 0, onder: 0 });
 });

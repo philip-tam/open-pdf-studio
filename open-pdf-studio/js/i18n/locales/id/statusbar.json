@@ -140,6 +140,7 @@
     "prepareOcr": "Buka untuk OCR…"
   },
   "symbolSearch": "Temukan simbol",
+  "findMoreOptions": "Opsi pencarian lainnya",
   "watchActive": "Memantau {{folder}}",
   "watchFailed": "Kesalahan pemantauan: {{folder}}",
   "watchTitle": "Alur kerja dokumen sedang memantau {{input}} dan menulis ke {{output}}. Klik untuk berhenti memantau.",
@@ -147,5 +148,14 @@
     "title": "Buka temuan render berikutnya. Tidak adanya temuan tidak menjamin render yang lengkap.",
     "count": "Temuan render: {{count}}",
     "detail": "Halaman {{page}}: {{code}}. Coba zoom yang lebih kecil atau buka ulang dokumen; kelengkapan tidak dijamin."
+  },
+  "mcpSignal": {
+    "label": "Koneksi AI (MCP)",
+    "connected": "Asisten AI terhubung",
+    "idle": "Server MCP aktif, diam",
+    "off": "Server MCP mati",
+    "port": "Port: {{port}}",
+    "lastTool": "Alat terakhir: {{tool}} pukul {{time}}",
+    "noTool": "Belum ada panggilan alat"
   }
 }

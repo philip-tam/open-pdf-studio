@@ -1,14 +1,5 @@
-import OcrReviewDialog from './dialogs/OcrReviewDialog.jsx';
-import DocumentWorkflowsDialog from './dialogs/DocumentWorkflowsDialog.jsx';
-import DrawingSetsDialog from './dialogs/DrawingSetsDialog.jsx';
-import SheetLinksDialog from './dialogs/SheetLinksDialog.jsx';
-import ApprovalRoutingDialog from './dialogs/ApprovalRoutingDialog.jsx';
-import { For } from 'solid-js';
+import { For, lazy } from 'solid-js';
 import { getDialogs } from '../stores/dialogStore.js';
-import PortfolioDialog from './dialogs/PortfolioDialog.jsx';
-import FormRecognitionDialog from './dialogs/FormRecognitionDialog.jsx';
-import SymbolSearchDialog from './dialogs/SymbolSearchDialog.jsx';
-import WorkbookBindingsDialog from './dialogs/WorkbookBindingsDialog.jsx';
 import DocPropertiesDialog from './DocPropertiesDialog.jsx';
 import PreferencesDialog from './preferences/PreferencesDialog.jsx';
 import NewDocDialog from './dialogs/NewDocDialog.jsx';
@@ -28,6 +19,7 @@ import TextAnnotationDialog from './dialogs/TextAnnotationDialog.jsx';
 import UpdateDialog from './dialogs/UpdateDialog.jsx';
 import BookmarkDialog from './dialogs/BookmarkDialog.jsx';
 import PageLabelsDialog from './dialogs/PageLabelsDialog.jsx';
+import BookmarkNamesDialog from './dialogs/BookmarkNamesDialog.jsx';
 import FormValidationDialog from './dialogs/FormValidationDialog.jsx';
 import StampPickerDialog from './dialogs/StampPickerDialog.jsx';
 import CalibrationDialog from './dialogs/CalibrationDialog.jsx';
@@ -59,8 +51,10 @@ import TitleBlockDialog from './dialogs/TitleBlockDialog.jsx';
 import CompareDialog from './compare/CompareDialog.jsx';
 import CadExportDialog from './dialogs/CadExportDialog.jsx';
 import CadImportDialog from './dialogs/CadImportDialog.jsx';
+import IfcxExportDialog from './dialogs/IfcxExportDialog.jsx';
 import AnnotationLayerDeleteDialog from './dialogs/AnnotationLayerDeleteDialog.jsx';
 import FlattenAllDialog from './dialogs/FlattenAllDialog.jsx';
+import { ToolSetImportDialog, ToolSetConfirmDialog } from './dialogs/ToolSetsDialogs.jsx';
 import TextEditOverlay from './TextEditOverlay.jsx';
 import StavenreeksInlineEditor from './StavenreeksInlineEditor.jsx';
 import ParametricLabelInlineEditor from './ParametricLabelInlineEditor.jsx';
@@ -73,8 +67,25 @@ import SysteemtypenDialog from './dialogs/SysteemtypenDialog.jsx';
 import SysteemPaneelComponentDialog from './dialogs/SysteemPaneelComponentDialog.jsx';
 import PrintProgressToast from './PrintProgressToast.jsx';
 
+// Feature dialogs that are opened rarely: loaded on first use, with their
+// services, so they stay out of the main chunk.
+const OcrReviewDialog = lazy(() => import('./dialogs/OcrReviewDialog.jsx'));
+const HostSaveAsDialog = lazy(() => import('./dialogs/HostSaveAsDialog.jsx'));
+const HostKeuzeDialog = lazy(() => import('./dialogs/HostKeuzeDialog.jsx'));
+const DocumentWorkflowsDialog = lazy(() => import('./dialogs/DocumentWorkflowsDialog.jsx'));
+const DrawingSetsDialog = lazy(() => import('./dialogs/DrawingSetsDialog.jsx'));
+const SheetLinksDialog = lazy(() => import('./dialogs/SheetLinksDialog.jsx'));
+const ApprovalRoutingDialog = lazy(() => import('./dialogs/ApprovalRoutingDialog.jsx'));
+const PortfolioDialog = lazy(() => import('./dialogs/PortfolioDialog.jsx'));
+const FormRecognitionDialog = lazy(() => import('./dialogs/FormRecognitionDialog.jsx'));
+const SymbolSearchDialog = lazy(() => import('./dialogs/SymbolSearchDialog.jsx'));
+const WorkbookBindingsDialog = lazy(() => import('./dialogs/WorkbookBindingsDialog.jsx'));
+const PageOrganizerDialog = lazy(() => import('./dialogs/PageOrganizerDialog.jsx'));
+const AccessibilityReportDialog = lazy(() => import('./dialogs/AccessibilityReportDialog.jsx'));
+
 const DIALOG_MAP = {
   'portfolio': PortfolioDialog,
+  'accessibility-report': AccessibilityReportDialog,
   'form-recognition': FormRecognitionDialog,
   'symbol-search': SymbolSearchDialog,
   'workbook-bindings': WorkbookBindingsDialog,
@@ -91,6 +102,7 @@ const DIALOG_MAP = {
   'systeemtypen': SysteemtypenDialog,
   'systeem-paneel-component': SysteemPaneelComponentDialog,
   'delete-pages': DeletePagesDialog,
+  'page-organizer': PageOrganizerDialog,
   'page-properties': PagePropertiesDialog,
   'extract-pages': ExtractPagesDialog,
   'split-document': SplitDocumentDialog,
@@ -105,6 +117,7 @@ const DIALOG_MAP = {
   'update': UpdateDialog,
   'bookmark': BookmarkDialog,
   'page-labels': PageLabelsDialog,
+  'bookmark-names': BookmarkNamesDialog,
   'form-validation': FormValidationDialog,
   'stamp-picker': StampPickerDialog,
   'calibration': CalibrationDialog,
@@ -126,6 +139,10 @@ const DIALOG_MAP = {
   'shortcuts': ShortcutsDialog,
   'extensions': ExtensionsDialog,
   'confirm': ConfirmDialog,
+  'host-save-as': HostSaveAsDialog,
+  'host-keuze': HostKeuzeDialog,
+  'tool-sets-import': ToolSetImportDialog,
+  'tool-sets-confirm': ToolSetConfirmDialog,
   'handtekening-detail': HandtekeningDetailDialog,
   'title-block-edit': TitleBlockDialog,
   'viewport-scale': ViewportScaleDialog,
@@ -135,6 +152,7 @@ const DIALOG_MAP = {
   'compare': CompareDialog,
   'cad-export': CadExportDialog,
   'cad-import': CadImportDialog,
+  'ifcx-export': IfcxExportDialog,
   'annotation-layer-delete': AnnotationLayerDeleteDialog,
   'flatten-all': FlattenAllDialog,
   'pdf-password': PasswordDialog,

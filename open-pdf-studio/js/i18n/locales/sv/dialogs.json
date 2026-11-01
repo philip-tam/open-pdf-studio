@@ -1,5 +1,15 @@
 {
   "newDoc": {
+    "frameStyles": {
+      "grootformaat": "Storformat",
+      "detailblad": "Detaljblad",
+      "voorblad": "Försättsblad"
+    },
+    "framePreview": "{{style}}, {{paper}} {{orientation}}, {{width}} x {{height}} mm",
+    "frameOrientation": {
+      "portrait": "stående",
+      "landscape": "liggande"
+    },
     "title": "Nytt dokument",
     "paperSize": "Pappersstorlek:",
     "widthMm": "Bredd (mm):",
@@ -23,7 +33,7 @@
   "printQueue": {
     "toolbarLabel": "Åtgärder för utskriftsjobb",
     "openInStudio": "Öppna i Studio",
-    "openInStudioTip": "Öppna det markerade jobbet i PT PDF Studio (Retur eller dubbelklick). Flera markerade jobb öppnas som ett sammanfogat dokument.",
+    "openInStudioTip": "Öppna det markerade jobbet i Open PDF Studio (Retur eller dubbelklick). Flera markerade jobb öppnas som ett sammanfogat dokument.",
     "mergeSelected": "Sammanfoga markerade…",
     "mergeSelectedTip": "Sammanfoga de markerade jobben, i listordning, till en PDF och spara den",
     "saveAs": "Spara som…",
@@ -63,11 +73,11 @@
     "adding": "Lägger till PDF-filer…",
     "saving": "Sparar…",
     "merging": "Sammanfogar {{done}} av {{count}}…",
-    "opening": "Öppnar i PT PDF Studio…",
+    "opening": "Öppnar i Open PDF Studio…",
     "deleting": "Raderar…",
     "saved": "Sparad som {{name}}",
     "merged": "Sammanfogad och sparad som {{name}}",
-    "opened": "Öppnad i PT PDF Studio",
+    "opened": "Öppnad i Open PDF Studio",
     "deleted": "Raderade: {{count}}",
     "failed": "Misslyckades: {{message}}",
     "mergedFileName": "Sammanfogad",
@@ -128,11 +138,15 @@
     "pageBorder": "Skriv ut sidkant",
     "perSheetNote": "Varje sida skalas för att passa sin cell, så sidskalningen ovan gäller inte.",
     "poster": "Affisch (rutor)",
+    "posterOverview": "Affischöversikt",
+    "posterOverlapLegend": "Skuggade områden upprepas på angränsande ark",
     "posterScale": "Rutskala",
     "posterOverlap": "Överlappning",
     "posterCutMarks": "Skärmärken",
     "posterLabels": "Etiketter (fil, sida, ruta)",
     "posterOnlyLarge": "Dela bara stora sidor",
+    "posterEdgeCrop": "Beskär små ytterkanter",
+    "posterEdgeCropHint": "Upp till {{max}} mm per ytterkant, endast för denna utskrift. Av: behåll allt innehåll.",
     "posterTileInfo": "Sida {{page}}: ruta {{row}},{{col}} (rad, kolumn) av {{rows}} × {{cols}}",
     "posterNotTiled": "Sida {{page}} får plats på ett ark och delas inte.",
     "posterAssumedPaper": "Okänd pappersstorlek: rutorna läggs ut på {{paper}}.",
@@ -177,6 +191,10 @@
     "documentAndMarkups": "Dokument och markeringar",
     "document": "Dokument",
     "printAsImage": "Skriv ut som bild",
+    "colorMode": "Färgläge:",
+    "colorModeColor": "Färg",
+    "colorModeGrayscale": "Gråskala",
+    "colorModeBlackWhite": "Svartvitt",
     "pagesToPrint": "sidor att skriva ut",
     "noPrinterSelected": "Ingen skrivare vald.",
     "noPagesToPrint": "Inga sidor att skriva ut.",
@@ -346,7 +364,13 @@
     "chooseImage": "Välj bild...",
     "scale": "Skala:",
     "selectImageFirst": "Välj en bild först.",
-    "defaultText": "UTKAST"
+    "defaultText": "UTKAST",
+    "autoFit": "Anpassa automatiskt till sidan",
+    "autoFitHint": "Anpassar texten till varje sida. Storleken som visas gäller aktuell sida.",
+    "increaseFontSize": "Öka teckenstorlek",
+    "decreaseFontSize": "Minska teckenstorlek",
+    "textHistory": "Tidigare använda texter",
+    "removeFromHistory": "Ta bort från historiken"
   },
   "headerFooter": {
     "addTitle": "Lägg till sidhuvud/sidfot",
@@ -405,7 +429,7 @@
   },
   "update": {
     "title": "Programuppdatering",
-    "newVersionAvailable": "En ny version av PT PDF Studio är tillgänglig.",
+    "newVersionAvailable": "En ny version av Open PDF Studio är tillgänglig.",
     "currentVersion": "Nuvarande version:",
     "newVersion": "Ny version:",
     "releaseNotes": "Versionsanteckningar:",
@@ -430,7 +454,8 @@
     "styleLabel": "Stil:",
     "nestTitle": "Placera under nytt bokmärke",
     "deleteTitle": "Ta bort bokmärken",
-    "deleteConfirm": "Ta bort {{count}} markerade bokmärken och allt under dem?"
+    "deleteConfirm": "Ta bort {{count}} markerade bokmärken och allt under dem?",
+    "replaceAll": "Ersätt alla bokmärken"
   },
   "formValidation": {
     "title": "Valideringsfel"
@@ -555,7 +580,7 @@
   },
   "defaultPdfApp": {
     "title": "Standard-PDF-app",
-    "message": "PT PDF Studio är inte angiven som standardapp för att öppna PDF-filer. Vill du ange den som standard?",
+    "message": "Open PDF Studio är inte angiven som standardapp för att öppna PDF-filer. Vill du ange den som standard?",
     "setAsDefault": "Ange som standard",
     "dontAskAgain": "Fråga inte igen",
     "notNow": "Inte nu"
@@ -563,6 +588,30 @@
   "ifcExport": {
     "saveTitle": "Spara som IFC-rapport",
     "failed": "Det gick inte att spara IFC-rapporten: {{error}}"
+  },
+  "ifcxExport": {
+    "title": "Exportera till IFCX (beta)",
+    "betaNote": "Beta: IFCX (IFC5) är fortfarande under utveckling. Kontrollera resultatet innan du förlitar dig på det.",
+    "pages": "Sidor:",
+    "allPages": "Alla sidor",
+    "currentPage": "Aktuell sida",
+    "customPages": "Sidintervall",
+    "rangePlaceholder": "t.ex. 1-3, 5",
+    "includeRaster": "Ta med bilder",
+    "includeText": "Ta med text",
+    "includeAnnotations": "Anteckningar på ett eget lager",
+    "export": "Exportera",
+    "progress": "Exporterar sida {{done}} av {{total}}…",
+    "done": "Skrivet: {{file}} ({{sheets}} blad, {{paths}} banor, {{texts}} texter, {{images}} bilder, {{annotations}} anteckningar).",
+    "capPaths": "Sida {{page}}: {{kept}} av {{total}} banor exporterade; resten överskrider gränsen.",
+    "capTexts": "Sida {{page}}: {{kept}} av {{total}} textrader exporterade; resten överskrider gränsen.",
+    "capImages": "Sida {{page}}: {{kept}} av {{total}} bilder exporterade; resten överskrider gränsen.",
+    "imagesOmitted": "Bilder utan pixeldata (stöds inte eller för stora): {{count}}. Deras placering behålls.",
+    "sizeLimit": "Sida {{page}} och sidorna efter den exporterades inte: filen nådde sin storleksgräns.",
+    "noPages": "Inga sidor valda.",
+    "noBytes": "PDF-data för det här dokumentet är inte tillgängliga. Spara dokumentet och försök igen.",
+    "failed": "IFCX-exporten misslyckades: {{error}}",
+    "unsavedNote": "Osparade ändringar i sidinnehållet tas inte med; anteckningar gör det."
   },
   "styleType": {
     "lineTypes": "Linjetyper",
@@ -1128,7 +1177,7 @@
   },
   "recovery": {
     "title": "Återställ osparat arbete",
-    "intro": "PT PDF Studio avslutades inte normalt förra gången. Osparat arbete har bevarats för dessa dokument:",
+    "intro": "Open PDF Studio avslutades inte normalt förra gången. Osparat arbete har bevarats för dessa dokument:",
     "savedAt": "Bevarat {{time}}",
     "pages": "Sidor: {{count}}",
     "untitled": "Namnlöst dokument",
@@ -1149,7 +1198,7 @@
     "deleteFailed": "Borttagningen misslyckades: {{error}}",
     "tabLabel": "återställt",
     "tabTip": "Återställt efter en oväntad avstängning. Spara skriver till originalfilen.",
-    "reloadStopped": "PT PDF Studio-fönstret slutade fungera flera gånger i rad och läses inte längre in automatiskt igen. Spara ditt arbete och starta om appen."
+    "reloadStopped": "Open PDF Studio-fönstret slutade fungera flera gånger i rad och läses inte längre in automatiskt igen. Spara ditt arbete och starta om appen."
   },
   "protectPdf": {
     "title": "Skydda med lösenord",
@@ -1246,7 +1295,9 @@
     "empty": "Inga kandidater att granska. Kör OCR först eller höj tröskelvärdet. Äldre PDF-filer utan granskningsmetadata behöver OCR igen.",
     "error": "Det gick inte att uppdatera verifieringen. Uppdatera kön om dokumentet har ändrats.",
     "accepted": "Godkänd",
-    "corrected": "Korrigerad"
+    "corrected": "Korrigerad",
+    "notEncodable": "Den sökbara OCR-texten kan inte innehålla dessa tecken: {{characters}}. Rätta ordet med andra tecken.",
+    "archived": "Granskningen är sparad i filen. Kör OCR på den här sidan igen för att ändra den."
   },
   "portfolio": {
     "title": "PDF-samlingsportfölj",
@@ -1596,6 +1647,57 @@
       "cancel": "Avbruten",
       "supersede": "Ersatt",
       "expire": "Förfallen"
+    }
+  },
+  "pageOrganizer": {
+    "title": "Redigera sidor",
+    "hint": "Dra sidor för att flytta dem; släpp en PDF-fil för att infoga dess sidor. Ctrl+klick, Skift+klick eller kryssrutorna markerar flera sidor. Inget ändras förrän Verkställ.",
+    "moveLeft": "Flytta åt vänster",
+    "moveRight": "Flytta åt höger",
+    "moveToStart": "Flytta till början",
+    "moveToEnd": "Flytta till slutet",
+    "selection": "{{selected}} av {{total}} sidor markerade",
+    "rotateLeft": "Rotera vänster",
+    "rotateRight": "Rotera höger",
+    "split": "Dela",
+    "splitTitle": "Placera delningsmärken runt de markerade sidorna: varje serie blir en egen fil",
+    "splitHere": "Dela här (placera eller ta bort ett delningsmärke)",
+    "extractTitle": "Extrahera de markerade sidorna till en ny fil",
+    "blankPage": "Tom sida",
+    "pagesFromFile": "Sidor från fil…",
+    "insertHere": "Infoga sidor här",
+    "select": "Markera sida",
+    "zoom": "Zoom",
+    "parts": "Delas i {{count}} filer vid Verkställ",
+    "chooseFolder": "Välj mappen för de delade filerna",
+    "fileFailed": "Kunde inte läsa {{name}}: {{error}}",
+    "applyFailed": "Det gick inte att verkställa sidändringarna: {{error}}",
+    "extractFailed": "Det gick inte att extrahera sidorna: {{error}}",
+    "blankSetup": "Inställning för tom sida",
+    "sameAsAdjacent": "Samma som intilliggande sida",
+    "width": "Bredd:",
+    "height": "Höjd:",
+    "unit": "Enhet:"
+  },
+  "accessibilityReport": {
+    "title": "Tillgänglighetskontroll",
+    "starting": "Kontrollerar...",
+    "checking": "Kontrollerar sida {{done}} av {{total}}...",
+    "noIssues": "Inga problem hittades.",
+    "summary": "{{count}} problem hittades. Dubbelklicka på ett objekt för att gå till dess sida.",
+    "failed": "Kontrollen kunde inte köras på det här dokumentet.",
+    "recheck": "Kontrollera igen",
+    "close": "Stäng",
+    "goTo": "Dubbelklicka för att gå till sidan",
+    "page": "Sida {{page}}",
+    "kind": {
+      "notTagged": "Dokumentet saknar taggar: det finns inget strukturträd, så hjälpmedel kan inte följa läsordningen.",
+      "notMarked": "Dokumentet är inte markerat som taggat (/MarkInfo /Marked).",
+      "noLanguage": "Dokumentets språk är inte angivet.",
+      "figureNoAlt": "{{role}} utan alternativtext",
+      "pageNotTagged": "Inget taggat innehåll på den här sidan ({{count}} textobjekt)",
+      "untaggedContent": "{{count}} textobjekt utanför taggarna",
+      "annotationNoText": "Kommentar ({{type}}) utan beskrivning"
     }
   },
   "calibrateXy": {

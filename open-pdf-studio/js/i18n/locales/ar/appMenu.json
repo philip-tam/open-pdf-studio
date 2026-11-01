@@ -71,6 +71,12 @@
     "site": "على هذا الموقع",
     "noSiteDocuments": "لا توجد مستندات على هذا الموقع",
     "siteListError": "تعذّر تحميل مستندات هذا الموقع",
+    "versions": "الإصدارات",
+    "versionNumber": "الإصدار {{version}}",
+    "currentVersion": "الحالي",
+    "noVersions": "لا توجد إصدارات",
+    "versionsError": "تعذّر تحميل الإصدارات",
+    "olderVersionsHint": "تُفتح الإصدارات الأقدم للقراءة فقط؛ ويُنزّل «حفظ باسم» نسخة.",
     "save": "حفظ"
   },
   "importPanel": {
@@ -117,6 +123,8 @@
     "pdfxNote": "يضيف نية إخراج وTrimBox وبيانات PDF/X الوصفية. مع ملف تعريف طباعة CMYK، تُحوَّل ألوان RGB والصور والتدرجات اللونية إلى CMYK ويصبح ملف التعريف هذا هو نية الإخراج؛ ومع sRGB لا يُحوَّل شيء. تبقى الخطوط القياسية غير المضمّنة قيدًا قائمًا.",
     "exportCad": "رسم CAD (DXF، DWG)",
     "exportCadDesc": "تصدير الرسم المتجه إلى DXF أو DWG مع الطبقات والمقياس والمنطقة",
+    "exportIfcx": "تصدير إلى IFCX (تجريبي)",
+    "exportIfcxDesc": "اللوحات والمتجهات والنصوص والصور والتعليقات التوضيحية إلى ملف JSON بتنسيق IFC5",
     "exportOdt": "OpenDocument (ODT)",
     "exportExcel": "Excel (XLSX)",
     "exportOdtDesc": "نص وجداول قابلة للتحرير مع صور اختيارية للصفحات",

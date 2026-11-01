@@ -1,38 +1,22 @@
 // De vorm van een tekstvak: rechthoek met scherpe hoeken, rechthoek met
-// afgeronde hoeken of ellips (een cirkel bij een vierkant vak), en een schaduw.
-// Een vak met vulkleur en lichte tekst (paars met wit, bijvoorbeeld) is zo ook
-// een afgeronde knop of een ovaal. Een tekstballon is zo'n vak met een
-// staartvormige aanhaallijn (staart-leider.js).
+// afgeronde hoeken of ellips (een cirkel bij een vierkant vak). Een vak met
+// vulkleur en lichte tekst (paars met wit, bijvoorbeeld) is zo ook een
+// afgeronde knop of een ovaal.
 //
 // Puur: geen app-state. Het canvas (rendering.js), de opgeslagen appearance
 // (saver.js) en de tekstinzet (textbox-layout.js) gebruiken dezelfde regels.
 
 export const TEKSTVAK_VORMEN = Object.freeze(['rect', 'rounded', 'ellipse']);
 
-// Vijfde van de korte zijde per hoek; een vak van 150 x 50 krijgt zo 10 pt.
+// Kwart van de korte zijde per hoek; een vak van 150 x 50 krijgt zo 10 pt.
 const HOEK_FRACTIE = 0.2;
 // 1 - cos(45 graden): hoeveel van een afrondingsstraal de tekst vrij moet blijven.
 const HOEK_VRIJ = 1 - Math.SQRT1_2;
 const BEZIER_K = 0.5522847498;
 
-/**
- * Hoever de schaduw van een tekstvak naar rechts en beneden valt, in punten
- * (altijd 0: geen schaduw meer). De schaduw lag BINNEN het vak: het lichaam is het vak
- * min deze afstand, zodat /Rect en de appearance kloppen.
- */
-export function schaduwAfstand(ann) {
-  // Slagschaduw is verwijderd: ook bestanden met een oude schaduw tonen er geen meer.
-  return 0;
-}
-
 /** De vorm van een annotatie; onbekend of leeg is een rechthoek. */
 export function vormVan(ann) {
   return TEKSTVAK_VORMEN.includes(ann?.boxShape) ? ann.boxShape : 'rect';
-}
-
-/** De ruimte onder het lichaam die de schaduw inneemt (voor de tekstindeling). */
-export function vormZones(ann) {
-  return { boven: 0, onder: schaduwAfstand(ann) };
 }
 
 /** De straal van de afgeronde hoeken van een vak, in paginapunten. */
@@ -42,19 +26,17 @@ export function hoekStraal(breedte, hoogte) {
 
 /**
  * Hoeveel de tekst extra van de rand blijft in een afgeronde of ovale vorm,
- * zodat hij binnen de contour past, plus een halve schaduw. Eén waarde voor
- * alle zijden (de tekstinzet is overal gelijk): bij een ellips de inzet van de
- * ingeschreven rechthoek langs de korte zijde.
+ * zodat hij binnen de contour past. Eén waarde voor alle zijden (de
+ * tekstinzet is overal gelijk): bij een ellips de inzet van de ingeschreven
+ * rechthoek langs de korte zijde.
  */
 export function vormInzet(ann) {
   const vorm = vormVan(ann);
-  const d = schaduwAfstand(ann);
-  const b = (ann?.width || 150) - d;
-  const h = (ann?.height || 50) - d;
-  const half = d / 2;
-  if (vorm === 'rect') return half;
-  if (vorm === 'rounded') return hoekStraal(b, h) * HOEK_VRIJ + half;
-  return (Math.min(b, h) / 2) * HOEK_VRIJ + half;
+  if (vorm === 'rect') return 0;
+  const b = ann?.width || 150;
+  const h = ann?.height || 50;
+  if (vorm === 'rounded') return hoekStraal(b, h) * HOEK_VRIJ;
+  return (Math.min(b, h) / 2) * HOEK_VRIJ;
 }
 
 /**

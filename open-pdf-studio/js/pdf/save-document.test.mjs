@@ -4,6 +4,10 @@ import { readFileSync } from 'node:fs';
 import { opslaanGeweigerd, isHostAlleenLezen, markeerBeveiligd } from './wachtwoord-pdf.js';
 import { bestandsnaamUitPad } from '../core/bestandsnaam.js';
 import { opslaanVraagtOpslaanAls } from './handtekeningen/opslaan.js';
+import { isOntbrekendeGlyfenFout, tekensVoorMelding } from '../text/glyf-dekking.js';
+import { hostFoutMelding } from '../core/host-brug.js';
+import { maakOpslagAnnulering, isOpslagGeannuleerd, GEEN_ANNULERING } from './saver/opslag-annuleren.js';
+import { hasEdits, editsAfterSave, withAlt, editsOf } from '../accessibility/struct-edits.js';
 
 // Execute the production save functions with controlled I/O. The app imports
 // require a webview; only those dependencies and dynamic imports are replaced.
@@ -19,7 +23,8 @@ function harness() {
   const a = { id: 'a', pdfDoc: {}, filePath: 'a.pdf', annotations: [], modified: true, undoStack: [] };
   const b = { id: 'b', pdfDoc: {}, filePath: 'b.pdf', annotations: [], modified: true, undoStack: [] };
   let active = a;
-  const writes = [], owners = [], attachmentEdits = [], opgeslagenGemeld = [];
+  const writes = [], owners = [], attachmentEdits = [], opgeslagenGemeld = [], structWritten = [], structSavedNotified = [];
+  const laagstandVerhuisd = [];
   const deps = {
     state: { documents: [a, b] }, getActiveDocument: () => active,
     showLoading() {}, hideLoading() {}, updateTabBar() {}, updateWindowTitle() {},
@@ -27,16 +32,32 @@ function harness() {
     verzamelSchaalBronnen: () => ({}),
     PDFDocument: { load: async bytes => ({ context: { largestObjectNumber: 1 }, getPages: () => [], catalog: { get: () => null },
       formCache: { getValue: () => undefined }, flush: async () => {}, save: async () => bytes }) },
-    ruimOngebruikteObjectenOp() {},
+    ruimOngebruikteObjectenOp() {}, ruimOngebruikteObjectenOpMetPauzes: async () => {},
+    // Annuleren (#766, echt).
+    maakOpslagAnnulering, isOpslagGeannuleerd, GEEN_ANNULERING, updateStatusMessage() {},
     PDFName: { of: x => x }, KNIPSEL_CATALOGUS: 'snippets',
     getAnnotationStorage: doc => { owners.push(doc); return null; },
     getAnnotIdToFieldName: doc => { owners.push(doc); return new Map(); },
-    schrijfAnnotatieLagen() {}, maakCjkFontKeten: () => ({}), layersForSave: doc => { owners.push(doc); return []; }, currentLayerId() {},
+    schrijfAnnotatieLagen() {},
+    // Laagstand als standaard (#377): niets klaargezet in deze documenten.
+    standaardOmTeBewaren: () => null, schrijfStandaardLaagstand() {}, laagstandZonderEigenLagen() {},
+    lagenNaOpslaan: async () => {},
+    // Opslaan als verhuist de laagstand mee naar het nieuwe pad (#684).
+    verhuisLaagstand: (doc, oud, nieuw) => { laagstandVerhuisd.push([doc.id, oud, nieuw]); return false; },
+    maakCjkFontKeten: () => ({}), layersForSave: doc => { owners.push(doc); return []; }, currentLayerId() {},
     saveTextEditsToPages: async (_pdf, _pages, doc) => owners.push(doc),
     saveWatermarksToPages: async (_pdf, _pages, doc) => owners.push(doc),
+    // Geen OCR-resultaten in deze documenten: geen laag (saver/ocr-text-layer.js).
+    writeOcrLayers: async () => null,
     saveBookmarksToOutline: (_pdf, doc) => owners.push(doc), saveStylePresetsToCatalog() {},
     slaPaginaLabelsOp: (_pdf, doc) => owners.push(doc),
     pasBijlagenToe: (_pdf, wijzigingen) => attachmentEdits.push(wijzigingen),
+    // Structuurbewerkingen van het tagspaneel (#384): het schrijven is een stub,
+    // de keuze wat na opslaan blijft staan is echt (struct-edits.js).
+    hasEdits, editsAfterSave,
+    applyEditsToPdf: (_pdf, edits) => { structWritten.push(edits); return { applied: 1, skipped: 0 }; },
+    notifyStructEditsSaved: doc => structSavedNotified.push(doc),
+    markDocumentModified: doc => { doc.modified = true; },
     unlockFile: async () => {}, lockFile: async () => {},
     writeBinaryFileAtomic: async (path, bytes) => { writes.push({ path, source: new TextDecoder().decode(bytes) }); },
     isTauri: () => false, markeerGebakken() {}, hidePdfABar() {}, stripPdfAMetadata() {},
@@ -45,6 +66,10 @@ function harness() {
     opslaanGeweigerd,
     // Door de gastsite alleen-lezen geopend (#704, echt).
     isHostAlleenLezen,
+    // Tekens zonder font in een tekstbewerking (#717, echt).
+    isOntbrekendeGlyfenFout, tekensVoorMelding,
+    // Foutcodes van de gastsite (#712, echt).
+    hostFoutMelding,
     // Naamloos of zonder pad: Opslaan vraagt om een plek (handtekeningen/opslaan.js, echt).
     opslaanVraagtOpslaanAls,
     // Leesbare naam, ook voor een content://-URI van Android (#596).
@@ -53,6 +78,8 @@ function harness() {
     meldOpgeslagen: doc => opgeslagenGemeld.push(doc),
     console: { error() {}, warn() {} },
     saveFileDialog: async () => 'copy.pdf',
+    // Opslaan als op de gastsite (#726): hier geen site.
+    hostKanOpslaanAls: () => false, leesHostNieuwPad: () => null, leesHostPad: () => null,
     // Het slot tegen een extensiewissel (#550): standaard loopt er geen.
     metOpslagSlot: async fn => fn(),
     loadModule: async path => {
@@ -65,7 +92,7 @@ function harness() {
   };
   // A with scope keeps the injected dependencies mutable across awaits.
   const api = new Function('deps', `with (deps) { ${saved}\n${functions}\n return {savePDF, savePDFAs, bouwMomentopname}; }`)(deps);
-  return { a, b, deps, api, writes, owners, attachmentEdits, opgeslagenGemeld, switchToB: () => { active = b; } };
+  return { a, b, deps, api, writes, owners, attachmentEdits, opgeslagenGemeld, structWritten, structSavedNotified, laagstandVerhuisd, switchToB: () => { active = b; } };
 }
 
 test('tab switch during signature verification still saves A to the requested path', async () => {
@@ -168,6 +195,7 @@ test('explicit Save As path retargets A without opening a file dialog', async ()
   assert.deepEqual(h.writes, [{ path: 'translated.pdf', source: 'a.pdf' }]);
   assert.equal(h.a.filePath, 'translated.pdf');
   assert.equal(h.b.filePath, 'b.pdf');
+  assert.deepEqual(h.laagstandVerhuisd, [['a', 'a.pdf', 'translated.pdf']], 'the layer view state moves with A');
 });
 
 test('closed document is not saved after the confirmation wait', async () => {
@@ -264,6 +292,59 @@ test('Save As keeps a refreshed text edit bound to its new file', async () => {
   assert.equal(h.a.modified, false);
 });
 
+// #673: na het inbakken tekent de viewport uit de werkkopie van de herlaad.
+// Opslaan als ruimt die werkkopie op; de viewport moet dan al uit het
+// opgeslagen bestand tekenen, anders blijft de pagina wazig.
+test('Save As after a text edit moves the view to the saved file before the working copy is removed (#673)', async () => {
+  const h = harness();
+  const log = [];
+  h.a.textEdits = [{ id: 'edit-3', newText: 'Bienvenue', baked: false }];
+  h.deps.saveTextEditsToPages = async (_pdf, _pages, doc) => {
+    doc.textEdits[0]._pendingBakeInfo = { bakedNewText: 'Bienvenue', inplaceBaked: null };
+  };
+  const loadModule = h.deps.loadModule;
+  h.deps.loadModule = async path => {
+    if (path.includes('page-manager')) {
+      return { reloadFromBytes: async (_bytes, _annotations, _rotations, _page, _viewport, doc) => {
+        doc.filePath = 'opds-edit-1761210000000.pdf';
+        doc._renderTemp = true;
+        doc._werkbestanden = ['opds-edit-1761210000000.pdf'];
+        doc.pdfDoc = { fresh: true };
+      } };
+    }
+    if (path.includes('pdf-viewport')) {
+      return { wisselBestandspad: (oud, nieuw) => { log.push(`view ${oud} -> ${nieuw}`); return true; } };
+    }
+    if (path.includes('document-release')) {
+      return {
+        losgelatenWerkbestanden: doc => doc._werkbestanden.filter(p => p !== doc.filePath),
+        ruimWerkbestandenOp: async (_doc, paden) => { for (const p of paden) log.push(`remove ${p}`); },
+      };
+    }
+    return loadModule(path);
+  };
+  h.deps.window = { __TAURI__: { fs: { remove: async p => log.push(`remove ${p}`) } } };
+  assert.equal(await h.api.savePDFAs(h.a), true);
+  assert.equal(h.a.filePath, 'copy.pdf');
+  assert.deepEqual(log, [
+    'view opds-edit-1761210000000.pdf -> copy.pdf',
+    'remove opds-edit-1761210000000.pdf',
+  ]);
+});
+
+test('Save As of a document without a working copy leaves the view alone', async () => {
+  const h = harness();
+  const log = [];
+  const loadModule = h.deps.loadModule;
+  h.deps.loadModule = async path => path.includes('pdf-viewport')
+    ? { wisselBestandspad: (oud, nieuw) => { log.push(`view ${oud} -> ${nieuw}`); return true; } }
+    : loadModule(path);
+  assert.equal(await h.api.savePDFAs(h.a, 'a.pdf'), true);
+  assert.deepEqual(log, [], 'same path: nothing to move');
+  assert.equal(await h.api.savePDFAs(h.a, 'other.pdf'), true);
+  assert.deepEqual(log, ['view a.pdf -> other.pdf'], 'a new path: the view follows the document');
+});
+
 test('saving aborts before writing when a page has model annotations but is not ready', async () => {
   const h = harness();
   h.a.annotations = [{ page: 1, type: 'highlight' }];
@@ -309,6 +390,53 @@ test('a document the host opened read-only (#704) is not saved back; Save As (a 
   assert.equal(h.a.modified, true, 'nothing is lost: the document stays modified');
   assert.equal(await h.api.savePDF('Plattegrond.pdf', { zonderHandtekeningVraag: true }), true, 'a copy may be downloaded');
   assert.deepEqual(h.writes.map((w) => w.path), ['Plattegrond.pdf']);
+});
+
+test('an older version from the host (#712) says so; Save As still downloads', async () => {
+  const h = harness();
+  const meldingen = [];
+  h.deps.showMessage = (m) => meldingen.push(m);
+  h.a.filePath = 'opds-host://DOC-1;versie=2/Plattegrond.pdf';
+  h.a.hostAlleenLezen = true;
+  h.a.hostVersie = { versie: 2, totaal: 3 };
+  assert.equal(await h.api.savePDF(null, { zonderHandtekeningVraag: true }), false);
+  assert.deepEqual(h.writes, []);
+  assert.deepEqual(meldingen, ['hostVersionSaveBlocked']);
+  assert.equal(await h.api.savePDF('Plattegrond.pdf', { zonderHandtekeningVraag: true }), true);
+});
+
+test('the host refusing with versie_alleen_lezen (#712) gives its own message, the host text as fallback', async () => {
+  const h = harness();
+  const meldingen = [];
+  h.deps.showMessage = (m) => meldingen.push(m);
+  h.deps.writeBinaryFileAtomic = async () => {
+    const fout = new Error('Versie 2 is alleen-lezen geopend.');
+    fout.hostCode = 'versie_alleen_lezen';
+    throw fout;
+  };
+  assert.equal(await h.api.savePDF(null, { zonderHandtekeningVraag: true }), false);
+  // i18next.t is hier de identiteit: dan de tekst van de gastpagina.
+  assert.deepEqual(meldingen, ['Versie 2 is alleen-lezen geopend.']);
+  h.deps.i18next = { t: (k, o) => (k === 'hostVersionReadOnlyRefused' ? 'vertaald' : (o?.defaultValue ?? k)) };
+  meldingen.length = 0;
+  assert.equal(await h.api.savePDF(null, { zonderHandtekeningVraag: true }), false);
+  assert.deepEqual(meldingen, ['vertaald']);
+  assert.equal(h.a.modified, true);
+});
+
+test('text without a font (#717) refuses the save with the characters, nothing is written', async () => {
+  const h = harness();
+  const meldingen = [];
+  h.deps.showMessage = (m) => meldingen.push(m);
+  h.deps.i18next = { t: (k, o) => `${k}:${o?.chars ?? ''}` };
+  h.deps.saveTextEditsToPages = async () => {
+    const { OntbrekendeGlyfenFout } = await import('../text/glyf-dekking.js');
+    throw new OntbrekendeGlyfenFout(['안', '녕', '안']);
+  };
+  assert.equal(await h.api.savePDF(null, { zonderHandtekeningVraag: true }), false);
+  assert.deepEqual(h.writes, []);
+  assert.deepEqual(meldingen, ['textEditMissingGlyphsSave:안 녕']);
+  assert.equal(h.a.modified, true);
 });
 
 test('a save writes the attachment changes of the document being saved (#376)', async () => {
@@ -377,4 +505,36 @@ test('a failed save does not report the document as saved', async () => {
   h.deps.writeBinaryFileAtomic = async () => { throw new Error('disk full'); };
   assert.equal(await h.api.savePDF(null, { zonderHandtekeningVraag: true }), false);
   assert.deepEqual(h.opgeslagenGemeld, []);
+});
+
+test('structure edits that were written are cleared after the save (#384)', async () => {
+  const h = harness();
+  h.a.structEdits = withAlt(editsOf({}), '0.2', 'Figure', 'written');
+  const written = h.a.structEdits;
+  assert.equal(await h.api.savePDF('copy-of-a.pdf'), true);
+  assert.deepEqual(h.structWritten, [written]);
+  assert.equal(h.a.structEdits, null);
+  assert.equal(h.a.modified, false);
+  assert.deepEqual(h.structSavedNotified, [h.a], 'the tags panel rereads the saved tree');
+});
+
+test('an alt text edited during a long save is kept and the document stays modified (#384)', async () => {
+  const h = harness(), gate = deferred(), entered = deferred();
+  h.a.structEdits = withAlt(editsOf({}), '0.2', 'Figure', 'written');
+  const written = h.a.structEdits;
+  h.deps.writeBinaryFileAtomic = async (path, bytes) => {
+    entered.resolve();
+    await gate.promise;
+    h.writes.push({ path, source: new TextDecoder().decode(bytes) });
+  };
+  const saving = h.api.savePDF('copy-of-a.pdf');
+  await entered.promise;
+  // The tags panel puts a new object on the document per edit.
+  h.a.structEdits = withAlt(h.a.structEdits, '0.3', 'Para', 'made during the save');
+  gate.resolve();
+  assert.equal(await saving, true);
+  assert.deepEqual(h.structWritten, [written], 'the save wrote the edits as they were');
+  assert.deepEqual(h.a.structEdits, { alt: { '0.3': { role: 'Para', value: 'made during the save' } }, order: {} },
+    'only the edit the save did not write is left');
+  assert.equal(h.a.modified, true, 'the unsaved edit keeps the document modified');
 });

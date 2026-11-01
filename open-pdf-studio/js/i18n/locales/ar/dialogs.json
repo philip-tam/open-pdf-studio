@@ -1,5 +1,15 @@
 {
   "newDoc": {
+    "frameStyles": {
+      "grootformaat": "تنسيق كبير",
+      "detailblad": "ورقة التفاصيل",
+      "voorblad": "ورقة الغلاف"
+    },
+    "framePreview": "{{style}}, {{paper}} {{orientation}}, {{width}} x {{height}} mm",
+    "frameOrientation": {
+      "portrait": "عمودي",
+      "landscape": "أفقي"
+    },
     "title": "مستند جديد",
     "paperSize": "حجم الورق:",
     "widthMm": "العرض (mm):",
@@ -23,7 +33,7 @@
   "printQueue": {
     "toolbarLabel": "إجراءات مهام الطباعة",
     "openInStudio": "فتح في Studio",
-    "openInStudioTip": "فتح المهمة المحددة في PT PDF Studio (Enter أو النقر المزدوج). عند تحديد عدة مهام تُفتح كمستند واحد مدمج.",
+    "openInStudioTip": "فتح المهمة المحددة في Open PDF Studio (Enter أو النقر المزدوج). عند تحديد عدة مهام تُفتح كمستند واحد مدمج.",
     "mergeSelected": "دمج المحدد…",
     "mergeSelectedTip": "دمج المهام المحددة، بترتيب القائمة، في ملف PDF واحد وحفظه",
     "saveAs": "حفظ باسم…",
@@ -63,11 +73,11 @@
     "adding": "جارٍ إضافة ملفات PDF…",
     "saving": "جارٍ الحفظ…",
     "merging": "جارٍ دمج {{done}} من {{count}}…",
-    "opening": "جارٍ الفتح في PT PDF Studio…",
+    "opening": "جارٍ الفتح في Open PDF Studio…",
     "deleting": "جارٍ الحذف…",
     "saved": "تم الحفظ باسم {{name}}",
     "merged": "تم الدمج والحفظ باسم {{name}}",
-    "opened": "تم الفتح في PT PDF Studio",
+    "opened": "تم الفتح في Open PDF Studio",
     "deleted": "تم الحذف: {{count}}",
     "failed": "فشل: {{message}}",
     "mergedFileName": "مدمج",
@@ -128,11 +138,15 @@
     "pageBorder": "طباعة حدود الصفحة",
     "perSheetNote": "يتم تغيير حجم كل صفحة لتلائم خليتها، لذا لا ينطبق تغيير حجم الصفحة أعلاه.",
     "poster": "ملصق (مربعات)",
+    "posterOverview": "نظرة عامة على الملصق",
+    "posterOverlapLegend": "تتكرر المناطق المظللة على الأوراق المجاورة",
     "posterScale": "مقياس المربعات",
     "posterOverlap": "التداخل",
     "posterCutMarks": "علامات القص",
     "posterLabels": "تسميات (الملف، الصفحة، المربع)",
     "posterOnlyLarge": "تقسيم الصفحات الكبيرة فقط",
+    "posterEdgeCrop": "قص الحواف الخارجية الصغيرة",
+    "posterEdgeCropHint": "حتى {{max}} مم لكل حافة خارجية، لهذه الطباعة فقط. عند التعطيل: الاحتفاظ بكل المحتوى.",
     "posterTileInfo": "الصفحة {{page}}: المربع {{row}},{{col}} (صف، عمود) من {{rows}} × {{cols}}",
     "posterNotTiled": "الصفحة {{page}} تتسع في ورقة واحدة ولن تُقسَّم.",
     "posterAssumedPaper": "حجم الورق غير معروف: تُوزَّع المربعات على {{paper}}.",
@@ -177,6 +191,10 @@
     "documentAndMarkups": "المستند والعلامات",
     "document": "المستند",
     "printAsImage": "طباعة كصورة",
+    "colorMode": "وضع الألوان:",
+    "colorModeColor": "ملون",
+    "colorModeGrayscale": "تدرج رمادي",
+    "colorModeBlackWhite": "أبيض وأسود",
     "pagesToPrint": "صفحة/صفحات للطباعة",
     "noPrinterSelected": "لم يتم تحديد طابعة.",
     "noPagesToPrint": "لا توجد صفحات للطباعة.",
@@ -346,7 +364,13 @@
     "chooseImage": "اختيار صورة...",
     "scale": "المقياس:",
     "selectImageFirst": "يرجى اختيار صورة أولاً.",
-    "defaultText": "مسودة"
+    "defaultText": "مسودة",
+    "autoFit": "ملاءمة تلقائية للصفحة",
+    "autoFitHint": "يلائم النص كل صفحة. الحجم المعروض خاص بالصفحة الحالية.",
+    "increaseFontSize": "تكبير حجم الخط",
+    "decreaseFontSize": "تصغير حجم الخط",
+    "textHistory": "النصوص المستخدمة سابقًا",
+    "removeFromHistory": "إزالة من السجل"
   },
   "headerFooter": {
     "addTitle": "إضافة رأس/تذييل",
@@ -405,7 +429,7 @@
   },
   "update": {
     "title": "تحديث البرنامج",
-    "newVersionAvailable": "يتوفر إصدار جديد من PT PDF Studio.",
+    "newVersionAvailable": "يتوفر إصدار جديد من Open PDF Studio.",
     "currentVersion": "الإصدار الحالي:",
     "newVersion": "الإصدار الجديد:",
     "releaseNotes": "ملاحظات الإصدار:",
@@ -430,7 +454,8 @@
     "styleLabel": "النمط:",
     "nestTitle": "تضمين تحت إشارة مرجعية جديدة",
     "deleteTitle": "حذف الإشارات المرجعية",
-    "deleteConfirm": "حذف {{count}} إشارات مرجعية محددة وكل ما تحتها؟"
+    "deleteConfirm": "حذف {{count}} إشارات مرجعية محددة وكل ما تحتها؟",
+    "replaceAll": "استبدال جميع الإشارات المرجعية"
   },
   "formValidation": {
     "title": "خطأ في التحقق"
@@ -555,7 +580,7 @@
   },
   "defaultPdfApp": {
     "title": "تطبيق PDF الافتراضي",
-    "message": "لم يتم تعيين PT PDF Studio كالتطبيق الافتراضي لفتح ملفات PDF. هل تريد تعيينه كافتراضي؟",
+    "message": "لم يتم تعيين Open PDF Studio كالتطبيق الافتراضي لفتح ملفات PDF. هل تريد تعيينه كافتراضي؟",
     "setAsDefault": "تعيين كافتراضي",
     "dontAskAgain": "لا تسأل مرة أخرى",
     "notNow": "ليس الآن"
@@ -563,6 +588,30 @@
   "ifcExport": {
     "saveTitle": "حفظ كتقرير IFC",
     "failed": "فشل حفظ تقرير IFC: {{error}}"
+  },
+  "ifcxExport": {
+    "title": "تصدير إلى IFCX (تجريبي)",
+    "betaNote": "تجريبي: لا يزال تنسيق IFCX (IFC5) قيد التطوير. تحقق من النتيجة قبل الاعتماد عليها.",
+    "pages": "الصفحات:",
+    "allPages": "كل الصفحات",
+    "currentPage": "الصفحة الحالية",
+    "customPages": "نطاق الصفحات",
+    "rangePlaceholder": "مثال: 1-3، 5",
+    "includeRaster": "تضمين الصور",
+    "includeText": "تضمين النص",
+    "includeAnnotations": "التعليقات التوضيحية في طبقة منفصلة",
+    "export": "تصدير",
+    "progress": "جارٍ تصدير الصفحة {{done}} من {{total}}…",
+    "done": "تمت الكتابة: {{file}} (اللوحات: {{sheets}}، المسارات: {{paths}}، النصوص: {{texts}}، الصور: {{images}}، التعليقات التوضيحية: {{annotations}}).",
+    "capPaths": "الصفحة {{page}}: تم تصدير {{kept}} من {{total}} مسار؛ الباقي يتجاوز الحد.",
+    "capTexts": "الصفحة {{page}}: تم تصدير {{kept}} من {{total}} سطر نص؛ الباقي يتجاوز الحد.",
+    "capImages": "الصفحة {{page}}: تم تصدير {{kept}} من {{total}} صورة؛ الباقي يتجاوز الحد.",
+    "imagesOmitted": "صور بلا بيانات بكسل (غير مدعومة أو كبيرة جدًا): {{count}}. يتم الاحتفاظ بموضعها.",
+    "sizeLimit": "لم يتم تصدير الصفحة {{page}} والصفحات التي تليها: بلغ الملف الحد الأقصى للحجم.",
+    "noPages": "لم يتم تحديد أي صفحات.",
+    "noBytes": "بيانات PDF لهذا المستند غير متاحة. احفظ المستند ثم أعد المحاولة.",
+    "failed": "فشل التصدير إلى IFCX: {{error}}",
+    "unsavedNote": "لا يتم تضمين التغييرات غير المحفوظة على محتوى الصفحات؛ أما التعليقات التوضيحية فيتم تضمينها."
   },
   "styleType": {
     "lineTypes": "أنواع الخطوط",
@@ -1128,7 +1177,7 @@
   },
   "recovery": {
     "title": "استعادة العمل غير المحفوظ",
-    "intro": "لم يُغلق PT PDF Studio بشكل طبيعي في المرة السابقة. تم الاحتفاظ بالعمل غير المحفوظ لهذه المستندات:",
+    "intro": "لم يُغلق Open PDF Studio بشكل طبيعي في المرة السابقة. تم الاحتفاظ بالعمل غير المحفوظ لهذه المستندات:",
     "savedAt": "محفوظ في {{time}}",
     "pages": "الصفحات: {{count}}",
     "untitled": "مستند بلا عنوان",
@@ -1149,7 +1198,7 @@
     "deleteFailed": "فشل الحذف: {{error}}",
     "tabLabel": "مستعاد",
     "tabTip": "تمت الاستعادة بعد إغلاق غير متوقع. الحفظ يكتب في الملف الأصلي.",
-    "reloadStopped": "توقفت نافذة PT PDF Studio عن العمل عدة مرات متتالية ولم تعد تُعاد تحميلها تلقائيًا. احفظ عملك وأعد تشغيل التطبيق."
+    "reloadStopped": "توقفت نافذة Open PDF Studio عن العمل عدة مرات متتالية ولم تعد تُعاد تحميلها تلقائيًا. احفظ عملك وأعد تشغيل التطبيق."
   },
   "protectPdf": {
     "title": "الحماية بكلمة مرور",
@@ -1246,7 +1295,9 @@
     "empty": "لا توجد عناصر للمراجعة. شغّل OCR أولاً أو ارفع الحد. تحتاج ملفات PDF القديمة التي لا تحتوي على بيانات وصفية للمراجعة إلى OCR مرة أخرى.",
     "error": "تعذّر تحديث التحقق. حدّث قائمة الانتظار إذا تغيّر المستند.",
     "accepted": "مقبول",
-    "corrected": "مُصحَّح"
+    "corrected": "مُصحَّح",
+    "notEncodable": "لا يمكن أن يحتوي نص OCR القابل للبحث على هذه الأحرف: {{characters}}. صحّح الكلمة باستخدام أحرف أخرى.",
+    "archived": "المراجعة محفوظة في الملف. شغّل OCR على هذه الصفحة مرة أخرى لتغييرها."
   },
   "portfolio": {
     "title": "حافظة مجموعة PDF",
@@ -1596,6 +1647,57 @@
       "cancel": "ملغى",
       "supersede": "مستبدَل",
       "expire": "منتهي الصلاحية"
+    }
+  },
+  "pageOrganizer": {
+    "title": "تحرير الصفحات",
+    "hint": "اسحب الصفحات لنقلها؛ أفلت ملف PDF لإدراج صفحاته. يحدد Ctrl+نقر أو Shift+نقر أو مربعات الاختيار عدة صفحات. لا يتغير شيء حتى تطبيق.",
+    "moveLeft": "نقل لليسار",
+    "moveRight": "نقل لليمين",
+    "moveToStart": "نقل إلى البداية",
+    "moveToEnd": "نقل إلى النهاية",
+    "selection": "تم تحديد {{selected}} من {{total}} صفحة",
+    "rotateLeft": "تدوير لليسار",
+    "rotateRight": "تدوير لليمين",
+    "split": "تقسيم",
+    "splitTitle": "وضع علامات تقسيم حول الصفحات المحددة: تصبح كل مجموعة ملفًا منفصلًا",
+    "splitHere": "تقسيم هنا (وضع علامة تقسيم أو إزالتها)",
+    "extractTitle": "استخراج الصفحات المحددة إلى ملف جديد",
+    "blankPage": "صفحة فارغة",
+    "pagesFromFile": "صفحات من ملف…",
+    "insertHere": "إدراج صفحات هنا",
+    "select": "تحديد الصفحة",
+    "zoom": "تكبير/تصغير",
+    "parts": "التقسيم إلى {{count}} ملفات عند التطبيق",
+    "chooseFolder": "اختر المجلد للملفات المقسمة",
+    "fileFailed": "تعذرت قراءة {{name}}: {{error}}",
+    "applyFailed": "فشل تطبيق تعديلات الصفحات: {{error}}",
+    "extractFailed": "فشل استخراج الصفحات: {{error}}",
+    "blankSetup": "إعداد الصفحة الفارغة",
+    "sameAsAdjacent": "مثل الصفحة المجاورة",
+    "width": "العرض:",
+    "height": "الارتفاع:",
+    "unit": "الوحدة:"
+  },
+  "accessibilityReport": {
+    "title": "فحص إمكانية الوصول",
+    "starting": "جارٍ الفحص...",
+    "checking": "جارٍ فحص الصفحة {{done}} من {{total}}...",
+    "noIssues": "لم يتم العثور على مشكلات.",
+    "summary": "تم العثور على {{count}} مشكلة. انقر نقرًا مزدوجًا على عنصر للانتقال إلى صفحته.",
+    "failed": "تعذّر إجراء الفحص على هذا المستند.",
+    "recheck": "إعادة الفحص",
+    "close": "إغلاق",
+    "goTo": "انقر نقرًا مزدوجًا للانتقال إلى الصفحة",
+    "page": "الصفحة {{page}}",
+    "kind": {
+      "notTagged": "المستند غير موسوم: لا توجد شجرة بنية، لذا لا تستطيع التقنيات المساعدة اتباع ترتيب القراءة.",
+      "notMarked": "المستند غير مُعلَّم على أنه موسوم (/MarkInfo /Marked).",
+      "noLanguage": "لم يتم تعيين لغة المستند.",
+      "figureNoAlt": "{{role}} بدون نص بديل",
+      "pageNotTagged": "لا يوجد محتوى موسوم في هذه الصفحة ({{count}} عنصر نصي)",
+      "untaggedContent": "{{count}} عنصر نصي خارج العلامات",
+      "annotationNoText": "تعليق توضيحي ({{type}}) بدون وصف"
     }
   },
   "calibrateXy": {

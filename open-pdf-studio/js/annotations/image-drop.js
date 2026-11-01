@@ -8,40 +8,24 @@ import { visibleCenterOnPage } from './clipboard.js';
 import { readBinaryFile } from '../core/platform.js';
 import i18next from '../i18n/config.js';
 import { layerForNewAnnotation } from './annotatie-lagen.js';
-
-const MIME_BY_EXT = {
-  png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg',
-  gif: 'image/gif', bmp: 'image/bmp', webp: 'image/webp', svg: 'image/svg+xml',
-};
+import { laadAfbeeldingBytes, AFBEELDING_EXTENSIES } from './afbeelding-bron.js';
 
 // (Re)load the bitmap for an image annotation from a file path into the
 // image cache. Used by linked images: at link-time, on demand ("Vernieuwen")
 // and after document open, so the annotation always shows the CURRENT file.
-async function _loadImageFromPath(filePath) {
+// Also used by the custom stamp from an image (stamps.js, #749).
+export async function laadAfbeeldingUitPad(filePath) {
   // Paths restored from a saved PDF are outside the fs-plugin scope until
   // granted (same mechanism the MCP bridge uses for arbitrary paths).
   try { await window.__TAURI__?.core?.invoke('allow_fs_scope', { path: filePath }); } catch { /* best-effort */ }
   const data = await readBinaryFile(filePath);
-  const ext = filePath.split('.').pop().toLowerCase();
-  const blob = new Blob([data], { type: MIME_BY_EXT[ext] || 'image/png' });
+  if (!data) throw new Error('image file could not be read');
   // imageData moet een data:-URL zijn: de saver leest daar de bytes uit om de
-  // afbeelding in de PDF te embedden (#352). Een blob:-URL is alleen in deze
-  // sessie geldig — de opgeslagen annotatie kwam dan als leeg stempel in het
-  // bestand en andere viewers toonden een plaatsvervanger. Zelfde conventie
-  // als plakken (clipboard.js pasteImageFromBlob).
-  const dataUrl = await new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-  // De bitmap komt uit de data-URL en blijft er ook aan gekoppeld. Een
-  // blob-URL werd direct na het laden ingetrokken: WebKit gooide dan de
-  // gedecodeerde pixels weg en het kader van de afbeelding bleef leeg.
-  const img = new Image();
-  img.src = dataUrl;
-  await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
-  return { img, dataUrl };
+  // afbeelding in de PDF te embedden (#352), en hij is PNG of JPEG, want
+  // alleen die kan pdf-lib insluiten (#749). De bitmap komt uit diezelfde
+  // data:-URL: een ingetrokken blob:-URL liet in WebKit alleen het kader
+  // zonder afbeelding staan (#711).
+  return laadAfbeeldingBytes(data, filePath);
 }
 
 /**
@@ -52,7 +36,7 @@ async function _loadImageFromPath(filePath) {
 export async function refreshLinkedImage(annotation, { silent = false } = {}) {
   if (!annotation?.linkedPath) return false;
   try {
-    const { img, dataUrl } = await _loadImageFromPath(annotation.linkedPath);
+    const { img, dataUrl } = await laadAfbeeldingUitPad(annotation.linkedPath);
     if (!annotation.imageId) annotation.imageId = generateImageId();
     imageCache.set(annotation.imageId, img);
     annotation.imageData = dataUrl;
@@ -148,7 +132,7 @@ export async function addImageFromFile(filePath, opts = {}) {
   }
 
   try {
-    const { img, dataUrl } = await _loadImageFromPath(filePath);
+    const { img, dataUrl } = await laadAfbeeldingUitPad(filePath);
 
     const imageId = generateImageId();
     imageCache.set(imageId, img);
@@ -191,9 +175,10 @@ export async function addImageFromFile(filePath, opts = {}) {
 }
 
 /**
- * De knop "Afbeelding" in het lint: een bestand kiezen en het op de huidige
- * pagina plaatsen (daarna verplaatsen en vergroten of verkleinen met de
- * greepjes). Zelfde pad als een afbeelding op de pagina slepen.
+ * The "Image" button (Drawing tab) and "Add Image..." in the page context
+ * menu: pick a file and place it on the current page, the same path as
+ * dropping an image on the page. Both used to call setTool('image'), but no
+ * tool named 'image' exists, so the click did nothing (#749, #711).
  */
 export async function kiesEnPlaatsAfbeelding() {
   if (!getActiveDocument()?.pdfDoc) {
@@ -201,7 +186,7 @@ export async function kiesEnPlaatsAfbeelding() {
     return;
   }
   const { openFileDialog } = await import('../core/platform.js');
-  const pad = await openFileDialog(['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'svg']);
+  const pad = await openFileDialog(AFBEELDING_EXTENSIES);
   if (!pad || typeof pad !== 'string') return;
   await addImageFromFile(pad);
 }

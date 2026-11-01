@@ -1,5 +1,15 @@
 {
   "newDoc": {
+    "frameStyles": {
+      "grootformaat": "Grand format",
+      "detailblad": "Feuille de détails",
+      "voorblad": "Page de garde"
+    },
+    "framePreview": "{{style}}, {{paper}} {{orientation}}, {{width}} x {{height}} mm",
+    "frameOrientation": {
+      "portrait": "portrait",
+      "landscape": "paysage"
+    },
     "title": "Nouveau document",
     "paperSize": "Format du papier :",
     "widthMm": "Largeur (mm) :",
@@ -23,7 +33,7 @@
   "printQueue": {
     "toolbarLabel": "Actions sur les travaux d'impression",
     "openInStudio": "Ouvrir dans Studio",
-    "openInStudioTip": "Ouvrir le travail sélectionné dans PT PDF Studio (Entrée ou double-clic). Plusieurs travaux sélectionnés s'ouvrent comme un seul document fusionné.",
+    "openInStudioTip": "Ouvrir le travail sélectionné dans Open PDF Studio (Entrée ou double-clic). Plusieurs travaux sélectionnés s'ouvrent comme un seul document fusionné.",
     "mergeSelected": "Fusionner la sélection…",
     "mergeSelectedTip": "Fusionner les travaux sélectionnés, dans l'ordre de la liste, en un seul PDF et l'enregistrer",
     "saveAs": "Enregistrer sous…",
@@ -63,11 +73,11 @@
     "adding": "Ajout des fichiers PDF…",
     "saving": "Enregistrement…",
     "merging": "Fusion {{done}} sur {{count}}…",
-    "opening": "Ouverture dans PT PDF Studio…",
+    "opening": "Ouverture dans Open PDF Studio…",
     "deleting": "Suppression…",
     "saved": "Enregistré sous {{name}}",
     "merged": "Fusionné et enregistré sous {{name}}",
-    "opened": "Ouvert dans PT PDF Studio",
+    "opened": "Ouvert dans Open PDF Studio",
     "deleted": "Supprimés : {{count}}",
     "failed": "Échec : {{message}}",
     "mergedFileName": "Fusionné",
@@ -128,11 +138,15 @@
     "pageBorder": "Imprimer le contour de page",
     "perSheetNote": "Chaque page est mise à l'échelle pour tenir dans sa cellule : la mise à l'échelle de page ci-dessus ne s'applique donc pas.",
     "poster": "Poster (mosaïque)",
+    "posterOverview": "Vue d’ensemble du poster",
+    "posterOverlapLegend": "Les zones colorées sont répétées sur les feuilles adjacentes",
     "posterScale": "Échelle de la mosaïque",
     "posterOverlap": "Chevauchement",
     "posterCutMarks": "Traits de coupe",
     "posterLabels": "Étiquettes (fichier, page, tuile)",
     "posterOnlyLarge": "Découper uniquement les grandes pages",
+    "posterEdgeCrop": "Rogner légèrement les bords extérieurs",
+    "posterEdgeCropHint": "Jusqu’à {{max}} mm par bord extérieur, uniquement pour cette impression. Désactivé : conserver tout le contenu.",
     "posterTileInfo": "Page {{page}} : tuile {{row}},{{col}} (ligne, colonne) sur {{rows}} × {{cols}}",
     "posterNotTiled": "La page {{page}} tient sur une feuille et n'est pas découpée.",
     "posterAssumedPaper": "Format de papier inconnu : les tuiles sont réparties sur du {{paper}}.",
@@ -177,6 +191,10 @@
     "documentAndMarkups": "Document et annotations",
     "document": "Document",
     "printAsImage": "Imprimer comme image",
+    "colorMode": "Mode couleur :",
+    "colorModeColor": "Couleur",
+    "colorModeGrayscale": "Niveaux de gris",
+    "colorModeBlackWhite": "Noir et blanc",
     "pagesToPrint": "page(s) à imprimer",
     "noPrinterSelected": "Aucune imprimante sélectionnée.",
     "noPagesToPrint": "Aucune page à imprimer.",
@@ -346,7 +364,13 @@
     "chooseImage": "Choisir une image...",
     "scale": "Échelle :",
     "selectImageFirst": "Veuillez d'abord sélectionner une image.",
-    "defaultText": "BROUILLON"
+    "defaultText": "BROUILLON",
+    "autoFit": "Ajuster automatiquement à la page",
+    "autoFitHint": "Ajuste le texte à chaque page. La taille affichée est celle de la page actuelle.",
+    "increaseFontSize": "Augmenter la taille de police",
+    "decreaseFontSize": "Réduire la taille de police",
+    "textHistory": "Textes utilisés précédemment",
+    "removeFromHistory": "Supprimer de l'historique"
   },
   "headerFooter": {
     "addTitle": "Ajouter un en-tête/pied de page",
@@ -405,7 +429,7 @@
   },
   "update": {
     "title": "Mise à jour du logiciel",
-    "newVersionAvailable": "Une nouvelle version de PT PDF Studio est disponible.",
+    "newVersionAvailable": "Une nouvelle version de Open PDF Studio est disponible.",
     "currentVersion": "Version actuelle :",
     "newVersion": "Nouvelle version :",
     "releaseNotes": "Notes de version :",
@@ -430,7 +454,8 @@
     "styleLabel": "Style :",
     "nestTitle": "Imbriquer sous un nouveau signet",
     "deleteTitle": "Supprimer les signets",
-    "deleteConfirm": "Supprimer les {{count}} signets sélectionnés et tout ce qu’ils contiennent ?"
+    "deleteConfirm": "Supprimer les {{count}} signets sélectionnés et tout ce qu’ils contiennent ?",
+    "replaceAll": "Remplacer tous les signets"
   },
   "formValidation": {
     "title": "Erreur de validation"
@@ -555,7 +580,7 @@
   },
   "defaultPdfApp": {
     "title": "Application PDF par défaut",
-    "message": "PT PDF Studio n'est pas défini comme l'application par défaut pour l'ouverture des fichiers PDF. Souhaitez-vous le définir comme application par défaut ?",
+    "message": "Open PDF Studio n'est pas défini comme l'application par défaut pour l'ouverture des fichiers PDF. Souhaitez-vous le définir comme application par défaut ?",
     "setAsDefault": "Définir par défaut",
     "dontAskAgain": "Ne plus demander",
     "notNow": "Pas maintenant"
@@ -563,6 +588,30 @@
   "ifcExport": {
     "saveTitle": "Enregistrer comme rapport IFC",
     "failed": "Échec de l'enregistrement du rapport IFC : {{error}}"
+  },
+  "ifcxExport": {
+    "title": "Exporter vers IFCX (bêta)",
+    "betaNote": "Bêta : IFCX (IFC5) est encore en développement. Vérifiez le résultat avant de vous y fier.",
+    "pages": "Pages :",
+    "allPages": "Toutes les pages",
+    "currentPage": "Page actuelle",
+    "customPages": "Plage de pages",
+    "rangePlaceholder": "ex. 1-3, 5",
+    "includeRaster": "Inclure les images",
+    "includeText": "Inclure le texte",
+    "includeAnnotations": "Annotations sur un calque séparé",
+    "export": "Exporter",
+    "progress": "Export de la page {{done}} sur {{total}}…",
+    "done": "Écrit : {{file}} ({{sheets}} feuilles, {{paths}} tracés, {{texts}} textes, {{images}} images, {{annotations}} annotations).",
+    "capPaths": "Page {{page}} : {{kept}} tracés sur {{total}} exportés ; le reste dépasse la limite.",
+    "capTexts": "Page {{page}} : {{kept}} lignes de texte sur {{total}} exportées ; le reste dépasse la limite.",
+    "capImages": "Page {{page}} : {{kept}} images sur {{total}} exportées ; le reste dépasse la limite.",
+    "imagesOmitted": "Images sans données de pixels (non prises en charge ou trop grandes) : {{count}}. Leur position est conservée.",
+    "sizeLimit": "La page {{page}} et les suivantes n'ont pas été exportées : le fichier a atteint sa taille maximale.",
+    "noPages": "Aucune page sélectionnée.",
+    "noBytes": "Les données PDF de ce document ne sont pas disponibles. Enregistrez le document et réessayez.",
+    "failed": "Échec de l'export IFCX : {{error}}",
+    "unsavedNote": "Les modifications non enregistrées du contenu des pages ne sont pas incluses ; les annotations le sont."
   },
   "styleType": {
     "lineTypes": "Types de lignes",
@@ -1128,7 +1177,7 @@
   },
   "recovery": {
     "title": "Récupérer le travail non enregistré",
-    "intro": "PT PDF Studio ne s'est pas fermé normalement la dernière fois. Le travail non enregistré de ces documents a été conservé :",
+    "intro": "Open PDF Studio ne s'est pas fermé normalement la dernière fois. Le travail non enregistré de ces documents a été conservé :",
     "savedAt": "Conservé le {{time}}",
     "pages": "Pages : {{count}}",
     "untitled": "Document sans titre",
@@ -1149,7 +1198,7 @@
     "deleteFailed": "La suppression a échoué : {{error}}",
     "tabLabel": "récupéré",
     "tabTip": "Récupéré après une fermeture inattendue. L'enregistrement écrit dans le fichier d'origine.",
-    "reloadStopped": "La fenêtre d'PT PDF Studio a cessé de fonctionner plusieurs fois de suite et n'est plus rechargée automatiquement. Enregistrez votre travail et redémarrez l'application."
+    "reloadStopped": "La fenêtre d'Open PDF Studio a cessé de fonctionner plusieurs fois de suite et n'est plus rechargée automatiquement. Enregistrez votre travail et redémarrez l'application."
   },
   "protectPdf": {
     "title": "Protéger par mot de passe",
@@ -1246,7 +1295,9 @@
     "empty": "Aucun élément à vérifier. Lancez d'abord l'OCR ou augmentez le seuil. Les anciens PDF sans métadonnées de vérification nécessitent un nouvel OCR.",
     "error": "Impossible de mettre à jour la vérification. Actualisez la file si le document a été modifié.",
     "accepted": "Accepté",
-    "corrected": "Corrigé"
+    "corrected": "Corrigé",
+    "notEncodable": "Le texte OCR consultable ne peut pas contenir ces caractères : {{characters}}. Corrigez le mot avec d'autres caractères.",
+    "archived": "Vérification enregistrée dans le fichier. Relancez l'OCR sur cette page pour la modifier."
   },
   "portfolio": {
     "title": "Portfolio PDF (collection)",
@@ -1596,6 +1647,57 @@
       "cancel": "Annulée",
       "supersede": "Remplacée",
       "expire": "Expirée"
+    }
+  },
+  "pageOrganizer": {
+    "title": "Modifier les pages",
+    "hint": "Faites glisser les pages pour les déplacer ; déposez un fichier PDF pour insérer ses pages. Ctrl+clic, Maj+clic ou les cases à cocher sélectionnent plusieurs pages. Rien ne change avant Appliquer.",
+    "moveLeft": "Vers la gauche",
+    "moveRight": "Vers la droite",
+    "moveToStart": "Au début",
+    "moveToEnd": "À la fin",
+    "selection": "{{selected}} pages sur {{total}} sélectionnées",
+    "rotateLeft": "Rotation à gauche",
+    "rotateRight": "Rotation à droite",
+    "split": "Fractionner",
+    "splitTitle": "Placer des marques de fractionnement autour des pages sélectionnées : chaque série devient un fichier distinct",
+    "splitHere": "Fractionner ici (placer ou retirer une marque)",
+    "extractTitle": "Extraire les pages sélectionnées dans un nouveau fichier",
+    "blankPage": "Page vierge",
+    "pagesFromFile": "Pages d'un fichier…",
+    "insertHere": "Insérer des pages ici",
+    "select": "Sélectionner la page",
+    "zoom": "Zoom",
+    "parts": "Fractionné en {{count}} fichiers lors de l'application",
+    "chooseFolder": "Choisissez le dossier des fichiers fractionnés",
+    "fileFailed": "Impossible de lire {{name}} : {{error}}",
+    "applyFailed": "L'application des modifications de pages a échoué : {{error}}",
+    "extractFailed": "L'extraction des pages a échoué : {{error}}",
+    "blankSetup": "Mise en page de la page vierge",
+    "sameAsAdjacent": "Comme la page adjacente",
+    "width": "Largeur :",
+    "height": "Hauteur :",
+    "unit": "Unité :"
+  },
+  "accessibilityReport": {
+    "title": "Vérification de l'accessibilité",
+    "starting": "Vérification...",
+    "checking": "Vérification de la page {{done}} sur {{total}}...",
+    "noIssues": "Aucun problème trouvé.",
+    "summary": "{{count}} problème(s) trouvé(s). Double-cliquez sur un élément pour aller à sa page.",
+    "failed": "La vérification n'a pas pu être effectuée sur ce document.",
+    "recheck": "Vérifier à nouveau",
+    "close": "Fermer",
+    "goTo": "Double-cliquez pour aller à la page",
+    "page": "Page {{page}}",
+    "kind": {
+      "notTagged": "Le document n'est pas balisé : il n'a pas d'arborescence de structure, les technologies d'assistance ne peuvent donc pas suivre son ordre de lecture.",
+      "notMarked": "Le document n'est pas marqué comme balisé (/MarkInfo /Marked).",
+      "noLanguage": "La langue du document n'est pas définie.",
+      "figureNoAlt": "{{role}} sans texte de remplacement",
+      "pageNotTagged": "Aucun contenu balisé sur cette page ({{count}} éléments de texte)",
+      "untaggedContent": "{{count}} élément(s) de texte hors des balises",
+      "annotationNoText": "Annotation ({{type}}) sans description"
     }
   },
   "calibrateXy": {

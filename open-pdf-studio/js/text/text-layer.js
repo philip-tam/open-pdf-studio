@@ -3,6 +3,8 @@ import { isTauri, invoke } from '../core/platform.js';
 import * as pdfjsLib from 'pdfjs-dist';
 import { resolveTextEditPageGeometry } from './text-edit-appearance.js';
 import { meetViewportVoorTekstlaag } from './tekstlaag-meetschaal.js';
+import { tekenafstandPerItem, lijktGespatieerd } from './tekenafstand.js';
+import { markeerWoordafstanden } from './tekstselectie-woordafstand.js';
 
 /**
  * Text Layer Management Module
@@ -101,6 +103,16 @@ export async function resolveTextLayerFonts(page, textLayerDiv) {
     .some(span => span.dataset.pdfFontName && !span.dataset.pdfLoadedFontName);
   if (!needsResolution) return true;
 
+  try {
+    await operatorLijst(page);
+  } catch (_) {
+    return false;
+  }
+  return applyResolvedFontInfo(textLayerDiv, page);
+}
+
+// De operatorlijst van PDF.js voor een pagina, één keer per pagina gevraagd.
+function operatorLijst(page) {
   let resolution = pageFontResolutionPromises.get(page);
   if (!resolution) {
     resolution = page.getOperatorList().catch((error) => {
@@ -109,13 +121,36 @@ export async function resolveTextLayerFonts(page, textLayerDiv) {
     });
     pageFontResolutionPromises.set(page, resolution);
   }
+  return resolution;
+}
 
+/**
+ * De tekenafstand (Tc, in punten) per span als `data-pdf-tc`, vóór het
+ * bewerken (#718): gespatieerde tekst opent dan zonder de spaties die PDF.js
+ * tussen de letters zette, en de vervanging houdt de Tc. Eén keer per laag;
+ * alleen als er tekst lijkt te staan die zo gespatieerd is, of als de
+ * operatorlijst er toch al is.
+ */
+export async function resolveTextLayerCharSpacing(page, textLayerDiv) {
+  if (!page || !textLayerDiv || textLayerDiv.dataset.tcBepaald === '1') return false;
+  const spans = [...textLayerDiv.querySelectorAll('span[data-item-index]')];
+  if (!spans.some((sp) => lijktGespatieerd(sp.textContent)) && !pageFontResolutionPromises.has(page)) {
+    textLayerDiv.dataset.tcBepaald = '1';
+    return false;
+  }
   try {
-    await resolution;
+    const [ops, inhoud] = await Promise.all([operatorLijst(page), page.getTextContent()]);
+    const items = inhoud.items.filter((item) => item.str !== undefined);
+    const tcs = tekenafstandPerItem(items, ops, pdfjsLib.OPS);
+    for (const sp of spans) {
+      const tc = tcs[Number(sp.dataset.itemIndex)];
+      if (tc > 0) sp.dataset.pdfTc = String(tc);
+    }
+    textLayerDiv.dataset.tcBepaald = '1';
+    return true;
   } catch (_) {
     return false;
   }
-  return applyResolvedFontInfo(textLayerDiv, page);
 }
 
 /**
@@ -210,9 +245,11 @@ function insertColumnBreaks(textItems, textDivs) {
  * spans uit die alleen witruimte bevatten (trailing spaties aan regeleindes,
  * inspring-spaties, kolomgaten). Bij een tekstselectie kleuren die apart op als
  * losse blauwe streepjes — o.a. een kolom in de linkermarge en slierten tussen
- * kolommen ("spook-selectie"). Deze spans dragen geen leesbare inhoud: echte
- * spaties tussen twee woorden zitten IN de woord-span zelf en blijven dus wel
- * oplichten. Het markeren raakt de DOM-volgorde, tekst en kopieer-inhoud niet.
+ * kolommen ("spook-selectie"). Deze spans dragen geen leesbare inhoud. Meestal
+ * zitten spaties tussen twee woorden IN de woord-span zelf; staat elk woord
+ * als eigen run in de PDF, dan krijgt de spatie-span ertussen zijn vlak terug
+ * via markeerWoordafstanden (tekstselectie-woordafstand.js, #506). Het
+ * markeren raakt de DOM-volgorde, tekst en kopieer-inhoud niet.
  * @param {HTMLElement} textLayerDiv
  */
 export function tagWhitespaceSpans(textLayerDiv) {
@@ -337,6 +374,9 @@ export async function createTextLayer(page, viewport, container, pageNum) {
   // Neutraliseer selectie-achtergrond op lege/witruimte-only spans (spook-
   // selectie: losse streepjes in de marge en tussen kolommen).
   tagWhitespaceSpans(textLayerDiv);
+  // Spaties tussen twee woord-runs op dezelfde regel wel markeren, op de
+  // breedte uit de PDF: anders lichte strepen tussen de woorden (#506).
+  markeerWoordafstanden(textLayerDiv);
 
   textLayers.set(pageNum, { element: textLayerDiv, textLayer });
 
@@ -493,6 +533,11 @@ export async function createSinglePageTextLayer(page, viewport) {
 
   const doc = getActiveDocument();
   await createTextLayer(page, viewport, container, doc ? doc.currentPage : 1);
+  // Uit welk bestand komt deze laag? Na opslaan met tekstbewerkingen herlaadt
+  // het document uit een nieuw werkbestand; de renderer bouwt de laag dan
+  // opnieuw (anders bleef de oude tekst selecteerbaar en bewerkbaar).
+  const laag = container.querySelector('.textLayer');
+  if (laag) laag.dataset.bron = doc?.filePath || '';
 }
 
 /**
