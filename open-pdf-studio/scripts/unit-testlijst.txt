@@ -689,3 +689,4 @@ js/solid/components/tool-palette-i18n.test.mjs
 scripts/ui-scale.test.mjs
 js/annotations/rendering/document-context.test.mjs
 js/pdf/monochrome-image.test.mjs
+js/pdf/page-scale-geometry.test.mjs
