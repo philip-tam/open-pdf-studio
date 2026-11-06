@@ -1,4 +1,5 @@
 import { state, getActiveDocument, selectAllOnPage, clearSelection } from '../core/state.js';
+import { isVerwijderToets } from './verwijder-toets.js';
 import { undo, redo, recordAdd, recordModify, recordBulkModify, recordClearPage } from '../core/undo-manager.js';
 import { setTool } from './manager.js';
 import { heeftGekozenAfbeelding, wisAfbeeldingSelectie, deleteSelectedEmbeddedImage } from './tools/remove-image-tool.js';
@@ -703,7 +704,7 @@ async function voerStandaardToetsUit(e) {
       }
       redraw();
     }
-  } else if (e.key === 'Delete') {
+  } else if (isVerwijderToets(e)) {
     if (!aan(e, 'edit.delete', 'Delete')) return;
     e.preventDefault();
     if (heeftGekozenAfbeelding()) {
@@ -757,10 +758,11 @@ async function voerStandaardToetsUit(e) {
       // Confirmation dialog
       {
         const { showConfirm } = await import('../ui/chrome/confirm-dialog.js');
+        const { default: i18next } = await import('../i18n/config.js');
         const msg = selected.length > 1
-          ? `Delete ${selected.length} annotations?`
-          : 'Delete this annotation?';
-        const title = selected.length > 1 ? 'Delete Annotations' : 'Delete Annotation';
+          ? i18next.t('context:multiSelect.deleteConfirm', { count: selected.length })
+          : i18next.t('context:deleteAnnotation.confirmSingle');
+        const title = i18next.t(selected.length > 1 ? 'context:multiSelect.deleteTitle' : 'context:deleteAnnotation.title');
         const confirmed = await showConfirm({ title, message: msg, preferenceKey: 'confirmBeforeDelete' });
         if (!confirmed) return;
       }

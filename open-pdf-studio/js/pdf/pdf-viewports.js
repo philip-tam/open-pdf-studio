@@ -3,7 +3,9 @@
 // DWG/DXF-import van deze app ook (#400). De maatvoering gebruikt ze nu
 // meteen, zonder dat de gebruiker hoeft te kalibreren (zie getMeasureScale).
 //
-// De viewports worden alleen gelezen; de PDF blijft ongewijzigd.
+// Hier wordt alleen gelezen. De eigen schalen van de app schrijft
+// schaal-in-pdf.js bij het opslaan, met /OPS_Bron gemarkeerd; die slaat deze
+// lezer over (#629).
 
 import { PDFName, PDFArray, PDFDict, PDFNumber, PDFString, PDFHexString } from 'pdf-lib';
 
@@ -197,6 +199,9 @@ export function leesViewportsVanPagina(pagina) {
     for (let j = 0; j < vp.size(); j++) {
       const d = vp.lookup(j);
       if (!(d instanceof PDFDict)) continue;
+      // Een eigen viewport (schaal-in-pdf.js, #629) spiegelt een schaalgebied,
+      // viewport-annotatie of de documentschaal: die komen zelf terug.
+      if (d.get(PDFName.of('OPS_Bron')) !== undefined) continue;
       const measure = d.lookup(PDFName.of('Measure'));
       const bbox = rechthoek(d.lookup(PDFName.of('BBox')));
       if (!(measure instanceof PDFDict) || !bbox) continue;
@@ -276,12 +281,13 @@ export function userUnitVanPdfPagina(pagina) {
  * schaal 1:N rekent met deze waarde om naar papiermillimeters
  * (pixelsPerUnitFor, #884).
  * @param {import('pdf-lib').PDFDocument} pdfLibDoc
- * @returns {Record<number, number>}
+ * @returns {Record<number, number>|null}  null als de pagina's niet te lezen
+ *   zijn: dan is de /UserUnit niet bekend, wat iets anders is dan overal 1.
  */
 export function leesUserUnits(pdfLibDoc) {
   const uit = {};
   let paginas;
-  try { paginas = pdfLibDoc.getPages(); } catch { return uit; }
+  try { paginas = pdfLibDoc.getPages(); } catch { return null; }
   paginas.forEach((pagina, i) => {
     const u = userUnitVanPdfPagina(pagina);
     if (u !== 1) uit[i + 1] = u;
@@ -325,7 +331,12 @@ export function rondViewportLezingAf(doc, kenmerk, viewports, userUnits) {
   if (!doc || doc._viewportLezing !== kenmerk) return false;
   doc._viewportLezing = null;
   if (viewports) doc.pdfViewports = Object.keys(viewports).length ? viewports : undefined;
-  if (viewports && userUnits) doc.pageUserUnits = Object.keys(userUnits).length ? userUnits : undefined;
+  if (viewports && userUnits) {
+    doc.pageUserUnits = Object.keys(userUnits).length ? userUnits : undefined;
+    // Zonder pageUserUnits: alle pagina's zijn 1 (dit vlaggetje), of het is nog
+    // niet bekend (geen vlaggetje). Zie documentSchaalOpPagina.
+    doc.userUnitsGelezen = true;
+  }
   return true;
 }
 

@@ -218,7 +218,7 @@ export function handlePointerDown(e) {
   // Dismiss context menu on any canvas click (left or right)
   hideMenu();
 
-  // Reclaim focus from a non-canvas text input (assistant chat, a properties
+  // Reclaim focus from a non-canvas text input (a properties
   // field, the OpenAEC controls, etc.) when the user clicks the page. Without
   // this the keydown lands on that input and handleKeydown's "typing in an
   // input" guard silently swallows Ctrl+Z / Ctrl+C / Ctrl+V for annotations.
@@ -1189,7 +1189,7 @@ function _finishDrawing(ctx, e, coords) {
     showProperties(ann);
     import('./manager.js').then(m => {
       m.setTool('select');
-      startTextEditing(ann);
+      startTextEditing(ann, { nieuw: true });
     });
   } else {
     // Auto-reset to select tool for non-text annotations

@@ -35,6 +35,7 @@ import './core/oude-webview-start.js';
 import './pdf/split-view/split-haken.js';
 import { state } from './core/state.js';
 import { loadPreferences, savePreferences } from './core/preferences.js';
+import { verwijderOpslag } from './core/opslag.js';
 import { initDomElements } from './ui/dom-elements.js';
 import { initPropertiesPanel } from './ui/panels/properties-panel.js';
 import { initToolPalette } from './solid/components/ToolPalette.jsx';
@@ -53,6 +54,7 @@ import { initAttachments } from './ui/panels/attachments.js';
 import { initLinks } from './ui/panels/links.js';
 import { initBookmarks } from './ui/panels/bookmarks.js';
 import { initLeftPanel } from './ui/panels/left-panel.js';
+import { herstelLinkerPaneel } from './ui/panels/werkruimte-toepassen.js';
 
 // Event setup
 import { setupEventListeners } from './ui/setup.js';
@@ -88,6 +90,7 @@ import { initMcpBridge } from './mcp-bridge.js';
 import i18next from './i18n/config.js';
 import { language } from './i18n/useTranslation.js';
 import { installeerGetalVelden, herformatteerGetalVelden } from './ui/getal-veld.js';
+import { stelNotatieBronIn } from './core/maat-notatie.js';
 
 // Solid.js
 import { render } from 'solid-js/web';
@@ -111,6 +114,8 @@ import { isAfbeeldingPad } from './pdf/open-image-pdf.js';
 import { openAlsAfbeelding } from './pdf/open-image.js';
 import { installeerWerkmapDialogen } from './core/openaec-omgeving.js';
 import { sneltoetsActief } from './core/keybindings/app-shortcuts.js';
+// Verkenner-rechtermuisknop Combineren / Omzetten naar PDF (#945): luistert vanaf de start.
+import { startShellActies } from './core/shell-acties.js';
 
 // Open PDF files: tabs created instantly, loads serialized through ONE global
 // queue - also across separate openFiles() calls (the Windows single-instance
@@ -233,6 +238,13 @@ async function init() {
   // Getalvelden accepteren komma én punt; ze tonen het decimaalteken van de
   // app-taal en schakelen mee bij een taalwissel (ui/getal-veld.js).
   installeerGetalVelden({ taal: () => language() });
+  // Maten tonen hetzelfde decimaalteken (of de voorkeur measureDecimalNotation)
+  // en eventueel duizendtalscheiding: "15,60 m²" in het Nederlands (#629).
+  stelNotatieBronIn(() => ({
+    taal: language(),
+    decimaalteken: state.preferences?.measureDecimalNotation,
+    groeperen: !!state.preferences?.measureDigitGrouping,
+  }));
   i18next.on('languageChanged', () => queueMicrotask(() => herformatteerGetalVelden()));
   // Dev: versienummer live uit package.json zodat de titelbalk na een
   // versie-bump klopt zonder Vite-herstart.
@@ -269,6 +281,10 @@ async function init() {
 
   // Load user preferences (before render so theme is applied)
   await loadPreferences();
+  // De ingebouwde assistent is verwijderd. Een persoonlijke sleutel die hij
+  // ooit in de browseropslag zette, wordt hier opgeruimd; staat er niets, dan
+  // doet dit niets.
+  verwijderOpslag('opds-anthropic-key');
   // Hoofdinstantie of tweede instantie (losgemaakt tabblad)? Een tweede
   // instantie laat sessie, AI-koppeling, printwachtrij en PrtScn aan de
   // hoofdinstantie over (core/instantie-rol.js).
@@ -295,6 +311,8 @@ async function init() {
   initPaletteOrder();
   initToolPalette();
   initSymbolPalette();
+  // Linkerpaneel: ingeklapt, tab en breedte zoals de gebruiker het liet (#932).
+  if (!mobile) herstelLinkerPaneel();
 
   // Re-register downloaded parametric steel catalogs from preferences so the
   // palette entries (parametricId) resolve to templates after a restart.
@@ -417,6 +435,7 @@ async function init() {
   }
   pendingOpenFiles = [];
   appReady = true;
+  startShellActies({ openFiles }).catch(e => console.warn('[shell-action] failed:', e));
 
   // Als gast in de OpenAEC-site: het document dat de site meegeeft openen
   // via het opslagcontract van de site (#546). Zonder contract gebeurt niets.
@@ -439,6 +458,14 @@ async function init() {
     // reloading. Tabs still appear and load the same way, just without
     // blocking "ready" on it. restoreLastSession() has its own try/catch.
     if (taakToegestaan('sessie-herstellen', rol)) restoreLastSession();
+  }
+
+  // Gedeelde beoordeling via een map (#237): een document dat er een had,
+  // gaat bij het openen weer meedoen.
+  if (isTauri()) {
+    import('./review/shared-review-service.js')
+      .then((m) => m.installSharedReview())
+      .catch((e) => console.warn('[shared-review] install failed:', e));
   }
 
   // Herstel van niet-opgeslagen werk (js/herstel/): momentopnamen in elke

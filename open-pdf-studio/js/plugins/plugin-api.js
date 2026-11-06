@@ -25,6 +25,7 @@ import { getPageInfoForDocument, readPageContentForDocument, renderPageTileForDo
 import { extractPageGeometry } from '../tools/pdf-snap-extractor.js';
 import { schaalOpPunt } from '../annotations/schaal-op-punt.js';
 import { getScaleFromRegion } from '../annotations/scale-region.js';
+import { documentSchaalOpPagina } from '../annotations/scale-region-scale.js';
 import * as systeemTypenRegistry from '../annotations/systeem-typen-registry.js';
 import { systeemInstanceGeometrie } from '../annotations/systeem-geometrie-app.js';
 import { openSysteemtypenEditor } from '../solid/stores/systeemtypenEditorStore.js';
@@ -140,7 +141,7 @@ function bronVingerafdruk(doc) {
 // De bevestigde schaal van een pagina: die van het document plus de
 // gekalibreerde gebieden op de pagina (dezelfde bronnen als scaleChanged).
 function schaalVanPagina(doc, page) {
-  const s = doc.measureScale;
+  const s = documentSchaalOpPagina(doc, page);
   const vanDocument = s && Number.isFinite(s.pixelsPerUnit) && s.pixelsPerUnit > 0
     ? { pixelsPerUnit: s.pixelsPerUnit, unit: s.unit ?? null, scaleRatio: s.scaleRatio ?? null } : null;
   const regions = [];
@@ -333,6 +334,8 @@ export function createPluginApi(pluginId) {
       systemInstanceLinks: true,
       scopedPropertyPanels: true,
       agentTasks: true,
+      ocrEngines: true,
+      assets: true,
     },
 
     // --- Annotation type registration ---
@@ -706,6 +709,41 @@ export function createPluginApi(pluginId) {
       return navigation().focusAnnotation(request);
     },
 
+    // --- OCR-engines (#970): de gebruiker kiest er één als voorkeursengine;
+    // elke OCR-taak in de app gebruikt die dan (js/pdf/ocr-engines.js). Hoort
+    // bij de bijdragescope: uitladen of herladen haalt de engine weg. ---
+    async registerOcrEngine(descriptor) {
+      scope.eisActief('ocrEngine', String(descriptor?.id));
+      const { registreerOcrEngine, verwijderOcrEngine } = await import('../pdf/ocr-engines.js');
+      // Na het laden opnieuw: de extensie kan intussen uitgeladen zijn.
+      scope.eisActief('ocrEngine', String(descriptor?.id));
+      const sleutel = registreerOcrEngine(pluginId, descriptor);
+      try {
+        scope.voegToe('ocrEngine', sleutel, () => verwijderOcrEngine(sleutel));
+      } catch (e) {
+        verwijderOcrEngine(sleutel);
+        throw e;
+      }
+      return sleutel;
+    },
+
+    unregisterOcrEngine(id) {
+      const sleutel = typeof id === 'string' && id.startsWith(`${pluginId}:`) ? id : `${pluginId}:${id}`;
+      return scope.verwijder('ocrEngine', sleutel);
+    },
+
+    /** Een binair bestand uit het eigen pakket van deze extensie (modellen, WebAssembly). */
+    async readAsset(path) {
+      const { isVeiligAssetPad } = await import('./plugin-assets.js');
+      if (!isVeiligAssetPad(path)) throw new TypeError('readAsset: a relative path inside the extension');
+      scope.eisActief('asset', path);
+      const { invoke } = await import('@tauri-apps/api/core');
+      const data = await invoke('read_plugin_asset', { pluginId, filePath: path });
+      if (data instanceof ArrayBuffer) return data;
+      if (ArrayBuffer.isView(data)) return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+      return new Uint8Array(data).buffer;
+    },
+
     // --- Linttabbladen (#551): alleen data, de host tekent; zie ribbon-tab-registry.js ---
     registerRibbonTab(descriptor) {
       return lintRegister.registreer(scope, descriptor);
@@ -751,8 +789,8 @@ export function createPluginApi(pluginId) {
     },
 
     // --- Agent tasks (#556) ---
-    // Submit a structured task for an MCP agent without opening the assistant
-    // window. Returns a handle with taskId, result (a promise), status,
+    // Submit a structured task for an MCP agent, without a chat message.
+    // Returns a handle with taskId, result (a promise), status,
     // onStatus, cancel and applyAnnotationBatch. The task is tied to the
     // document, page, source, rotation and scale at submission; a change
     // cancels it and a late result is refused. See

@@ -12,7 +12,7 @@ import { peilmaatTemplate } from './templates/peilmaat.js';
 import { wandarceringTemplate } from './templates/wandarcering.js';
 import { wapeningVerdelingTemplate } from './templates/wapening-verdeling.js';
 import { beugelTemplate } from './templates/beugel.js';
-import { heaTemplate, hebTemplate, ipeTemplate, unpTemplate, kokerTemplate, hoeklijnTemplate } from './templates/staalprofiel.js';
+import { heaTemplate, hebTemplate, ipeTemplate, unpTemplate, kokerTemplate, hoeklijnTemplate, buisTemplate } from './templates/staalprofiel.js';
 import { vloerTemplates } from './templates/vloer-dxf.js';
 import { ifcSpaceTemplate } from './templates/ifc-space.js';
 import { ruimteTagTemplate } from './templates/ruimtetag.js';
@@ -37,11 +37,17 @@ import {
   beddingsverenTemplate, windverbandTemplate, scharnierVerbindingTemplate,
 } from './templates/constructie-symbolen.js';
 import {
+  staafTemplate, knoopTemplate, verdeeldeLastTemplate, momentTemplate,
+} from './templates/schematisering.js';
+import {
   bouwkraanTemplate, draaicirkelTemplate, parkeervakTemplate, bouwkeetTemplate,
 } from './templates/bouwplaats-symbolen.js';
 import { SANITAIR_TEMPLATES } from './templates/sanitair.js';
 import { KEUKEN_TEMPLATES } from './templates/keuken.js';
 import { vliesgevelTemplate, kozijnTemplate } from './templates/gevelelement.js';
+import { gdtKenmerkkaderTemplate } from './templates/gdt.js';
+import { rondeDoorsnedeTemplate } from './templates/ronde-doorsnede.js';
+import { paalpositieTemplate } from './templates/paalpositie.js';
 
 const templates = new Map();
 
@@ -64,6 +70,7 @@ register(ipeTemplate);
 register(unpTemplate);
 register(kokerTemplate);
 register(hoeklijnTemplate);
+register(buisTemplate);
 for (const t of vloerTemplates) register(t);
 register(ifcSpaceTemplate);
 register(ruimteTagTemplate);
@@ -91,6 +98,11 @@ register(qlastTemplate);
 register(beddingsverenTemplate);
 register(windverbandTemplate);
 register(scharnierVerbindingTemplate);
+// Constructieve schematisering: staaf, knoop, q-last (lijn) en moment.
+register(staafTemplate);
+register(knoopTemplate);
+register(verdeeldeLastTemplate);
+register(momentTemplate);
 register(bouwkraanTemplate);
 register(draaicirkelTemplate);
 register(parkeervakTemplate);
@@ -100,6 +112,11 @@ for (const t of KEUKEN_TEMPLATES) register(t);
 // Gevelelement (#475): vliesgevel en kozijn, één object met twee voorinstellingen.
 register(vliesgevelTemplate);
 register(kozijnTemplate);
+// Ronde doorsnede (beton/hout) en paalpositie voor het palenplan (#936).
+register(rondeDoorsnedeTemplate);
+register(paalpositieTemplate);
+// GD&T (#971): kenmerkkader met bewerkbare cellen.
+register(gdtKenmerkkaderTemplate);
 
 // Runtime registration for catalog-driven templates (downloaded steel
 // catalogs from the online symbol library — see symbols/steel-catalog-store.js).

@@ -164,8 +164,7 @@ function DesktopApp() {
       <SymbolSettingsDialog />
       <SymbolTypeEditor />
       <SchedulePanel />
-      {/* AssistantPanel (floating OpenAEC-assistent chat bubble) and MiniLog
-          (floating engine-log overlay) both removed per user request. */}
+      {/* MiniLog floating engine-log overlay removed per user request. */}
       <LoadingOverlay />
       <TypeLengthHUD />
       <KeystrokeOverlay />

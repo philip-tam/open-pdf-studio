@@ -10,8 +10,8 @@
 //     vastgelegd, zodat elke plek dezelfde zin toont.
 //
 // Als gast in de OpenAEC-site (#544) komt er een tweede tabel bij: diensten
-// op een ándere host (feedback, de AI-assistent, de online symboolbibliotheek,
-// de release-notes). Daar praat het gereedschap alleen met zijn eigen site,
+// op een ándere host (feedback, de online symboolbibliotheek, de
+// release-notes). Daar praat het gereedschap alleen met zijn eigen site,
 // dus staan die knoppen uit, met dezelfde ene melding (#548).
 //
 // Deze module is met opzet vrij van DOM- en i18n-imports: de tabel en de
@@ -31,6 +31,8 @@ export const MELDING_SLEUTEL = 'desktopOnly';
  */
 export const BUREAUBLAD_KNOPPEN = Object.freeze({
   'ep-ocr': 'ocr',
+  'ep-batch-ocr': 'batchOcr',
+  'ep-scan': 'scan',
   'ep-compress-pdf': 'compress',
   'btn-home-cad-export': 'cadExport',
   'btn-home-ifc-export': 'ifc',
@@ -82,7 +84,6 @@ export function knopUitInBrowser(id, inTauri) {
  */
 export const EXTERNE_DIENSTEN = Object.freeze({
   'send-feedback': 'feedback', // feedbackdienst
-  'assistant-launcher': 'assistant', // AI-dienst met een persoonlijke sleutel
   'symbol-library-download': 'symbolLibrary', // GitHub: index en collecties
   'ribbon-whats-new': 'whatsNew', // GitHub: release-notes
   'menu-whats-new': 'whatsNew',

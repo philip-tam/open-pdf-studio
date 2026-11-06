@@ -11,8 +11,8 @@ if (typeof globalThis.addEventListener !== 'function') {
   globalThis.dispatchEvent = doel.dispatchEvent.bind(doel);
 }
 test('only supported persisted UI sizes are accepted', () => {
-  for (const n of [100,125,150,175,200]) assert.equal(normalizeUiScale(String(n)),n);
-  for (const n of [0,99,Infinity,NaN,null,{},'large',201]) assert.equal(normalizeUiScale(n),100);
+  for (const n of [80,90,100,110,125,150,175,200]) assert.equal(normalizeUiScale(String(n)),n);
+  for (const n of [0,79,85,99,Infinity,NaN,null,{},'large',201]) assert.equal(normalizeUiScale(n),100);
 });
 test('CSS dimensions scale together, leaving zero, percentages and non-dimensions alone', () => {
   assert.equal(scaleUiValue('padding','2px 0px 4px 5%'),'calc(2px * var(--ui-scale, 1)) 0px calc(4px * var(--ui-scale, 1)) 5%');
@@ -23,7 +23,7 @@ test('CSS dimensions scale together, leaving zero, percentages and non-dimension
 test('the plugin excludes PDF geometry, text/form layers and mobile styles', () => {
   const plugin=uiScaleCss();
   const run=(file,selector)=>{const d={source:{input:{file:'/app/styles/'+file}},parent:{selector},prop:'width',value:'100px'};plugin.Declaration(d);return d.value;};
-  for (const file of ['text-layer.css','form-layer.css','mobile.css','layout.css','assistant.css']) assert.equal(run(file,'.pdf-page'),'100px');
+  for (const file of ['text-layer.css','form-layer.css','mobile.css','layout.css']) assert.equal(run(file,'.pdf-page'),'100px');
   assert.match(run('ribbon.css','.ribbon-tab'),/--ui-scale/);
   assert.match(run('layout.css','.left-panel'),/--ui-scale/);
 });
@@ -45,16 +45,58 @@ test('context menus and RTL overrides scale, the calibration bar does not', () =
   assert.match(run('dialogs.css','.screen-cal-text','max-width','520px'),/--ui-scale/);
 });
 
-test('a submenu that would leave the window opens to the left and moves up', async () => {
+test('a submenu that would leave the window flips to the left and moves up', async () => {
   const { submenuPlaatsing } = await import('../js/solid/components/submenu-plaatsing.js');
-  const item={left:600,right:800,top:0,bottom:0};
-  assert.deepEqual(submenuPlaatsing({left:800,right:1000,top:100,bottom:300,width:200},item,1200,800),{naarLinks:false,omhoog:0});
-  assert.deepEqual(submenuPlaatsing({left:800,right:1100,top:100,bottom:300,width:300},item,1000,800),{naarLinks:true,omhoog:0});
-  // No room on the left either: stays where it is.
-  assert.equal(submenuPlaatsing({left:200,right:1100,top:0,bottom:10,width:900},{left:150},1000,800).naarLinks,false);
-  // 100 px too low, but never above the window top.
-  assert.equal(submenuPlaatsing({left:0,right:10,top:600,bottom:896,width:10},item,1000,800).omhoog,100);
-  assert.equal(submenuPlaatsing({left:0,right:10,top:30,bottom:1200,width:10},item,1000,800).omhoog,26);
+  const item={left:600,right:800,top:100,bottom:124};
+  // Fits on the right: lines up with the item, no scrollbar.
+  assert.deepEqual(submenuPlaatsing({width:200,height:200},item,1200,800,{inzet:3}),{left:800,top:97,maxHoogte:null,naarLinks:false});
+  // Past the right edge: flips.
+  assert.deepEqual(submenuPlaatsing({width:300,height:200},item,1000,800),{left:300,top:100,maxHoogte:null,naarLinks:true});
+  // No room on either side: the side with most room, clamped to the window.
+  const smal=submenuPlaatsing({width:900,height:10},{left:150,right:350,top:0},1000,800);
+  assert.equal(smal.naarLinks,false);assert.equal(smal.left,96);
+  // 100 px too low: moves up exactly that far.
+  assert.equal(submenuPlaatsing({width:10,height:296},{...item,top:600},1000,800).top,500);
+  // Taller than the window: window height minus the margins, and it scrolls.
+  assert.deepEqual(submenuPlaatsing({width:10,height:1170},{...item,top:30},1000,800),{left:800,top:4,maxHoogte:792,naarLinks:false});
+});
+
+test('a right-to-left submenu prefers the left and flips to the right', async () => {
+  const { submenuPlaatsing } = await import('../js/solid/components/submenu-plaatsing.js');
+  const item={left:600,right:800,top:100};
+  assert.equal(submenuPlaatsing({width:200,height:10},item,1200,800,{voorkeurLinks:true}).naarLinks,true);
+  const rechts=submenuPlaatsing({width:200,height:10},{...item,left:100,right:300},1200,800,{voorkeurLinks:true});
+  assert.equal(rechts.naarLinks,false);assert.equal(rechts.left,300);
+});
+
+// Release gate 2026.44.6: at 200% the annotation menu was 1341 px tall in a
+// window of 1100 px, so its bottom items could not be reached.
+test('a menu taller than the window gets the window height and stays inside', async () => {
+  const { menuPlaatsing } = await import('../js/solid/components/submenu-plaatsing.js');
+  assert.deepEqual(menuPlaatsing({x:914,y:600,breedte:452,hoogte:1341},1800,1100),{left:914,top:4,maxHoogte:1092});
+  for (const [x,y] of [[0,0],[1799,1099],[-20,-20],[1500,700]]) {
+    const p=menuPlaatsing({x,y,breedte:452,hoogte:1341},1800,1100);
+    assert.ok(p.left>=4&&p.left+452<=1796,'horizontal '+x);
+    assert.ok(p.top>=4&&p.top+p.maxHoogte<=1096,'vertical '+y);
+  }
+});
+
+test('a menu that fits keeps its spot, or shifts only as far as needed, without a scrollbar', async () => {
+  const { menuPlaatsing } = await import('../js/solid/components/submenu-plaatsing.js');
+  assert.deepEqual(menuPlaatsing({x:100,y:200,breedte:227,hoogte:671},1800,1100),{left:100,top:200,maxHoogte:null});
+  assert.deepEqual(menuPlaatsing({x:1700,y:600,breedte:227,hoogte:671},1800,1100),{left:1569,top:425,maxHoogte:null});
+  // Exactly the room there is: no scrollbar.
+  assert.equal(menuPlaatsing({x:0,y:0,breedte:10,hoogte:1092},1800,1100).maxHoogte,null);
+  // A window narrower than the menu: the start of the menu stays visible.
+  assert.equal(menuPlaatsing({x:50,y:0,breedte:500,hoogte:10},300,300).left,4);
+});
+
+test('the stylesheet lets menus scroll, and fixes submenus so a scrolling menu does not clip them', () => {
+  const css=readFileSync(new URL('../styles/context-menu.css',import.meta.url),'utf8');
+  assert.match(css,/\.context-menu\.scrollt[\s\S]*?overflow-y:\s*auto/);
+  const sub=css.match(/^\.context-menu-submenu-content \{[^}]*\}/m)[0];
+  assert.match(sub,/position:\s*fixed/);
+  assert.match(sub,/border-radius:\s*0/);
 });
 
 test('the scale is put on the document and announced once per change', async () => {
@@ -119,4 +161,34 @@ test('the tab context menu (inline styles) follows the interface size too', () =
   const tabs=readFileSync(new URL('../js/solid/components/DocumentTabs.jsx',import.meta.url),'utf8');
   assert.match(tabs,/'font-size': 'calc\(13px \* var\(--ui-scale, 1\)\)'/);
   assert.match(tabs,/'min-width': 'calc\(200px \* var\(--ui-scale, 1\)\)'/);
+});
+
+// #932: kleiner dan 100% geeft het document meer ruimte. Alleen de bediening
+// schaalt; de ruimtemakende regels voor grote bediening blijven uit.
+test('a smaller interface size scales the chrome without the enlarged-layout rules', async () => {
+  const { pasUiSchaalToe, uiSchaalFactor, UI_SCALES } = await import('../js/core/ui-scale.js');
+  assert.deepEqual(UI_SCALES.slice(0, 4), [80, 90, 100, 110]);
+  const props=new Map(), attrs=new Set();
+  const root={style:{setProperty:(k,v)=>props.set(k,v),getPropertyValue:k=>props.get(k)??'',removeProperty:k=>props.delete(k)},
+    toggleAttribute:(n,on)=>{on?attrs.add(n):attrs.delete(n);},removeAttribute:n=>attrs.delete(n)};
+  // Labels uit een eerdere test luisteren naar de schaalwissel.
+  const raf=globalThis.requestAnimationFrame;
+  globalThis.requestAnimationFrame=()=>0;
+  try{
+    pasUiSchaalToe(80,root);
+    assert.equal(uiSchaalFactor(root),0.8);
+    assert.ok(!attrs.has('data-ui-scaled'));
+    pasUiSchaalToe(110,root);
+    assert.equal(uiSchaalFactor(root),1.1);
+    assert.ok(attrs.has('data-ui-scaled'));
+  }finally{
+    if (raf===undefined) delete globalThis.requestAnimationFrame; else globalThis.requestAnimationFrame=raf;
+  }
+  assert.equal(scaleUiValue('font-size','11px'),'calc(11px * var(--ui-scale, 1))');
+});
+
+test('the preferences dialog previews the interface size and restores it on cancel', () => {
+  const dialoog=readFileSync(new URL('../js/solid/components/preferences/PreferencesDialog.jsx',import.meta.url),'utf8');
+  assert.match(dialoog,/createEffect\(\(\) => pasUiSchaalToe\(prefs\.uiScale\[0\]\(\)\)\)/);
+  assert.match(dialoog,/onCleanup\(\(\) => pasUiSchaalToe\(state\.preferences\.uiScale\)\)/);
 });

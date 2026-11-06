@@ -47,12 +47,12 @@ test('Rust: lijst, dispatch, metatabel en de telling van het publieke profiel', 
     assert.match(rs, new RegExp(`"${naam}"\\s+=> tool_app_request\\(state, "${gebeurtenis}",\\s+&arguments, Duration::from_secs\\(${seconden}\\)\\)`));
     assert.match(meta, new RegExp(`${soort}\\("${naam}", "[^"]+"\\)`));
   }
-  assert.match(rs, /assert_eq!\(arr\.len\(\), 98\);/);
-  assert.match(lees('../../../mcp-stdio/brug.test.mjs'), /assert\.equal\(lijst\.length, 98\);/);
+  assert.match(rs, /assert_eq!\(arr\.len\(\), 94\);/);
+  assert.match(lees('../../../mcp-stdio/brug.test.mjs'), /assert\.equal\(lijst\.length, 94\);/);
   // De README noemt dezelfde telling (twee keer).
   const leesmij = lees('../../../mcp-stdio/README.md');
-  assert.match(leesmij, /\(98 public tools:/);
-  assert.match(leesmij, /OK — 98 tools available/);
+  assert.match(leesmij, /\(94 public tools:/);
+  assert.match(leesmij, /OK — 94 tools available/);
   assert.doesNotMatch(leesmij, /\b62 (public )?tools\b/);
   assert.match(rs, /Extension actions appear as 'ext:<extensionId>:<itemId>'\./);
 });
@@ -110,7 +110,7 @@ test('de inhoud van een tabblad blijft een direct kind van .ribbon-container (ge
   const ribbon = lees('../solid/components/ribbon/Ribbon.jsx');
   assert.doesNotMatch(ribbon.replace(/\{\/\*[\s\S]*?\*\/\}/g, ''), /ribbon-panel/);
   const eindStrook = '</button>\n      </div>';
-  const tussen = ribbon.slice(ribbon.indexOf(eindStrook) + eindStrook.length, ribbon.indexOf('<Show when={!ribbonCollapsed()}>'));
+  const tussen = ribbon.slice(ribbon.indexOf(eindStrook) + eindStrook.length, ribbon.indexOf('<Show when={inhoudZichtbaar()}>'));
   assert.doesNotMatch(tussen.replace(/\{\/\*[\s\S]*?\*\/\}/g, ''), /<div/, 'geen omhulling vóór de inhoud');
   assert.match(ribbon, /<\/Switch>\n {6}<\/Show>\n {4}<\/>/, 'en ook niet erna');
   assert.doesNotMatch(lees('../../styles/ribbon.css'), /\.ribbon-panel\b/);
